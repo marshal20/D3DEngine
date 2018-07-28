@@ -147,11 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\logger.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\checks.h" />
     <ClInclude Include="Source\logger.h" />
     <ClInclude Include="Source\window.h" />

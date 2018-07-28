@@ -1,8 +1,10 @@
 #include "window.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <stdlib.h>
 
 const WindowOptions Window::WIND_OPT_DEF = { false, true, true, false,true, 0, 0, 800, 600, "UNNAMED" };
+Window* Window::main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
@@ -21,6 +23,7 @@ void Window::init(const WindowOptions& options)
 {
 	m_options = options;
 	m_closed = false;
+	main_window = this;
 
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;
@@ -134,6 +137,8 @@ void Window::destroy()
 		delete[] m_application_name;
 		m_application_name = 0;
 	}
+
+	m_closed = true;
 }
 
 void Window::update()
@@ -156,9 +161,32 @@ void Window::update()
 
 }
 
+void Window::close()
+{
+	m_closed = true;
+}
+
 bool Window::isClosed()
 {
 	return m_closed;
+}
+
+void Window::setInputSystem(InputSystem* inputsys)
+{
+	m_inputsystem = inputsys;
+}
+
+LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+{
+	switch (umessage)
+	{
+	case WM_KEYDOWN:
+		if (m_inputsystem) m_inputsystem->keydown((unsigned int)wparam); return 0;
+	case WM_KEYUP:
+		if (m_inputsystem) m_inputsystem->keyup((unsigned int)wparam); return 0;
+	default:
+		return DefWindowProc(hwnd, umessage, wparam, lparam);
+	}
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
@@ -182,8 +210,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 	// All other messages pass to the message handler in the system class.
 	default:
 	{
-		//return ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
-		return DefWindowProc(hwnd, umessage, wparam, lparam);
+		return Window::main_window->MessageHandler(hwnd, umessage, wparam, lparam);
 	}
 	}
 }

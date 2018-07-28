@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <Windows.h>
+#include "input.h"
 
 struct WindowOptions
 {
@@ -19,7 +20,6 @@ struct WindowOptions
 };
 
 
-
 class Window
 {
 public:
@@ -29,10 +29,12 @@ public:
 	void init(const WindowOptions& options = Window::WIND_OPT_DEF);
 	void destroy();
 	void update();
+	void close();
 	bool isClosed();
 
-public:
-	static const WindowOptions WIND_OPT_DEF;
+	void setInputSystem(InputSystem* inputsys);
+
+	LRESULT CALLBACK MessageHandler(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
 private:
 	HWND m_hwnd = nullptr;
@@ -40,4 +42,9 @@ private:
 	wchar_t* m_application_name = nullptr;
 	WindowOptions m_options;
 	bool m_closed = true;
+	InputSystem* m_inputsystem = nullptr;
+
+public:
+	static const WindowOptions WIND_OPT_DEF;
+	static Window* main_window;
 };
