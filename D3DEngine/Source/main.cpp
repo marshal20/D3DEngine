@@ -32,7 +32,7 @@ int main()
 		Sleep(50);
 	}
 
-	wind.destroy();
+	wind.cleanup();
 
 	magnificent_exit();
 	return 0;

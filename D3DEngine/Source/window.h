@@ -22,8 +22,10 @@ public:
 	Window();
 	Window(const Window& other) = delete;
 	~Window();
+
 	void init(const std::string& name = "UNNAMED", const WindowOptions* options = 0);
-	void destroy();
+	void cleanup();
+
 	void update();
 	void close();
 	bool isClosed();

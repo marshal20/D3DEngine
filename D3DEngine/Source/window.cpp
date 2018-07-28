@@ -133,7 +133,7 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	return;
 }
 
-void Window::destroy()
+void Window::cleanup()
 {
 	if (m_handle->hwnd)
 	{
