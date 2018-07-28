@@ -3,17 +3,18 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
+#include "logger.h"
 
 #define ENGINE_DBG 1
 
 #define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 
-#define ENGINE_ERROR(x) std::cout << x << std::endl << "\t" << __FILENAME__ << ":" << __LINE__ << std::endl; \
-std::cin.get();\
+#define ENGINE_ERROR(x) logger::customLog(x, __FILENAME__, __LINE__);\
 std::terminate();
 
 #define D3D11CALL(x) if(FAILED(x)) {\
-ENGINE_ERROR();\
+ENGINE_ERROR("Failed D3D11 call.");\
 }
 
 #if !ENGINE_DBG
