@@ -12,8 +12,8 @@ struct WindowOptions
 
 	int x;
 	int y;
-	int width;
-	int height;
+	int width; // 0 for fullwidth
+	int height; // 0 for fullheight
 };
 
 class Window
@@ -41,5 +41,5 @@ private:
 	WindowOptions m_options;
 	bool m_closed = true;
 	InputSystem* m_inputsystem = nullptr;
-
+	int m_screenWidth, m_screenHeight;
 };

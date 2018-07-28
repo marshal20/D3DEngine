@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <stdlib.h>
 
-const WindowOptions WIND_OPT_DEF = { false, true, true, false,true, 0, 0, 800, 600 };
+const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
@@ -26,6 +26,22 @@ Window::~Window()
 
 }
 
+void setScreenRes(int width, int height)
+{
+	DEVMODE dmScreenSettings;
+
+	// If full screen set the screen to maximum size of the users desktop and 32bit.
+	memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+	dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+	dmScreenSettings.dmPelsWidth = (unsigned long)width;
+	dmScreenSettings.dmPelsHeight = (unsigned long)height;
+	dmScreenSettings.dmBitsPerPel = 32;
+	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+	// Change the display settings to full screen.
+	ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
+}
+
 DWORD calcStyle(const WindowOptions& options)
 {
 	DWORD style;
@@ -43,32 +59,14 @@ DWORD calcStyle(const WindowOptions& options)
 
 void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
 {
-	DEVMODE dmScreenSettings;
+	width = options.width;
+	height = options.height;
 
-	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
-	if (options.fullscreen)
-	{
-		// Determine the resolution of the clients desktop screen.
+	if(width == 0)
 		width = GetSystemMetrics(SM_CXSCREEN);
+
+	if (height == 0)
 		height = GetSystemMetrics(SM_CYSCREEN);
-
-		// If full screen set the screen to maximum size of the users desktop and 32bit.
-		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = (unsigned long)width;
-		dmScreenSettings.dmPelsHeight = (unsigned long)height;
-		dmScreenSettings.dmBitsPerPel = 32;
-		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-		// Change the display settings to full screen.
-		ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-	}
-	else
-	{
-		// If windowed then set it to resolution.
-		width = options.width;
-		height = options.height;
-	}
 }
 
 void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height)
@@ -114,7 +112,7 @@ wchar_t* create_wcharstr(const char* src)
 
 void Window::init(const std::string& name, const WindowOptions* options)
 {
-	// setingup
+	// settingup
 	if (!options) options = &WIND_OPT_DEF;
 	m_options = *options;
 	m_closed = false;
@@ -122,7 +120,6 @@ void Window::init(const std::string& name, const WindowOptions* options)
 
 	// local variables
 	WNDCLASSEX wc;
-	int screenWidth, screenHeight;
 	DWORD window_style;
 	int window_width; int window_height;
 	int window_x, window_y;
@@ -149,17 +146,18 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	// Register the window class.
 	RegisterClassEx(&wc);
 
-	calcScreenDimentions(m_options, screenWidth, screenHeight);
+	calcScreenDimentions(m_options, m_screenWidth, m_screenHeight);
+	if(m_options.fullscreen) 
+		setScreenRes(m_screenWidth, m_screenHeight);
 
 	// calculations
 	window_style = calcStyle(m_options);
-	calcWindowDimentions(window_style, screenWidth, screenHeight, window_width, window_height);
+	calcWindowDimentions(window_style, m_screenWidth, m_screenHeight, window_width, window_height);
 	calcWindowPos(m_options, window_x, window_y, window_width, window_height);
 
 	m_handle->hwnd = CreateWindow(m_handle->application_name, m_handle->application_name,
 		window_style,
 		window_x, window_y, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
-
 
 	// Bring the window up on the screen and set it as main focus.
 	ShowWindow(m_handle->hwnd, SW_SHOW);
@@ -234,6 +232,21 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 {
 	switch (umessage)
 	{
+	case WM_ACTIVATEAPP:
+	{
+		if (!m_options.fullscreen) break;
+
+		if (LOWORD(wparam) == WA_INACTIVE)
+		{
+			ChangeDisplaySettings(NULL, 0);
+		}
+
+		if (LOWORD(wparam) == WA_ACTIVE)
+		{
+			setScreenRes(m_screenWidth, m_screenHeight);
+		}
+	}
+
 	case WM_KEYDOWN:
 		if (m_inputsystem) 
 			m_inputsystem->keydown((unsigned int)wparam); 
