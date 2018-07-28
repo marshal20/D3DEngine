@@ -3,14 +3,21 @@
 #include <Windows.h>
 #include <stdlib.h>
 
-const WindowOptions Window::WIND_OPT_DEF = { false, true, true, false,true, 0, 0, 800, 600, "UNNAMED" };
-Window* Window::main_window = nullptr;
+const WindowOptions WIND_OPT_DEF = { false, true, true, false,true, 0, 0, 800, 600 };
+Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
+struct Window::NativeHandle
+{
+	HWND hwnd = nullptr;
+	HINSTANCE hinstance = nullptr;
+	wchar_t* application_name = nullptr;
+};
+
 Window::Window()
 {
-
+	m_handle = new NativeHandle;
 
 }
 
@@ -19,43 +26,46 @@ Window::~Window()
 
 }
 
-void Window::init(const WindowOptions& options)
+void Window::init(const std::string& name, const WindowOptions* options)
 {
-	m_options = options;
+	// setingup
+	if (!options) options = &WIND_OPT_DEF;
+	m_options = *options;
 	m_closed = false;
 	main_window = this;
 
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;
 	int posX, posY;
+	int screenWidth, screenHeight;
 
-	m_application_name = new wchar_t[m_options.window_name.length() + 1];
-	ZeroMemory((char*)m_application_name, (m_options.window_name.length() + 1) * sizeof(wchar_t));
-	mbstowcs(m_application_name, m_options.window_name.c_str(), m_options.window_name.length());
+	m_handle->application_name = new wchar_t[name.length() + 1];
+	ZeroMemory((char*)m_handle->application_name, (name.length() + 1) * sizeof(wchar_t));
+	mbstowcs(m_handle->application_name, name.c_str(), name.length());
 
 	// Get the instance of this application.
-	m_hinstance = GetModuleHandle(NULL);
+	m_handle->hinstance = GetModuleHandle(NULL);
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = WndProc; //WndProc
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = m_hinstance;
+	wc.hInstance = m_handle->hinstance;
 	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = m_application_name;
+	wc.lpszClassName = m_handle->application_name;
 	wc.cbSize = sizeof(WNDCLASSEX);
 
 	// Register the window class.
 	RegisterClassEx(&wc);
 
 	// Determine the resolution of the clients desktop screen.
-	int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	screenWidth = GetSystemMetrics(SM_CXSCREEN);
+	screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
 	if (m_options.fullscreen)
@@ -107,15 +117,15 @@ void Window::init(const WindowOptions& options)
 		printf("%d %d\n", window_width, window_height);
 	}
 
-	m_hwnd = CreateWindow(m_application_name, m_application_name,
+	m_handle->hwnd = CreateWindow(m_handle->application_name, m_handle->application_name,
 		window_style,
-		posX, posY, window_width, window_height, NULL, NULL, m_hinstance, NULL);
+		posX, posY, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
 
 
 	// Bring the window up on the screen and set it as main focus.
-	ShowWindow(m_hwnd, SW_SHOW);
-	SetForegroundWindow(m_hwnd);
-	SetFocus(m_hwnd);
+	ShowWindow(m_handle->hwnd, SW_SHOW);
+	SetForegroundWindow(m_handle->hwnd);
+	SetFocus(m_handle->hwnd);
 
 	// Hide the mouse cursor.
 	if (!m_options.cursor) ShowCursor(false);
@@ -125,17 +135,22 @@ void Window::init(const WindowOptions& options)
 
 void Window::destroy()
 {
-	if (m_hwnd)
+	if (m_handle->hwnd)
 	{
-		DestroyWindow(m_hwnd);
-		UnregisterClass(m_application_name, m_hinstance);
-		m_hwnd = 0;
+		DestroyWindow(m_handle->hwnd);
+		UnregisterClass(m_handle->application_name, m_handle->hinstance);
+		m_handle->hwnd = 0;
 	}
 
-	if (m_application_name)
+	if (m_handle->application_name)
 	{
-		delete[] m_application_name;
-		m_application_name = 0;
+		delete[] m_handle->application_name;
+		m_handle->application_name = 0;
+	}
+
+	if (m_handle)
+	{
+		delete m_handle;
 	}
 
 	m_closed = true;
@@ -176,16 +191,22 @@ void Window::setInputSystem(InputSystem* inputsys)
 	m_inputsystem = inputsys;
 }
 
-LRESULT CALLBACK Window::MessageHandler(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 {
 	switch (umessage)
 	{
 	case WM_KEYDOWN:
-		if (m_inputsystem) m_inputsystem->keydown((unsigned int)wparam); return 0;
+		if (m_inputsystem) 
+			m_inputsystem->keydown((unsigned int)wparam); 
+		return true;
+
 	case WM_KEYUP:
-		if (m_inputsystem) m_inputsystem->keyup((unsigned int)wparam); return 0;
+		if (m_inputsystem) 
+			m_inputsystem->keyup((unsigned int)wparam); 
+		return true;
+
 	default:
-		return DefWindowProc(hwnd, umessage, wparam, lparam);
+		return false;
 	}
 }
 
@@ -210,7 +231,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 	// All other messages pass to the message handler in the system class.
 	default:
 	{
-		return Window::main_window->MessageHandler(hwnd, umessage, wparam, lparam);
+		if (main_window->HandleMessage(umessage, wparam))
+			return 0;
+		
+		return DefWindowProc(hwnd, umessage, wparam, lparam);
 	}
 	}
 }
