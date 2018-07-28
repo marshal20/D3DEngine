@@ -28,7 +28,7 @@ Window::~Window()
 
 DWORD calcStyle(const WindowOptions& options)
 {
-	DWORD style = 0;
+	DWORD style;
 
 	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
@@ -92,15 +92,24 @@ void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int
 
 void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height)
 {
+	RECT wr;
 
-	// Calculate windows size with style.
-	{
-		RECT wr = { 0, 0, screenWidth, screenHeight };
-		AdjustWindowRect(&wr, style, false);
+	wr = { 0, 0, screenWidth, screenHeight };
+	AdjustWindowRect(&wr, style, false);
 
-		width = wr.right - wr.left;
-		height = wr.bottom - wr.top;
-	}
+	width = wr.right - wr.left;
+	height = wr.bottom - wr.top;
+}
+
+wchar_t* create_wcharstr(const char* src)
+{
+	wchar_t* buffer = 0;
+	
+	buffer = new wchar_t[strlen(src) + 1];
+	ZeroMemory((char*)buffer, (strlen(src) + 1) * sizeof(wchar_t));
+	mbstowcs(buffer, src, strlen(src));
+
+	return buffer;
 }
 
 void Window::init(const std::string& name, const WindowOptions* options)
@@ -118,9 +127,7 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	int window_width; int window_height;
 	int window_x, window_y;
 
-	m_handle->application_name = new wchar_t[name.length() + 1];
-	ZeroMemory((char*)m_handle->application_name, (name.length() + 1) * sizeof(wchar_t));
-	mbstowcs(m_handle->application_name, name.c_str(), name.length());
+	m_handle->application_name = create_wcharstr(name.c_str());
 
 	// Get the instance of this application.
 	m_handle->hinstance = GetModuleHandle(NULL);
