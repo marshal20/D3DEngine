@@ -26,6 +26,83 @@ Window::~Window()
 
 }
 
+DWORD calcStyle(const WindowOptions& options)
+{
+	DWORD style = 0;
+
+	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+
+	if (options.resizable) 
+		style = WS_OVERLAPPEDWINDOW;
+
+	if (!options.border || options.fullscreen) 
+		style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
+
+	return style;
+}
+
+void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
+{
+	DEVMODE dmScreenSettings;
+
+	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
+	if (options.fullscreen)
+	{
+		// Determine the resolution of the clients desktop screen.
+		width = GetSystemMetrics(SM_CXSCREEN);
+		height = GetSystemMetrics(SM_CYSCREEN);
+
+		// If full screen set the screen to maximum size of the users desktop and 32bit.
+		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth = (unsigned long)width;
+		dmScreenSettings.dmPelsHeight = (unsigned long)height;
+		dmScreenSettings.dmBitsPerPel = 32;
+		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+		// Change the display settings to full screen.
+		ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
+	}
+	else
+	{
+		// If windowed then set it to resolution.
+		width = options.width;
+		height = options.height;
+	}
+}
+
+void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height)
+{
+	if (options.fullscreen)
+	{
+		x = 0;
+		y = 0;
+	}
+	if (options.centered)
+	{
+		x = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
+		y = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
+	}
+	else
+	{
+		x = options.x;
+		y = options.y;
+	}
+}
+
+void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height)
+{
+
+	// Calculate windows size with style.
+	{
+		RECT wr = { 0, 0, screenWidth, screenHeight };
+		AdjustWindowRect(&wr, style, false);
+
+		width = wr.right - wr.left;
+		height = wr.bottom - wr.top;
+	}
+}
+
 void Window::init(const std::string& name, const WindowOptions* options)
 {
 	// setingup
@@ -34,10 +111,12 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	m_closed = false;
 	main_window = this;
 
+	// local variables
 	WNDCLASSEX wc;
-	DEVMODE dmScreenSettings;
-	int posX, posY;
 	int screenWidth, screenHeight;
+	DWORD window_style;
+	int window_width; int window_height;
+	int window_x, window_y;
 
 	m_handle->application_name = new wchar_t[name.length() + 1];
 	ZeroMemory((char*)m_handle->application_name, (name.length() + 1) * sizeof(wchar_t));
@@ -63,63 +142,16 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	// Register the window class.
 	RegisterClassEx(&wc);
 
-	// Determine the resolution of the clients desktop screen.
-	screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	screenHeight = GetSystemMetrics(SM_CYSCREEN);
+	calcScreenDimentions(m_options, screenWidth, screenHeight);
 
-	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
-	if (m_options.fullscreen)
-	{
-		// If full screen set the screen to maximum size of the users desktop and 32bit.
-		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = (unsigned long)screenWidth;
-		dmScreenSettings.dmPelsHeight = (unsigned long)screenHeight;
-		dmScreenSettings.dmBitsPerPel = 32;
-		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-		// Change the display settings to full screen.
-		ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-
-		// Set the position of the window to the top left corner.
-		posX = m_options.x;
-		posY = m_options.y;
-	}
-	else
-	{
-		// If windowed then set it to resolution.
-		screenWidth = m_options.width;
-		screenHeight = m_options.height;
-
-		// Place the window in the middle of the screen.
-		if (m_options.centered)
-		{
-			posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;
-			posY = (GetSystemMetrics(SM_CYSCREEN) - screenHeight) / 2;
-		}	
-	}
-
-	// Set the style.
-	int window_width = 0;
-	int window_height = 0;
-	DWORD window_style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-	if (m_options.resizable) window_style = WS_OVERLAPPEDWINDOW;
-	if (!m_options.border || m_options.fullscreen) window_style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-
-	// Calculate windows size with style.
-	{
-		RECT wr = { 0, 0, screenWidth, screenHeight };
-		AdjustWindowRect(&wr, window_style, false);
-
-		window_width = wr.right - wr.left;
-		window_height = wr.bottom - wr.top;
-
-		printf("%d %d\n", window_width, window_height);
-	}
+	// calculations
+	window_style = calcStyle(m_options);
+	calcWindowDimentions(window_style, screenWidth, screenHeight, window_width, window_height);
+	calcWindowPos(m_options, window_x, window_y, window_width, window_height);
 
 	m_handle->hwnd = CreateWindow(m_handle->application_name, m_handle->application_name,
 		window_style,
-		posX, posY, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
+		window_x, window_y, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
 
 
 	// Bring the window up on the screen and set it as main focus.
