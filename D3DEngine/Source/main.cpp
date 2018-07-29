@@ -44,11 +44,11 @@ int main()
 	{
 		wind.update();
 
-		if (inputsys.isKeydown(VK_ESCAPE))
+		if (inputsys.isKeyDown(VK_ESCAPE))
 			wind.close();
 
 		// toggle fullscreen mode
-		if (inputsys.isKeydown(VK_F11))
+		if (inputsys.isKeyPressed(VK_F11))
 		{
 			static bool fullscreen = false;
 			fullscreen = !fullscreen;

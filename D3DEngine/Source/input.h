@@ -11,8 +11,10 @@ public:
 
 	void end();
 
-	bool isKeydown(int key);
-	bool isKeyup(int key);
+	bool isKeyDown(int key);
+	bool isKeyUp(int key);
+	bool isKeyPressed(int key);
+	bool isKeyReleased(int key);
 
 private:
 	void keydown(int key);
@@ -21,5 +23,5 @@ private:
 	friend class Window;
 
 private:
-	std::array<bool, 256> m_keys = {false};
+	std::array<char, 256> m_keys = {false};
 };
