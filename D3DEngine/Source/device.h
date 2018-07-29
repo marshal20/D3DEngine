@@ -41,7 +41,7 @@ public:
 
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();
-	static OutputMode getOutputMode(int width, int height);
+	static OutputMode getOutputMode(unsigned int width, unsigned int height);
 
 private:
 	struct D3D11Impl;

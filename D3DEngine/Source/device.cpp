@@ -218,7 +218,7 @@ std::vector<OutputMode> Device::getOutputModes()
 	return outputModes;
 }
 
-OutputMode Device::getOutputMode(int width, int height)
+OutputMode Device::getOutputMode(unsigned int width, unsigned int height)
 {
 	std::vector<OutputMode> modes = getOutputModes();
 	for(auto& mode: modes)
