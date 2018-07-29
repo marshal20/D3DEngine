@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "checks.h"
 
-const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
+const WindowOptions WIND_OPT_DEF = { true, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);

@@ -54,9 +54,12 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 	D3D_FEATURE_LEVEL featureLevel;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ID3D11Texture2D* pBackBuffer;
+	bool isWindowed;
+
+	isWindowed = !outputWindow.m_options.fullscreen;
 
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-	
+	// setting up the swap chain description.
 	swapChainDesc.BufferCount = 1;
 	swapChainDesc.BufferDesc.Width = outputmode.width;
 	swapChainDesc.BufferDesc.Height = outputmode.height;
@@ -75,8 +78,7 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 	swapChainDesc.OutputWindow = (HWND)outputWindow.getNativeHandle();
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
-	// ------------------------- TESTING ------------------------
-	swapChainDesc.Windowed = true;
+	swapChainDesc.Windowed = isWindowed;
 
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
@@ -98,6 +100,8 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 
 void RenderDevice::cleanup()
 {
+	setFullscreenState(false);
+
 	if (m_impl->pRenderTargetView)
 	{
 		m_impl->pRenderTargetView->Release();
@@ -159,6 +163,15 @@ void RenderDevice::setViewport(int width, int height)
 
 	m_impl->pContext->RSSetViewports(1, &viewport);
 }
+
+void RenderDevice::setFullscreenState(bool enabled)
+{
+	if(enabled)
+		m_impl->pSwapchain->SetFullscreenState(true, NULL);
+	else
+		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);
+}
+
 
 // STATIC FUNCTIONS
 

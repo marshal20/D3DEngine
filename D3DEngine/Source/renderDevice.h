@@ -40,6 +40,7 @@ public:
 	void endScene();
 
 	void setViewport(int width, int height);
+	void setFullscreenState(bool enabled);
 
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();
