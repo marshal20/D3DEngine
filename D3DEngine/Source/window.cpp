@@ -268,6 +268,11 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 	}
 }
 
+void* Window::getNativeHandle() const
+{
+	return (void*)m_handle->hwnd;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
 	switch (umessage)

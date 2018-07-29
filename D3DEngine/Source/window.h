@@ -19,6 +19,7 @@ struct WindowOptions
 class Window
 {
 public:
+	
 	Window();
 	Window(const Window& other) = delete;
 	~Window();
@@ -33,6 +34,10 @@ public:
 	void setInputSystem(InputSystem* inputsys);
 
 	bool HandleMessage(unsigned int umessage, unsigned int wparam);
+
+private:
+	friend class Device;
+	void* getNativeHandle() const;
 
 private:
 	struct NativeHandle;

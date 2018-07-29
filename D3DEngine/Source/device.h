@@ -3,6 +3,8 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #include <string>
+#include <vector>
+#include "window.h"
 
 struct AdapterInfo
 {
@@ -16,20 +18,38 @@ struct AdapterInfo
 	size_t SharedSystemMemory;
 };
 
+struct Rational
+{
+	unsigned int Numerator;
+	unsigned int Denominator;
+};
+
+struct OutputMode
+{
+	unsigned int width;
+	unsigned int height;
+	Rational RefreshRate;
+};
+
 class Device
 {
 public:
 	Device();
 	~Device();
-	void init();
+	void init(const OutputMode& outputmode, const Window& outputWindow);
 
 	static AdapterInfo getAdapterInfo();
+	static std::vector<OutputMode> getOutputModes();
+	static OutputMode getOutputMode(int width, int height);
 
 private:
 	//class DeviceImpl;
 	//DeviceImpl* m_impl = nullptr;
 
 	ID3D11Device* m_pDevice;
-	ID3D11DeviceContext* m_context;
-	IDXGISwapChain* m_swapchain;
+	ID3D11DeviceContext* m_pContext;
+	IDXGISwapChain* m_pSwapchain;
+	bool m_vsync_enabled = false;
+	int numerator = 0;
+	int denominator = 1;
 };

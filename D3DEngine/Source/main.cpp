@@ -15,15 +15,8 @@ void magnificent_exit()
 	}
 }
 
-int main()
+void experimental()
 {
-	std::cout << "hello world..." << std::endl;
-	
-	Window wind;
-	InputSystem inputsys;
-	wind.init("D3D11Engine");
-	wind.setInputSystem(&inputsys);
-
 	AdapterInfo GPU = Device::getAdapterInfo();
 	std::cout << GPU.Description << std::endl;
 	std::cout << GPU.VendorId << std::endl;
@@ -33,6 +26,19 @@ int main()
 	std::cout << GPU.DedicatedVideoMemory / 1024 / 1024 << std::endl;
 	std::cout << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
 	std::cout << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
+}
+
+int main()
+{
+	std::cout << "hello world..." << std::endl;
+	experimental();
+	
+	Window wind;
+	InputSystem inputsys;
+	Device d3d11Device;
+	wind.init("D3D11Engine");
+	wind.setInputSystem(&inputsys);
+	d3d11Device.init(Device::getOutputMode(800, 600), wind);
 
 	while (!wind.isClosed())
 	{
