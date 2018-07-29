@@ -32,6 +32,7 @@ public:
 	bool isClosed();
 
 	void setInputSystem(InputSystem* inputsys);
+	void setFullscreenState(bool enabled);
 
 	bool HandleMessage(unsigned int umessage, unsigned int wparam);
 
@@ -43,8 +44,8 @@ private:
 	struct NativeHandle;
 	NativeHandle* m_handle = nullptr;
 
+	InputSystem* m_inputsystem = nullptr;
 	WindowOptions m_options;
 	bool m_closed = true;
-	InputSystem* m_inputsystem = nullptr;
 	int m_screenWidth, m_screenHeight;
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <vector>
 #include <Windows.h>
 
 class InputSystem
@@ -7,6 +8,8 @@ class InputSystem
 public:
 	InputSystem();
 	~InputSystem();
+
+	void end();
 
 	bool isKeydown(int key);
 	bool isKeyup(int key);

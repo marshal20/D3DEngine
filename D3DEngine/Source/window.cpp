@@ -4,10 +4,16 @@
 #include <stdlib.h>
 #include "checks.h"
 
-const WindowOptions WIND_OPT_DEF = { true, true, true, false, true, 0, 0, 800, 600 };
+const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
+void setScreenRes(int width, int height);
+DWORD calcStyle(const WindowOptions& options);
+void calcScreenDimentions(const WindowOptions& options, int& width, int& height);
+void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height);
+void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height);
+wchar_t* create_wcharstr(const char* src);
 
 struct Window::NativeHandle
 {
@@ -25,90 +31,6 @@ Window::Window()
 Window::~Window()
 {
 
-}
-
-void setScreenRes(int width, int height)
-{
-	DEVMODE dmScreenSettings;
-
-	// If full screen set the screen to maximum size of the users desktop and 32bit.
-	memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
-	dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-	dmScreenSettings.dmPelsWidth = (unsigned long)width;
-	dmScreenSettings.dmPelsHeight = (unsigned long)height;
-	dmScreenSettings.dmBitsPerPel = 32;
-	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-	// Change the display settings to full screen.
-	ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-}
-
-DWORD calcStyle(const WindowOptions& options)
-{
-	DWORD style;
-
-	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-
-	if (options.resizable) 
-		style = WS_OVERLAPPEDWINDOW;
-
-	if (!options.border || options.fullscreen) 
-		style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
-
-	return style;
-}
-
-void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
-{
-	width = options.width;
-	height = options.height;
-
-	if(width == 0)
-		width = GetSystemMetrics(SM_CXSCREEN);
-
-	if (height == 0)
-		height = GetSystemMetrics(SM_CYSCREEN);
-}
-
-void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height)
-{
-	if (options.fullscreen)
-	{
-		x = 0;
-		y = 0;
-	}
-	if (options.centered)
-	{
-		x = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
-		y = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
-	}
-	else
-	{
-		x = options.x;
-		y = options.y;
-	}
-}
-
-void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height)
-{
-	RECT wr;
-
-	wr = { 0, 0, screenWidth, screenHeight };
-	AdjustWindowRect(&wr, style, false);
-
-	width = wr.right - wr.left;
-	height = wr.bottom - wr.top;
-}
-
-wchar_t* create_wcharstr(const char* src)
-{
-	wchar_t* buffer = 0;
-	
-	buffer = new wchar_t[strlen(src) + 1];
-	ZeroMemory((char*)buffer, (strlen(src) + 1) * sizeof(wchar_t));
-	mbstowcs(buffer, src, strlen(src));
-
-	return buffer;
 }
 
 void Window::init(const std::string& name, const WindowOptions* options)
@@ -234,6 +156,16 @@ void Window::setInputSystem(InputSystem* inputsys)
 	m_inputsystem = inputsys;
 }
 
+void Window::setFullscreenState(bool enabled)
+{
+	m_options.fullscreen = enabled;
+
+	if (m_options.fullscreen)
+		setScreenRes(m_screenWidth, m_screenHeight);
+	else
+		ChangeDisplaySettings(NULL, 0);
+}
+
 bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 {
 	switch (umessage)
@@ -274,25 +206,25 @@ void* Window::getNativeHandle() const
 	return (void*)m_handle->hwnd;
 }
 
+
+// HELPER FUNCTIONS
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 {
 	switch (umessage)
 	{
-		// Check if the window is being destroyed.
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
 		return 0;
 	}
 
-	// Check if the window is being closed.
 	case WM_CLOSE:
 	{
 		PostQuitMessage(0);
 		return 0;
 	}
 
-	// All other messages pass to the message handler in the system class.
 	default:
 	{
 		if (main_window->HandleMessage(umessage, wparam))
@@ -301,4 +233,86 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 		return DefWindowProc(hwnd, umessage, wparam, lparam);
 	}
 	}
+}
+
+void setScreenRes(int width, int height)
+{
+	DEVMODE dmScreenSettings;
+
+	memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
+	dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+	dmScreenSettings.dmPelsWidth = (unsigned long)width;
+	dmScreenSettings.dmPelsHeight = (unsigned long)height;
+	dmScreenSettings.dmBitsPerPel = 32;
+	dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+	ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
+}
+
+DWORD calcStyle(const WindowOptions& options)
+{
+	DWORD style;
+
+	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+
+	if (options.resizable)
+		style = WS_OVERLAPPEDWINDOW;
+
+	if (!options.border || options.fullscreen)
+		style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP;
+
+	return style;
+}
+
+void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
+{
+	width = options.width;
+	height = options.height;
+
+	if (width == 0)
+		width = GetSystemMetrics(SM_CXSCREEN);
+
+	if (height == 0)
+		height = GetSystemMetrics(SM_CYSCREEN);
+}
+
+void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height)
+{
+	if (options.fullscreen)
+	{
+		x = 0;
+		y = 0;
+	}
+	if (options.centered)
+	{
+		x = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
+		y = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
+	}
+	else
+	{
+		x = options.x;
+		y = options.y;
+	}
+}
+
+void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height)
+{
+	RECT wr;
+
+	wr = { 0, 0, screenWidth, screenHeight };
+	AdjustWindowRect(&wr, style, false);
+
+	width = wr.right - wr.left;
+	height = wr.bottom - wr.top;
+}
+
+wchar_t* create_wcharstr(const char* src)
+{
+	wchar_t* buffer = 0;
+
+	buffer = new wchar_t[strlen(src) + 1];
+	ZeroMemory((char*)buffer, (strlen(src) + 1) * sizeof(wchar_t));
+	mbstowcs(buffer, src, strlen(src));
+
+	return buffer;
 }

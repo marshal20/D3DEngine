@@ -42,13 +42,25 @@ int main()
 
 	while (!wind.isClosed())
 	{
+		wind.update();
+
 		if (inputsys.isKeydown(VK_ESCAPE))
 			wind.close();
 
-		wind.update();
+		// toggle fullscreen mode
+		if (inputsys.isKeydown(VK_F11))
+		{
+			static bool fullscreen = false;
+			fullscreen = !fullscreen;
+			std::cout << (fullscreen ? "Going fullscreen" : "Going windowed") << std::endl;
+			wind.setFullscreenState(fullscreen);
+			d3d11Device.setFullscreenState(fullscreen);
+		}
+
 		d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 		d3d11Device.endScene();
 
+		inputsys.end();
 		Sleep(50);
 	}
 

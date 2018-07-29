@@ -31,7 +31,7 @@ RenderDevice::~RenderDevice()
 
 void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow)
 {
-
+	m_outputmode = outputmode;
 
 	/*IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
@@ -57,17 +57,18 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 	bool isWindowed;
 
 	isWindowed = !outputWindow.m_options.fullscreen;
+	m_fullscreen = !isWindowed;
 
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	// setting up the swap chain description.
 	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Width = outputmode.width;
-	swapChainDesc.BufferDesc.Height = outputmode.height;
+	swapChainDesc.BufferDesc.Width = m_outputmode.width;
+	swapChainDesc.BufferDesc.Height = m_outputmode.height;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	if (m_vsync_enabled)
 	{
-		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
-		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = m_outputmode.RefreshRate.Numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Denominator = m_outputmode.RefreshRate.Denominator;
 	}
 	else
 	{
@@ -166,7 +167,9 @@ void RenderDevice::setViewport(int width, int height)
 
 void RenderDevice::setFullscreenState(bool enabled)
 {
-	if(enabled)
+	m_fullscreen = enabled;
+
+	if(m_fullscreen)
 		m_impl->pSwapchain->SetFullscreenState(true, NULL);
 	else
 		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);

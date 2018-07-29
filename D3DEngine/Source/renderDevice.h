@@ -51,6 +51,6 @@ private:
 	D3D11Impl* m_impl = nullptr;
 
 	bool m_vsync_enabled = false;
-	int numerator = 0;
-	int denominator = 1;
+	bool m_fullscreen = false;
+	OutputMode m_outputmode;
 };

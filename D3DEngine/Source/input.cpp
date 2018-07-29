@@ -11,6 +11,12 @@ InputSystem::~InputSystem()
 
 }
 
+void InputSystem::end()
+{
+	// TODO:
+	m_keys = { false };
+}
+
 bool InputSystem::isKeydown(int key)
 {
 	return m_keys[key];
