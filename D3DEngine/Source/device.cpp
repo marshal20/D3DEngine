@@ -146,6 +146,21 @@ void Device::endScene()
 	return;
 }
 
+void Device::setViewport(const int width, const int height)
+{
+	D3D11_VIEWPORT viewport;
+
+	viewport.Width = (float)width;
+	viewport.Height = (float)height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	m_impl->pContext->RSSetViewports(1, &viewport);
+}
+
+// STATIC FUNCTIONS
 
 AdapterInfo Device::getAdapterInfo()
 {

@@ -39,6 +39,8 @@ public:
 	void beginScene(float r, float g, float b, float a);
 	void endScene();
 
+	void setViewport(const int width, const int height);
+
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();
 	static OutputMode getOutputMode(unsigned int width, unsigned int height);
