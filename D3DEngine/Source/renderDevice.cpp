@@ -1,4 +1,4 @@
-#include "device.h"
+#include "renderDevice.h"
 #include "checks.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -6,7 +6,7 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 
-struct Device::D3D11Impl
+struct RenderDevice::D3D11Impl
 {
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
@@ -14,7 +14,7 @@ struct Device::D3D11Impl
 	ID3D11RenderTargetView* pRenderTargetView;
 };
 
-Device::Device()
+RenderDevice::RenderDevice()
 {
 	m_impl = new D3D11Impl;
 	m_impl->pDevice = nullptr;
@@ -23,13 +23,13 @@ Device::Device()
 	m_impl->pRenderTargetView = nullptr;
 }
 
-Device::~Device()
+RenderDevice::~RenderDevice()
 {
 	delete m_impl;
 	m_impl = nullptr;
 }
 
-void Device::init(const OutputMode& outputmode, const Window& outputWindow)
+void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow)
 {
 
 
@@ -96,7 +96,7 @@ void Device::init(const OutputMode& outputmode, const Window& outputWindow)
 	pBackBuffer->Release();
 }
 
-void Device::cleanup()
+void RenderDevice::cleanup()
 {
 	if (m_impl->pRenderTargetView)
 	{
@@ -123,7 +123,7 @@ void Device::cleanup()
 	}
 }
 
-void Device::beginScene(float r, float g, float b, float a)
+void RenderDevice::beginScene(float r, float g, float b, float a)
 {
 	float color[4] = {r, g, b, a};
 
@@ -132,7 +132,7 @@ void Device::beginScene(float r, float g, float b, float a)
 	return;
 }
 
-void Device::endScene()
+void RenderDevice::endScene()
 {
 	if (m_vsync_enabled)
 	{
@@ -146,7 +146,7 @@ void Device::endScene()
 	return;
 }
 
-void Device::setViewport(const int width, const int height)
+void RenderDevice::setViewport(int width, int height)
 {
 	D3D11_VIEWPORT viewport;
 
@@ -162,7 +162,7 @@ void Device::setViewport(const int width, const int height)
 
 // STATIC FUNCTIONS
 
-AdapterInfo Device::getAdapterInfo()
+AdapterInfo RenderDevice::getAdapterInfo()
 {
 	AdapterInfo info;
 	IDXGIFactory* pFactory = nullptr;
@@ -197,7 +197,7 @@ AdapterInfo Device::getAdapterInfo()
 	return info;
 }
 
-std::vector<OutputMode> Device::getOutputModes()
+std::vector<OutputMode> RenderDevice::getOutputModes()
 {
 	std::vector<OutputMode> outputModes;
 	IDXGIFactory* pFactory = nullptr;
@@ -233,7 +233,7 @@ std::vector<OutputMode> Device::getOutputModes()
 	return outputModes;
 }
 
-OutputMode Device::getOutputMode(unsigned int width, unsigned int height)
+OutputMode RenderDevice::matchOutputMode(unsigned int width, unsigned int height)
 {
 	std::vector<OutputMode> modes = getOutputModes();
 	for(auto& mode: modes)

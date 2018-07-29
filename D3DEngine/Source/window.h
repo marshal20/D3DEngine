@@ -36,7 +36,7 @@ public:
 	bool HandleMessage(unsigned int umessage, unsigned int wparam);
 
 private:
-	friend class Device;
+	friend class RenderDevice;
 	void* getNativeHandle() const;
 
 private:

@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include "window.h"
 #include "input.h"
-#include "device.h"
+#include "renderDevice.h"
 
 void magnificent_exit()
 {
@@ -17,7 +17,7 @@ void magnificent_exit()
 
 void experimental()
 {
-	AdapterInfo GPU = Device::getAdapterInfo();
+	AdapterInfo GPU = RenderDevice::getAdapterInfo();
 	std::cout << "GPU description: "<< GPU.Description << std::endl;
 	std::cout << "GPU Vendor ID: " << GPU.VendorId << std::endl;
 	std::cout << "GPU Device ID: " << GPU.DeviceId << std::endl;
@@ -35,10 +35,10 @@ int main()
 	
 	Window wind;
 	InputSystem inputsys;
-	Device d3d11Device;
+	RenderDevice d3d11Device;
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
-	d3d11Device.init(Device::getOutputMode(800, 600), wind);
+	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
 
 	while (!wind.isClosed())
 	{

@@ -28,22 +28,22 @@ struct OutputMode
 	Rational RefreshRate;
 };
 
-class Device
+class RenderDevice
 {
 public:
-	Device();
-	~Device();
+	RenderDevice();
+	~RenderDevice();
 	void init(const OutputMode& outputmode, const Window& outputWindow);
 	void cleanup();
 
 	void beginScene(float r, float g, float b, float a);
 	void endScene();
 
-	void setViewport(const int width, const int height);
+	void setViewport(int width, int height);
 
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();
-	static OutputMode getOutputMode(unsigned int width, unsigned int height);
+	static OutputMode matchOutputMode(unsigned int width, unsigned int height);
 
 private:
 	struct D3D11Impl;
