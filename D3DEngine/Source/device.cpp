@@ -11,6 +11,7 @@ struct Device::D3D11Impl
 	ID3D11Device* pDevice;
 	ID3D11DeviceContext* pContext;
 	IDXGISwapChain* pSwapchain;
+	ID3D11RenderTargetView* pRenderTargetView;
 };
 
 Device::Device()
@@ -19,6 +20,7 @@ Device::Device()
 	m_impl->pDevice = nullptr;
 	m_impl->pContext = nullptr;
 	m_impl->pSwapchain = nullptr;
+	m_impl->pRenderTargetView = nullptr;
 }
 
 Device::~Device()
@@ -51,6 +53,7 @@ void Device::init(const OutputMode& outputmode, const Window& outputWindow)
 
 	D3D_FEATURE_LEVEL featureLevel;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	ID3D11Texture2D* pBackBuffer;
 
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	
@@ -85,8 +88,62 @@ void Device::init(const OutputMode& outputmode, const Window& outputWindow)
 	D3D11CALL(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL,
 		&featureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc,
 		&m_impl->pSwapchain, &m_impl->pDevice, NULL, &m_impl->pContext));
+	
+	// render target view
+	m_impl->pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_impl->pRenderTargetView);
 
+	pBackBuffer->Release();
+}
 
+void Device::cleanup()
+{
+	if (m_impl->pRenderTargetView)
+	{
+		m_impl->pRenderTargetView->Release();
+		m_impl->pRenderTargetView = nullptr;
+	}
+
+	if (m_impl->pSwapchain)
+	{
+		m_impl->pSwapchain->Release();
+		m_impl->pSwapchain = nullptr;
+	}
+
+	if (m_impl->pContext)
+	{
+		m_impl->pContext->Release();
+		m_impl->pContext = nullptr;
+	}
+
+	if (m_impl->pDevice)
+	{
+		m_impl->pDevice->Release();
+		m_impl->pDevice = nullptr;
+	}
+}
+
+void Device::beginScene(float r, float g, float b, float a)
+{
+	float color[4] = {r, g, b, a};
+
+	m_impl->pContext->ClearRenderTargetView(m_impl->pRenderTargetView, color);
+
+	return;
+}
+
+void Device::endScene()
+{
+	if (m_vsync_enabled)
+	{
+		m_impl->pSwapchain->Present(1, 0);
+	}
+	else
+	{
+		m_impl->pSwapchain->Present(0, 0);
+	}
+
+	return;
 }
 
 

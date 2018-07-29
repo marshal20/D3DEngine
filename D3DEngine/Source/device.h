@@ -34,6 +34,10 @@ public:
 	Device();
 	~Device();
 	void init(const OutputMode& outputmode, const Window& outputWindow);
+	void cleanup();
+
+	void beginScene(float r, float g, float b, float a);
+	void endScene();
 
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();

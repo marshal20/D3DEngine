@@ -46,9 +46,13 @@ int main()
 			wind.close();
 
 		wind.update();
+		d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
+		d3d11Device.endScene();
+
 		Sleep(50);
 	}
 
+	d3d11Device.cleanup();
 	wind.cleanup();
 
 	magnificent_exit();
