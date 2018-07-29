@@ -2,6 +2,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <stdlib.h>
+#include "checks.h"
 
 const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
@@ -158,6 +159,11 @@ void Window::init(const std::string& name, const WindowOptions* options)
 	m_handle->hwnd = CreateWindow(m_handle->application_name, m_handle->application_name,
 		window_style,
 		window_x, window_y, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
+
+	if (!m_handle->hwnd)
+	{
+		ENGINE_ERROR("can't initialize window.");
+	}
 
 	// Bring the window up on the screen and set it as main focus.
 	ShowWindow(m_handle->hwnd, SW_SHOW);

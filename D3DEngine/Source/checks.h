@@ -21,5 +21,5 @@ ENGINE_ERROR("Failed D3D11 call.");\
 #undef ENGINE_ERROR
 #undef D3D11CALL
 #define ENGINE_ERROR(x) 
-#define D3D11CALL(x) 
+#define D3D11CALL(x) x
 #endif

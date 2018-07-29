@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include "window.h"
 #include "input.h"
+#include "device.h"
 
 void magnificent_exit()
 {
@@ -22,6 +23,16 @@ int main()
 	InputSystem inputsys;
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
+
+	AdapterInfo GPU = Device::getAdapterInfo();
+	std::cout << GPU.Description << std::endl;
+	std::cout << GPU.VendorId << std::endl;
+	std::cout << GPU.DeviceId << std::endl;
+	std::cout << GPU.SubSysId << std::endl;
+	std::cout << GPU.Revision << std::endl;
+	std::cout << GPU.DedicatedVideoMemory / 1024 / 1024 << std::endl;
+	std::cout << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
+	std::cout << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
 
 	while (!wind.isClosed())
 	{
