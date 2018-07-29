@@ -240,7 +240,7 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 	{
 	case WM_ACTIVATEAPP:
 	{
-		if (!m_options.fullscreen) break;
+		if (!m_options.fullscreen) return false;
 
 		if (LOWORD(wparam) == WA_INACTIVE)
 		{
@@ -251,6 +251,7 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 		{
 			setScreenRes(m_screenWidth, m_screenHeight);
 		}
+		return true;
 	}
 
 	case WM_KEYDOWN:

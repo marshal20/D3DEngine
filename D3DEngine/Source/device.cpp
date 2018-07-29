@@ -2,15 +2,29 @@
 #include "checks.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <d3d11.h>
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+
+struct Device::D3D11Impl
+{
+	ID3D11Device* pDevice;
+	ID3D11DeviceContext* pContext;
+	IDXGISwapChain* pSwapchain;
+};
 
 Device::Device()
 {
-
+	m_impl = new D3D11Impl;
+	m_impl->pDevice = nullptr;
+	m_impl->pContext = nullptr;
+	m_impl->pSwapchain = nullptr;
 }
 
 Device::~Device()
 {
-
+	delete m_impl;
+	m_impl = nullptr;
 }
 
 void Device::init(const OutputMode& outputmode, const Window& outputWindow)
@@ -70,7 +84,7 @@ void Device::init(const OutputMode& outputmode, const Window& outputWindow)
 
 	D3D11CALL(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL,
 		&featureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc,
-		&m_pSwapchain, &m_pDevice, NULL, &m_pContext));
+		&m_impl->pSwapchain, &m_impl->pDevice, NULL, &m_impl->pContext));
 
 
 }
@@ -119,7 +133,6 @@ std::vector<OutputMode> Device::getOutputModes()
 	IDXGIOutput* pOutput = nullptr;
 	DXGI_MODE_DESC* pModeList = nullptr;
 	unsigned int numModes;
-	DXGI_ADAPTER_DESC adapterDesc;
 
 	D3D11CALL(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&pFactory));
 	D3D11CALL(pFactory->EnumAdapters(0, &pAdapter));
@@ -131,7 +144,7 @@ std::vector<OutputMode> Device::getOutputModes()
 	D3D11CALL(pOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, pModeList));
 
 	outputModes.reserve(numModes);
-	for (int i = 0; i < numModes; i++)
+	for (unsigned int i = 0; i < numModes; i++)
 	{
 		outputModes.push_back({ pModeList[i].Width, pModeList[i].Height, 
 					{pModeList[i].RefreshRate.Numerator, pModeList[i].RefreshRate.Denominator} });

@@ -18,14 +18,14 @@ void magnificent_exit()
 void experimental()
 {
 	AdapterInfo GPU = Device::getAdapterInfo();
-	std::cout << GPU.Description << std::endl;
-	std::cout << GPU.VendorId << std::endl;
-	std::cout << GPU.DeviceId << std::endl;
-	std::cout << GPU.SubSysId << std::endl;
-	std::cout << GPU.Revision << std::endl;
-	std::cout << GPU.DedicatedVideoMemory / 1024 / 1024 << std::endl;
-	std::cout << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
-	std::cout << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
+	std::cout << "GPU description: "<< GPU.Description << std::endl;
+	std::cout << "GPU Vendor ID: " << GPU.VendorId << std::endl;
+	std::cout << "GPU Device ID: " << GPU.DeviceId << std::endl;
+	std::cout << "GPU SubSys ID: " << GPU.SubSysId << std::endl;
+	std::cout << "GPU Revision: " << GPU.Revision << std::endl;
+	std::cout << "GPU Mem (ded): " << GPU.DedicatedVideoMemory / 1024 / 1024 << std::endl;
+	std::cout << "System Mem (ded): " << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
+	std::cout << "Shared Mem: " << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
 }
 
 int main()

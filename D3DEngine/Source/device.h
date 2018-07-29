@@ -1,7 +1,4 @@
 #pragma once
-#include <d3d11.h>
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
 #include <string>
 #include <vector>
 #include "window.h"
@@ -43,12 +40,9 @@ public:
 	static OutputMode getOutputMode(int width, int height);
 
 private:
-	//class DeviceImpl;
-	//DeviceImpl* m_impl = nullptr;
+	struct D3D11Impl;
+	D3D11Impl* m_impl = nullptr;
 
-	ID3D11Device* m_pDevice;
-	ID3D11DeviceContext* m_pContext;
-	IDXGISwapChain* m_pSwapchain;
 	bool m_vsync_enabled = false;
 	int numerator = 0;
 	int denominator = 1;
