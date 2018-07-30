@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include "window.h"
 #include "input.h"
-#include "renderDevice.h"
+#include "renderdevice.h"
 
 void magnificent_exit()
 {
