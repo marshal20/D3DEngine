@@ -3,7 +3,7 @@
 #include <vector>
 #include "window.h"
 #include "pointerutil.h"
-#include <d3d11.h>
+
 
 struct RenderDeviceImpl;
 

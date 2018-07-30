@@ -3,6 +3,7 @@
 #include "input.h"
 #include "pointerutil.h"
 
+
 struct WindowOptions
 {
 	bool fullscreen;

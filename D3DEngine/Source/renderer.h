@@ -2,12 +2,8 @@
 #include "renderdevice.h"
 #include "shader.h"
 #include "pointerutil.h"
-
-struct RenderDeviceImpl;
-
-// TO BE DELETED
-#include <d3d11.h>
 #include <directxmath.h>
+
 
 class Renderer
 {
@@ -26,8 +22,8 @@ public:
 
 private:
 	ImplPtr<RenderDeviceImpl> m_devicehandle;
+	struct RendererBuffers;
+	ImplPtr<RendererBuffers> m_buffers;
 
 	Shader m_shader;
-	InterPtr<ID3D11Buffer> m_vertexBuffer;
-	InterPtr<ID3D11Buffer> m_indexBuffer;
 };

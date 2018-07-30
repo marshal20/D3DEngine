@@ -3,6 +3,11 @@
 #include "checks.h"
 #include "renderdeviceImpl.h"
 
+struct Renderer::RendererBuffers
+{
+	InterPtr<ID3D11Buffer> pVertexBuffer;
+	InterPtr<ID3D11Buffer> pIndexBuffer;
+};
 
 Renderer::Renderer()
 {
@@ -47,7 +52,7 @@ void Renderer::init(RenderDevice* targetdevice)
 	indexData[5] = 2;  // Top right.
 
 	// vertex buffer
-	ZeroMemory(&vertexBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(VertexType) * 4;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -61,10 +66,10 @@ void Renderer::init(RenderDevice* targetdevice)
 	vertexSubsourceData.SysMemSlicePitch = 0;
 
 	// vertexbuffer creating
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&vertexBufferDesc, &vertexSubsourceData, &m_vertexBuffer));
+	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&vertexBufferDesc, &vertexSubsourceData, &m_buffers->pVertexBuffer));
 
 	// index buffer
-	ZeroMemory(&indexBufferDesc, sizeof(D3D11_BUFFER_DESC));
+	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	indexBufferDesc.ByteWidth = sizeof(unsigned long) * 6;
 	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -78,7 +83,7 @@ void Renderer::init(RenderDevice* targetdevice)
 	indexSubsourceData.SysMemSlicePitch = 0;
 
 	// index buffer creating
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&indexBufferDesc, &indexSubsourceData, &m_indexBuffer));
+	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&indexBufferDesc, &indexSubsourceData, &m_buffers->pIndexBuffer));
 
 	// free out buffers
 	delete[] vertexData;
@@ -106,9 +111,9 @@ void Renderer::render()
 	stride = sizeof(VertexType);
 	offset = 0;
 
-	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &m_buffers->pVertexBuffer, &stride, &offset);
 
-	m_devicehandle->pContext->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
+	m_devicehandle->pContext->IASetIndexBuffer(m_buffers->pIndexBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
 
 	m_devicehandle->pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
