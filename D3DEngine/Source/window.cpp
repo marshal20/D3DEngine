@@ -1,8 +1,8 @@
 #include "window.h"
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include <stdlib.h>
 #include "checks.h"
+#include "strutil.h"
 
 const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
@@ -13,7 +13,6 @@ DWORD calcStyle(const WindowOptions& options);
 void calcScreenDimentions(const WindowOptions& options, int& width, int& height);
 void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height);
 void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height);
-wchar_t* create_wcharstr(const char* src);
 
 struct Window::NativeHandle
 {
@@ -299,15 +298,4 @@ void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& w
 
 	width = wr.right - wr.left;
 	height = wr.bottom - wr.top;
-}
-
-wchar_t* create_wcharstr(const char* src)
-{
-	wchar_t* buffer = 0;
-
-	buffer = new wchar_t[strlen(src) + 1];
-	ZeroMemory((char*)buffer, (strlen(src) + 1) * sizeof(wchar_t));
-	mbstowcs(buffer, src, strlen(src));
-
-	return buffer;
 }

@@ -5,8 +5,7 @@
 #pragma comment(lib, "d3dcompiler.lib")
 #include "checks.h"
 #include "renderdeviceImpl.h"
-
-wchar_t* create_wcharstr2(const char* src);
+#include "strutil.h"
 
 struct Shader::ShaderBuffers
 {
@@ -38,8 +37,8 @@ void Shader::init(RenderDevice* renderDevice, const std::string& vertex, const s
 	wchar_t* vsFilename;
 	wchar_t* psFilename;
 
-	vsFilename = create_wcharstr2(vertex.c_str());
-	psFilename = create_wcharstr2(pixel.c_str());
+	vsFilename = create_wcharstr(vertex.c_str());
+	psFilename = create_wcharstr(pixel.c_str());
 
 	D3D11CALL(D3DCompileFromFile(vsFilename, NULL, NULL, "SimpleVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, NULL));
@@ -124,16 +123,4 @@ void Shader::render(unsigned int indexCount)
 	m_devicehandle->pContext->DrawIndexed(indexCount, 0, 0);
 
 
-}
-
-
-wchar_t* create_wcharstr2(const char* src)
-{
-	wchar_t* buffer = 0;
-
-	buffer = new wchar_t[strlen(src) + 1];
-	ZeroMemory((char*)buffer, (strlen(src) + 1) * sizeof(wchar_t));
-	mbstowcs(buffer, src, strlen(src));
-
-	return buffer;
 }
