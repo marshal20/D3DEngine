@@ -151,14 +151,24 @@
     <ClCompile Include="Source\logger.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\renderdevice.cpp" />
+    <ClCompile Include="Source\renderer.cpp" />
+    <ClCompile Include="Source\shader.cpp" />
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\pointerutil.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\checks.h" />
     <ClInclude Include="Source\logger.h" />
     <ClInclude Include="Source\renderdevice.h" />
+    <ClInclude Include="Source\renderdeviceImpl.h" />
+    <ClInclude Include="Source\renderer.h" />
+    <ClInclude Include="Source\shader.h" />
     <ClInclude Include="Source\window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\simple.ps" />
+    <None Include="Resources\Shaders\simple.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

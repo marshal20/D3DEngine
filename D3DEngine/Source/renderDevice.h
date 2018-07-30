@@ -2,6 +2,10 @@
 #include <string>
 #include <vector>
 #include "window.h"
+#include "pointerutil.h"
+#include <d3d11.h>
+
+struct RenderDeviceImpl;
 
 struct AdapterInfo
 {
@@ -33,7 +37,7 @@ class RenderDevice
 public:
 	RenderDevice();
 	~RenderDevice();
-	void init(const OutputMode& outputmode, const Window& outputWindow);
+	void init(const OutputMode& outputmode, Window& outputWindow);
 	void cleanup();
 
 	void beginScene(float r, float g, float b, float a);
@@ -47,8 +51,14 @@ public:
 	static OutputMode matchOutputMode(unsigned int width, unsigned int height);
 
 private:
-	struct D3D11Impl;
-	D3D11Impl* m_impl = nullptr;
+	friend class Renderer;
+	friend class Shader;
+	RenderDeviceImpl* getImplementation();
+
+private:
+	ImplPtr<RenderDeviceImpl> m_impl;
+	struct RenderBuffers;
+	ImplPtr<RenderBuffers> m_buffers;
 
 	bool m_vsync_enabled = false;
 	bool m_fullscreen = false;

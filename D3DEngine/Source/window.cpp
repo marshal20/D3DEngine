@@ -24,7 +24,6 @@ struct Window::NativeHandle
 
 Window::Window()
 {
-	m_handle = new NativeHandle;
 
 }
 
@@ -113,11 +112,6 @@ void Window::cleanup()
 		m_handle->application_name = 0;
 	}
 
-	if (m_handle)
-	{
-		delete m_handle;
-	}
-
 	m_closed = true;
 }
 
@@ -202,9 +196,9 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 	}
 }
 
-void* Window::getNativeHandle() const
+void* Window::getNativeHandle()
 {
-	return (void*)m_handle->hwnd;
+	return (void*)(m_handle->hwnd);
 }
 
 

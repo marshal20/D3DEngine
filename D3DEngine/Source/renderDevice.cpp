@@ -5,31 +5,28 @@
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
+#include "renderdeviceImpl.h"
 
-struct RenderDevice::D3D11Impl
+struct RenderDevice::RenderBuffers
 {
-	ID3D11Device* pDevice;
-	ID3D11DeviceContext* pContext;
-	IDXGISwapChain* pSwapchain;
-	ID3D11RenderTargetView* pRenderTargetView;
+	InterPtr<ID3D11RenderTargetView> pRenderTargetView;
+	InterPtr<ID3D11RasterizerState> pRasterState;
+	InterPtr<ID3D11Texture2D> pDepthStencilBuffer;
+	InterPtr<ID3D11DepthStencilState> pDepthStencilState;
+	InterPtr<ID3D11DepthStencilView> pDepthStencilView;
 };
 
 RenderDevice::RenderDevice()
 {
-	m_impl = new D3D11Impl;
-	m_impl->pDevice = nullptr;
-	m_impl->pContext = nullptr;
-	m_impl->pSwapchain = nullptr;
-	m_impl->pRenderTargetView = nullptr;
+
 }
 
 RenderDevice::~RenderDevice()
 {
-	delete m_impl;
-	m_impl = nullptr;
+
 }
 
-void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow)
+void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 {
 	m_outputmode = outputmode;
 
@@ -53,8 +50,14 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 
 	D3D_FEATURE_LEVEL featureLevel;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	ID3D11Texture2D* pBackBuffer;
+	InterPtr<ID3D11Texture2D> pBackBuffer;
+	D3D11_RASTERIZER_DESC rasterDesc;
 	bool isWindowed;
+
+	m_impl->pDevice = nullptr;
+	m_impl->pContext = nullptr;
+	m_impl->pSwapchain = nullptr;
+	m_buffers->pRenderTargetView = nullptr;
 
 	isWindowed = !outputWindow.m_options.fullscreen;
 	m_fullscreen = !isWindowed;
@@ -94,45 +97,115 @@ void RenderDevice::init(const OutputMode& outputmode, const Window& outputWindow
 	
 	// render target view
 	m_impl->pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_impl->pRenderTargetView);
+	m_impl->pDevice->CreateRenderTargetView(pBackBuffer.get(), NULL, &m_buffers->pRenderTargetView);
+
+
+	// RETHINK // THIS MAKES IT RUN
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+
+	D3D11CALL(m_impl->pDevice->CreateRenderTargetView(pBackBuffer.get(), NULL, &m_buffers->pRenderTargetView));
 
 	pBackBuffer->Release();
+	pBackBuffer = 0;
+
+	// Initialize the description of the depth buffer.
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+
+	// Set up the description of the depth buffer.
+	depthBufferDesc.Width = m_outputmode.width;
+	depthBufferDesc.Height = m_outputmode.height;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	// Create the texture for the depth buffer using the filled out description.
+	D3D11CALL(m_impl->pDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_buffers->pDepthStencilBuffer));
+
+
+	// Initialize the description of the stencil state.
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	// Set up the description of the stencil state.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable = true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create the depth stencil state.
+	D3D11CALL(m_impl->pDevice->CreateDepthStencilState(&depthStencilDesc, &m_buffers->pDepthStencilState));
+
+	// Set the depth stencil state.
+	m_impl->pContext->OMSetDepthStencilState(m_buffers->pDepthStencilState.get(), 1);
+
+	// Initialize the depth stencil view.
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	// Set up the depth stencil view description.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// Create the depth stencil view.
+	D3D11CALL(m_impl->pDevice->CreateDepthStencilView(m_buffers->pDepthStencilBuffer.get(), &depthStencilViewDesc, &m_buffers->pDepthStencilView));
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_impl->pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_buffers->pDepthStencilView.get());
+	// END RETHINK*/
+
+
+	// resterizing options
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
+	m_impl->pContext->RSSetState(m_buffers->pRasterState.get());
+
+
 }
 
 void RenderDevice::cleanup()
 {
 	setFullscreenState(false);
-
-	if (m_impl->pRenderTargetView)
-	{
-		m_impl->pRenderTargetView->Release();
-		m_impl->pRenderTargetView = nullptr;
-	}
-
-	if (m_impl->pSwapchain)
-	{
-		m_impl->pSwapchain->Release();
-		m_impl->pSwapchain = nullptr;
-	}
-
-	if (m_impl->pContext)
-	{
-		m_impl->pContext->Release();
-		m_impl->pContext = nullptr;
-	}
-
-	if (m_impl->pDevice)
-	{
-		m_impl->pDevice->Release();
-		m_impl->pDevice = nullptr;
-	}
 }
 
 void RenderDevice::beginScene(float r, float g, float b, float a)
 {
 	float color[4] = {r, g, b, a};
 
-	m_impl->pContext->ClearRenderTargetView(m_impl->pRenderTargetView, color);
+	m_impl->pContext->ClearRenderTargetView(m_buffers->pRenderTargetView.get(), color);
+
+	m_impl->pContext->ClearDepthStencilView(m_buffers->pDepthStencilView.get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
 }
@@ -181,8 +254,8 @@ void RenderDevice::setFullscreenState(bool enabled)
 AdapterInfo RenderDevice::getAdapterInfo()
 {
 	AdapterInfo info;
-	IDXGIFactory* pFactory = nullptr;
-	IDXGIAdapter* pAdapter = nullptr;
+	InterPtr<IDXGIFactory> pFactory;
+	InterPtr<IDXGIAdapter> pAdapter;
 	DXGI_ADAPTER_DESC adapterDesc;
 	char description[128];
 
@@ -205,20 +278,16 @@ AdapterInfo RenderDevice::getAdapterInfo()
 	info.DedicatedSystemMemory = adapterDesc.DedicatedSystemMemory;
 	info.SharedSystemMemory = adapterDesc.SharedSystemMemory;
 
-	pAdapter->Release();
-	pAdapter = nullptr;
-	pFactory->Release();
-	pFactory = nullptr;
-
 	return info;
 }
 
 std::vector<OutputMode> RenderDevice::getOutputModes()
 {
 	std::vector<OutputMode> outputModes;
-	IDXGIFactory* pFactory = nullptr;
-	IDXGIAdapter* pAdapter = nullptr;
-	IDXGIOutput* pOutput = nullptr;
+	InterPtr<IDXGIFactory> pFactory;
+	InterPtr<IDXGIAdapter> pAdapter;
+	InterPtr<IDXGIOutput> pOutput;
+
 	DXGI_MODE_DESC* pModeList = nullptr;
 	unsigned int numModes;
 
@@ -239,12 +308,6 @@ std::vector<OutputMode> RenderDevice::getOutputModes()
 	}
 
 	delete[] pModeList;
-	pOutput->Release();
-	pOutput = nullptr;
-	pAdapter->Release();
-	pAdapter = nullptr;
-	pFactory->Release();
-	pFactory = nullptr;
 
 	return outputModes;
 }
@@ -258,4 +321,9 @@ OutputMode RenderDevice::matchOutputMode(unsigned int width, unsigned int height
 			return mode;
 	}
 	return { (unsigned int)width, (unsigned int)height, {0, 1} };
+}
+
+RenderDeviceImpl* RenderDevice::getImplementation()
+{
+	return m_impl.get();
 }

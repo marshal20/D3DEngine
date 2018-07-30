@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "input.h"
+#include "pointerutil.h"
 
 struct WindowOptions
 {
@@ -38,11 +39,11 @@ public:
 
 private:
 	friend class RenderDevice;
-	void* getNativeHandle() const;
+	void* getNativeHandle();
 
 private:
 	struct NativeHandle;
-	NativeHandle* m_handle = nullptr;
+	ImplPtr<NativeHandle> m_handle;
 
 	InputSystem* m_inputsystem = nullptr;
 	WindowOptions m_options;

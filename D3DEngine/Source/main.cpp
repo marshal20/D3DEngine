@@ -4,6 +4,7 @@
 #include "window.h"
 #include "input.h"
 #include "renderdevice.h"
+#include "renderer.h"
 
 void magnificent_exit()
 {
@@ -26,6 +27,7 @@ void experimental()
 	std::cout << "GPU Mem (ded): " << GPU.DedicatedVideoMemory / 1024 / 1024 << std::endl;
 	std::cout << "System Mem (ded): " << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
 	std::cout << "Shared Mem: " << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
+	std::cout << "---------------------" << std::endl << std::endl;
 }
 
 int main()
@@ -36,9 +38,13 @@ int main()
 	Window wind;
 	InputSystem inputsys;
 	RenderDevice d3d11Device;
+	Renderer renderer;
+
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
+	d3d11Device.setViewport(800, 600);
+	renderer.init(&d3d11Device);
 
 	while (!wind.isClosed())
 	{
@@ -57,13 +63,20 @@ int main()
 			d3d11Device.setFullscreenState(fullscreen);
 		}
 
-		d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
+		d3d11Device.beginScene(0.25f, 0.5f, 0.25f, 1.0f);
+
+		if (inputsys.isKeyDown(VK_F2))
+			d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
+
+		renderer.render();
+
 		d3d11Device.endScene();
 
 		inputsys.end();
 		Sleep(50);
 	}
 
+	renderer.cleanup();
 	d3d11Device.cleanup();
 	wind.cleanup();
 
