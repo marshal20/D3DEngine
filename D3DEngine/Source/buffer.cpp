@@ -3,25 +3,9 @@
 #include <d3d11.h>
 
 #include "pointerutil.h"
-#include "renderdeviceImpl.h"
+#include "renderdevicehandle.h"
 #include "checks.h"
 
-
-/*
-// vertex buffer
-ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
-vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-vertexBufferDesc.ByteWidth = sizeof(VertexType) * 4;
-vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-vertexBufferDesc.CPUAccessFlags = 0;
-vertexBufferDesc.MiscFlags = 0;
-vertexBufferDesc.StructureByteStride = 0;
-
-// vertex subsource
-vertexSubsourceData.pSysMem = vertexData;
-vertexSubsourceData.SysMemPitch = 0;
-vertexSubsourceData.SysMemSlicePitch = 0;
-*/
 
 struct Buffer::BufferBuffers
 {
@@ -38,13 +22,12 @@ Buffer::~Buffer()
 
 }
 
-void Buffer::init(RenderDevice& renderdevice, const size_t size, const char* pData, Type type)
+void Buffer::init(const size_t size, const char* pData, Type type)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA subsourceData;
 	UINT bindFlags;
 
-	m_devicehandle = renderdevice.getImplementation();
 	m_type = type;
 
 	bindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -70,7 +53,7 @@ void Buffer::init(RenderDevice& renderdevice, const size_t size, const char* pDa
 	subsourceData.SysMemPitch = 0;
 	subsourceData.SysMemSlicePitch = 0;
 
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&bufferDesc, &subsourceData, &m_buffers->pBuffer));
+	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&bufferDesc, &subsourceData, &m_buffers->pBuffer));
 }
 
 void Buffer::cleanup()

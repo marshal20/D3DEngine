@@ -6,7 +6,8 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "checks.h"
-#include "renderdeviceImpl.h"
+#include "renderdevicehandle.h"
+#include "pointerutil.h"
 #include "strutil.h"
 
 struct Shader::ShaderBuffers
@@ -27,10 +28,8 @@ Shader::~Shader()
 
 }
 
-void Shader::init(RenderDevice& targetdevice, const std::string& vertex, const std::string& pixel)
-{
-	m_devicehandle = targetdevice.getImplementation();
-	
+void Shader::init(const std::string& vertex, const std::string& pixel)
+{	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[1];
@@ -47,10 +46,10 @@ void Shader::init(RenderDevice& targetdevice, const std::string& vertex, const s
 	D3D11CALL(D3DCompileFromFile(psFilename, NULL, NULL, "SimplePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, NULL));
 
-
-	D3D11CALL(m_devicehandle->pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), 
+	
+	D3D11CALL(DeviceHandle::pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
 		vertexShaderBuffer->GetBufferSize(), NULL, &m_buffers->pVertexShader));
-	D3D11CALL(m_devicehandle->pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), 
+	D3D11CALL(DeviceHandle::pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(),
 		pixelShaderBuffer->GetBufferSize(), NULL, &m_buffers->pPixelShader));
 
 	// setup the layout
@@ -64,7 +63,7 @@ void Shader::init(RenderDevice& targetdevice, const std::string& vertex, const s
 
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
-	D3D11CALL(m_devicehandle->pDevice->CreateInputLayout(polygonLayout, numElements,
+	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(polygonLayout, numElements,
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout));
 	
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -74,7 +73,7 @@ void Shader::init(RenderDevice& targetdevice, const std::string& vertex, const s
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
 
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_buffers->pMatrixBuffer));
+	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_buffers->pMatrixBuffer));
 
 	delete[] vsFilename;
 	delete[] psFilename;
@@ -115,14 +114,14 @@ void Shader::render(unsigned int indexCount)
 	*/
 
 
-	m_devicehandle->pContext->IASetInputLayout(m_buffers->pLayout);
+	DeviceHandle::pContext->IASetInputLayout(m_buffers->pLayout);
 
 	// Set the vertex and pixel shaders that will be used to render this triangle.
-	m_devicehandle->pContext->VSSetShader(m_buffers->pVertexShader, NULL, 0);
-	m_devicehandle->pContext->PSSetShader(m_buffers->pPixelShader, NULL, 0);
+	DeviceHandle::pContext->VSSetShader(m_buffers->pVertexShader, NULL, 0);
+	DeviceHandle::pContext->PSSetShader(m_buffers->pPixelShader, NULL, 0);
 
 	// Render the triangle.
-	m_devicehandle->pContext->DrawIndexed(indexCount, 0, 0);
+	DeviceHandle::pContext->DrawIndexed(indexCount, 0, 0);
 
 
 }

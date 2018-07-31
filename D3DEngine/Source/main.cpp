@@ -28,12 +28,12 @@ void experimental()
 	std::cout << "---------------------" << std::endl << std::endl;
 }
 
-void loadShaders(RenderDevice& renderDevice)
+void loadShaders()
 {
 	Shader* simpleShader;
 
 	simpleShader = new Shader;
-	simpleShader->init(renderDevice, "Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps");
+	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps");
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 
@@ -50,8 +50,8 @@ int main()
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
-	loadShaders(d3d11Device);
-	renderer.init(d3d11Device);
+	loadShaders();
+	renderer.init();
 
 	while (!wind.isClosed())
 	{

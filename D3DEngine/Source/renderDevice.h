@@ -64,12 +64,7 @@ public:
 	static OutputMode matchOutputMode(unsigned int width, unsigned int height);
 
 private:
-	friend class Renderer;
-	friend class Shader;
-	friend class Buffer;
-	std::shared_ptr<RenderDeviceImpl> getImplementation();
-
-private:
+	struct RenderDeviceImpl;
 	std::shared_ptr<RenderDeviceImpl> m_impl;
 	struct RenderDeviceBuffers;
 	std::unique_ptr<RenderDeviceBuffers> m_buffers;

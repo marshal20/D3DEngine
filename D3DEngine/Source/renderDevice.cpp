@@ -7,9 +7,15 @@
 #pragma comment(lib, "dxgi.lib")
 
 #include "checks.h"
-#include "renderdeviceImpl.h"
+#include "renderdevicehandle.h"
 #include "pointerutil.h"
 
+struct RenderDevice::RenderDeviceImpl
+{
+	InterPtr<ID3D11Device> pDevice;
+	InterPtr<ID3D11DeviceContext> pContext;
+	InterPtr<IDXGISwapChain> pSwapchain;
+};
 
 struct RenderDevice::RenderDeviceBuffers
 {
@@ -181,7 +187,11 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 
 	setRestrizerOptions({RestrizerOptions::CullMode::Back, 
 						RestrizerOptions::FillMode::Solid, false, true, false});
+
 	setViewport(m_outputmode.width, m_outputmode.height);
+	
+	DeviceHandle::pDevice = m_impl->pDevice;
+	DeviceHandle::pContext = m_impl->pContext;
 }
 
 void RenderDevice::cleanup()
@@ -294,10 +304,10 @@ void RenderDevice::setFullscreenState(bool enabled)
 		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);
 }
 
-std::shared_ptr<RenderDeviceImpl> RenderDevice::getImplementation()
+/*std::shared_ptr<RenderDeviceImpl> RenderDevice::getImplementation()
 {
 	return m_impl;
-}
+}*/
 
 // STATIC FUNCTIONS
 

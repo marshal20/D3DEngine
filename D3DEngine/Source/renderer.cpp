@@ -3,7 +3,7 @@
 #include <d3d11.h>
 
 #include "checks.h"
-#include "renderdeviceImpl.h"
+#include "renderdevicehandle.h"
 #include "pointerutil.h"
 #include "buffer.h"
 
@@ -24,10 +24,8 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::init(RenderDevice& targetdevice)
+void Renderer::init()
 {
-	m_devicehandle = targetdevice.getImplementation();
-
 	VertexType* vertexData;
 	unsigned long* indexData;
 	unsigned int vertexCount, indexCount;
@@ -54,8 +52,8 @@ void Renderer::init(RenderDevice& targetdevice)
 	indexData[4] = 0;  // Bottom left.
 	indexData[5] = 2;  // Top right.
 
-	m_buffers->vertexBuffer.init(targetdevice, sizeof(VertexType) * 4, (char*)vertexData, Buffer::Type::Vertex);
-	m_buffers->indexBuffer.init(targetdevice, sizeof(unsigned long) * 6, (char*)indexData, Buffer::Type::Index);
+	m_buffers->vertexBuffer.init(sizeof(VertexType) * 4, (char*)vertexData, Buffer::Type::Vertex);
+	m_buffers->indexBuffer.init(sizeof(unsigned long) * 6, (char*)indexData, Buffer::Type::Index);
 
 	// free out buffers
 	delete[] vertexData;
@@ -80,11 +78,11 @@ void Renderer::render()
 	offset = 0;
 
 	pVertexBuffer = (ID3D11Buffer*)m_buffers->vertexBuffer.getInternal();
-	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
+	DeviceHandle::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 
-	m_devicehandle->pContext->IASetIndexBuffer((ID3D11Buffer*)m_buffers->indexBuffer.getInternal(), DXGI_FORMAT_R32_UINT, 0);
+	DeviceHandle::pContext->IASetIndexBuffer((ID3D11Buffer*)m_buffers->indexBuffer.getInternal(), DXGI_FORMAT_R32_UINT, 0);
 
-	m_devicehandle->pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DeviceHandle::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	m_shader->render(6);
 

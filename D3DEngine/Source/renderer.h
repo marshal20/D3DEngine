@@ -1,5 +1,4 @@
 #pragma once
-#include "renderdevice.h"
 #include "shader.h"
 #include "shaderfactory.h"
 #include <directxmath.h>
@@ -15,13 +14,12 @@ public:
 	Renderer();
 	~Renderer();
 
-	void init(RenderDevice& targetdevice);
+	void init();
 	void cleanup();
 
 	void render();
 
 private:
-	std::shared_ptr<RenderDeviceImpl> m_devicehandle;
 	struct RendererBuffers;
 	std::unique_ptr<RendererBuffers> m_buffers;
 
