@@ -1,5 +1,6 @@
 #pragma once
 
+
 template<typename T>
 class ImplPtr
 {
@@ -9,9 +10,27 @@ public:
 		m_ptr = new T;
 	}
 
+	ImplPtr(const ImplPtr& other)
+	{
+		if (m_ptr && !m_coppied)
+			delete m_ptr;
+
+		m_coppied = true;
+		m_ptr = other.m_ptr;
+	}
+
+	ImplPtr(T* ptr)
+	{
+		if (m_ptr && !m_coppied)
+			delete m_ptr;
+
+		m_coppied = true;
+		m_ptr = ptr;
+	}
+
 	~ImplPtr()
 	{
-		if(!m_coppied)
+		if (m_ptr && !m_coppied)
 			delete m_ptr;
 	}
 
@@ -28,12 +47,6 @@ public:
 	T* get()
 	{
 		return m_ptr;
-	}
-
-	void copy(T* value_ptr)
-	{
-		*m_ptr = *value_ptr;
-		m_coppied = true;
 	}
 	
 private:
@@ -60,6 +73,7 @@ public:
 	{
 		if (m_ptr)
 			m_ptr->Release();
+		m_ptr = nullptr;
 	}
 
 	T **operator&()
