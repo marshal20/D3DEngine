@@ -20,6 +20,11 @@ public:
 		return m_ptr; 
 	}
 
+	operator T*()
+	{
+		return m_ptr;
+	}
+
 	T* get()
 	{
 		return m_ptr;
@@ -63,6 +68,11 @@ public:
 	}
 
 	T *operator->()
+	{
+		return m_ptr;
+	}
+
+	operator T*()
 	{
 		return m_ptr;
 	}

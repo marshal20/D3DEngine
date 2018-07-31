@@ -97,7 +97,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	
 	// render target view
 	m_impl->pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	m_impl->pDevice->CreateRenderTargetView(pBackBuffer.get(), NULL, &m_buffers->pRenderTargetView);
+	m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView);
 
 
 	// RETHINK // THIS MAKES IT RUN
@@ -105,7 +105,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 
-	D3D11CALL(m_impl->pDevice->CreateRenderTargetView(pBackBuffer.get(), NULL, &m_buffers->pRenderTargetView));
+	D3D11CALL(m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView));
 
 	pBackBuffer->Release();
 	pBackBuffer = 0;
@@ -158,7 +158,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	D3D11CALL(m_impl->pDevice->CreateDepthStencilState(&depthStencilDesc, &m_buffers->pDepthStencilState));
 
 	// Set the depth stencil state.
-	m_impl->pContext->OMSetDepthStencilState(m_buffers->pDepthStencilState.get(), 1);
+	m_impl->pContext->OMSetDepthStencilState(m_buffers->pDepthStencilState, 1);
 
 	// Initialize the depth stencil view.
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -169,10 +169,10 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the depth stencil view.
-	D3D11CALL(m_impl->pDevice->CreateDepthStencilView(m_buffers->pDepthStencilBuffer.get(), &depthStencilViewDesc, &m_buffers->pDepthStencilView));
+	D3D11CALL(m_impl->pDevice->CreateDepthStencilView(m_buffers->pDepthStencilBuffer, &depthStencilViewDesc, &m_buffers->pDepthStencilView));
 
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	m_impl->pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_buffers->pDepthStencilView.get());
+	m_impl->pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_buffers->pDepthStencilView);
 	// END RETHINK*/
 
 
@@ -189,7 +189,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
 	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
-	m_impl->pContext->RSSetState(m_buffers->pRasterState.get());
+	m_impl->pContext->RSSetState(m_buffers->pRasterState);
 
 
 }
@@ -203,9 +203,9 @@ void RenderDevice::beginScene(float r, float g, float b, float a)
 {
 	float color[4] = {r, g, b, a};
 
-	m_impl->pContext->ClearRenderTargetView(m_buffers->pRenderTargetView.get(), color);
+	m_impl->pContext->ClearRenderTargetView(m_buffers->pRenderTargetView, color);
 
-	m_impl->pContext->ClearDepthStencilView(m_buffers->pDepthStencilView.get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_impl->pContext->ClearDepthStencilView(m_buffers->pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
 }
@@ -325,5 +325,5 @@ OutputMode RenderDevice::matchOutputMode(unsigned int width, unsigned int height
 
 RenderDeviceImpl* RenderDevice::getImplementation()
 {
-	return m_impl.get();
+	return m_impl;
 }

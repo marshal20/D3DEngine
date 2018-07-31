@@ -113,11 +113,11 @@ void Shader::render(unsigned int indexCount)
 	*/
 
 
-	m_devicehandle->pContext->IASetInputLayout(m_buffers->pLayout.get());
+	m_devicehandle->pContext->IASetInputLayout(m_buffers->pLayout);
 
 	// Set the vertex and pixel shaders that will be used to render this triangle.
-	m_devicehandle->pContext->VSSetShader(m_buffers->pVertexShader.get(), NULL, 0);
-	m_devicehandle->pContext->PSSetShader(m_buffers->pPixelShader.get(), NULL, 0);
+	m_devicehandle->pContext->VSSetShader(m_buffers->pVertexShader, NULL, 0);
+	m_devicehandle->pContext->PSSetShader(m_buffers->pPixelShader, NULL, 0);
 
 	// Render the triangle.
 	m_devicehandle->pContext->DrawIndexed(indexCount, 0, 0);

@@ -113,7 +113,7 @@ void Renderer::render()
 
 	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &m_buffers->pVertexBuffer, &stride, &offset);
 
-	m_devicehandle->pContext->IASetIndexBuffer(m_buffers->pIndexBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
+	m_devicehandle->pContext->IASetIndexBuffer(m_buffers->pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	m_devicehandle->pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
