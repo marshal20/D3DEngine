@@ -94,13 +94,13 @@ void Renderer::init(RenderDevice& targetdevice)
 
 	// END RETHINK
 
-	m_shader.init(targetdevice, "Resources/Shaders/simple.vs",
-								 "Resources/Shaders/simple.ps");
+
+	m_shader = ShaderFactory::getShader("Simple");
 }
 
 void Renderer::cleanup()
 {
-	m_shader.cleanup();
+	
 }
 
 void Renderer::render()
@@ -117,7 +117,7 @@ void Renderer::render()
 
 	m_devicehandle->pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	m_shader.render(6);
+	m_shader->render(6);
 
 
 	return;

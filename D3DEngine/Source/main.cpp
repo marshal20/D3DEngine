@@ -43,6 +43,7 @@ int main()
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
+	ShaderFactory::addShader(d3d11Device, "Simple", "Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps");
 	renderer.init(d3d11Device);
 
 	while (!wind.isClosed())
@@ -76,6 +77,7 @@ int main()
 	}
 
 	renderer.cleanup();
+	ShaderFactory::releaseShaders();
 	d3d11Device.cleanup();
 	wind.cleanup();
 

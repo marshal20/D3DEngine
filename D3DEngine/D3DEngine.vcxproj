@@ -153,6 +153,7 @@
     <ClCompile Include="Source\renderdevice.cpp" />
     <ClCompile Include="Source\renderer.cpp" />
     <ClCompile Include="Source\shader.cpp" />
+    <ClCompile Include="Source\shaderfactory.cpp" />
     <ClCompile Include="Source\strutil.cpp" />
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="Source\renderdeviceImpl.h" />
     <ClInclude Include="Source\renderer.h" />
     <ClInclude Include="Source\shader.h" />
+    <ClInclude Include="Source\shaderfactory.h" />
     <ClInclude Include="Source\strutil.h" />
     <ClInclude Include="Source\window.h" />
   </ItemGroup>

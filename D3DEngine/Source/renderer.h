@@ -1,6 +1,7 @@
 #pragma once
 #include "renderdevice.h"
 #include "shader.h"
+#include "shaderfactory.h"
 #include "pointerutil.h"
 #include <directxmath.h>
 
@@ -25,5 +26,5 @@ private:
 	struct RendererBuffers;
 	ImplPtr<RendererBuffers> m_buffers;
 
-	Shader m_shader;
+	Shader* m_shader;
 };
