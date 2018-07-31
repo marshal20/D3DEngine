@@ -1,8 +1,11 @@
 #include "window.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
 #include "checks.h"
 #include "strutil.h"
+
 
 const WindowOptions Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
@@ -23,7 +26,7 @@ struct Window::NativeHandle
 
 Window::Window()
 {
-
+	m_handle = std::make_unique<NativeHandle>();
 }
 
 Window::~Window()

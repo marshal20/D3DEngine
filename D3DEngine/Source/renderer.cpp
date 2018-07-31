@@ -1,7 +1,11 @@
 #include "renderer.h"
+
 #include <d3d11.h>
+
 #include "checks.h"
 #include "renderdeviceImpl.h"
+#include "pointerutil.h"
+
 
 struct Renderer::RendererBuffers
 {
@@ -11,7 +15,7 @@ struct Renderer::RendererBuffers
 
 Renderer::Renderer()
 {
-
+	m_buffers = std::make_unique<RendererBuffers>();
 }
 
 Renderer::~Renderer()

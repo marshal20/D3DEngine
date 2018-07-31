@@ -1,8 +1,10 @@
 #include "shader.h"
+
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #pragma comment(lib, "d3dcompiler.lib")
+
 #include "checks.h"
 #include "renderdeviceImpl.h"
 #include "strutil.h"
@@ -17,7 +19,7 @@ struct Shader::ShaderBuffers
 
 Shader::Shader()
 {
-	
+	m_buffers = std::make_unique<ShaderBuffers>();
 }
 
 Shader::~Shader()

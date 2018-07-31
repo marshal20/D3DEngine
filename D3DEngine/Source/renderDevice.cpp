@@ -1,13 +1,17 @@
 #include "renderdevice.h"
-#include "checks.h"
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#include "renderdeviceImpl.h"
 
-struct RenderDevice::RenderBuffers
+#include "checks.h"
+#include "renderdeviceImpl.h"
+#include "pointerutil.h"
+
+
+struct RenderDevice::RenderDeviceBuffers
 {
 	InterPtr<ID3D11RenderTargetView> pRenderTargetView;
 	InterPtr<ID3D11RasterizerState> pRasterState;
@@ -18,7 +22,8 @@ struct RenderDevice::RenderBuffers
 
 RenderDevice::RenderDevice()
 {
-
+	m_impl = std::make_shared<RenderDeviceImpl>();
+	m_buffers = std::make_unique<RenderDeviceBuffers>();
 }
 
 RenderDevice::~RenderDevice()
@@ -289,6 +294,10 @@ void RenderDevice::setFullscreenState(bool enabled)
 		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);
 }
 
+std::shared_ptr<RenderDeviceImpl> RenderDevice::getImplementation()
+{
+	return m_impl;
+}
 
 // STATIC FUNCTIONS
 
@@ -362,9 +371,4 @@ OutputMode RenderDevice::matchOutputMode(unsigned int width, unsigned int height
 			return mode;
 	}
 	return { (unsigned int)width, (unsigned int)height, {0, 1} };
-}
-
-RenderDeviceImpl* RenderDevice::getImplementation()
-{
-	return m_impl;
 }

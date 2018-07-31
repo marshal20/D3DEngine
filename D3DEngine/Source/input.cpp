@@ -1,4 +1,5 @@
 #include "input.h"
+
 #include <iostream>
 
 enum keyState

@@ -2,6 +2,7 @@
 #include <string>
 #include "input.h"
 #include "pointerutil.h"
+#include <memory>
 
 
 struct WindowOptions
@@ -44,7 +45,7 @@ private:
 
 private:
 	struct NativeHandle;
-	ImplPtr<NativeHandle> m_handle;
+	std::unique_ptr<NativeHandle> m_handle;
 
 	InputSystem* m_inputsystem = nullptr;
 	WindowOptions m_options;

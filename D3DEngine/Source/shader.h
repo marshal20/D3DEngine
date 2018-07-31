@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "renderdevice.h"
-#include "pointerutil.h"
+#include <memory>
 
 
 class Shader
@@ -16,7 +16,7 @@ public:
 	void render(unsigned int indexCount);
 
 private:
-	ImplPtr<RenderDeviceImpl> m_devicehandle;
+	std::shared_ptr<RenderDeviceImpl> m_devicehandle;
 	struct ShaderBuffers;
-	ImplPtr<ShaderBuffers> m_buffers;
+	std::unique_ptr<ShaderBuffers> m_buffers;
 };

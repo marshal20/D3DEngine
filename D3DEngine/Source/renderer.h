@@ -2,7 +2,6 @@
 #include "renderdevice.h"
 #include "shader.h"
 #include "shaderfactory.h"
-#include "pointerutil.h"
 #include <directxmath.h>
 
 
@@ -22,9 +21,9 @@ public:
 	void render();
 
 private:
-	ImplPtr<RenderDeviceImpl> m_devicehandle;
+	std::shared_ptr<RenderDeviceImpl> m_devicehandle;
 	struct RendererBuffers;
-	ImplPtr<RendererBuffers> m_buffers;
+	std::unique_ptr<RendererBuffers> m_buffers;
 
 	Shader* m_shader;
 };

@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "window.h"
-#include "pointerutil.h"
+#include <memory>
 
 
 struct RenderDeviceImpl;
@@ -66,12 +66,12 @@ public:
 private:
 	friend class Renderer;
 	friend class Shader;
-	RenderDeviceImpl* getImplementation();
+	std::shared_ptr<RenderDeviceImpl> getImplementation();
 
 private:
-	ImplPtr<RenderDeviceImpl> m_impl;
-	struct RenderBuffers;
-	ImplPtr<RenderBuffers> m_buffers;
+	std::shared_ptr<RenderDeviceImpl> m_impl;
+	struct RenderDeviceBuffers;
+	std::unique_ptr<RenderDeviceBuffers> m_buffers;
 
 	bool m_vsync_enabled = false;
 	bool m_fullscreen = false;
