@@ -22,13 +22,15 @@ Buffer::~Buffer()
 
 }
 
-void Buffer::init(const size_t size, const char* pData, Type type)
+void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA subsourceData;
 	UINT bindFlags;
+	UINT cpuaccessflag;
 
 	m_type = type;
+	m_map = map;
 
 	bindFlags = D3D11_BIND_VERTEX_BUFFER;
 	switch (m_type)
@@ -39,13 +41,28 @@ void Buffer::init(const size_t size, const char* pData, Type type)
 	case Type::Index:
 		bindFlags = D3D11_BIND_INDEX_BUFFER;
 		break;
+	default:
+		break;
+	}
+
+	cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
+	switch (m_map)
+	{
+	case Map::Write:
+		cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
+		break;
+	case Map::None:
+		cpuaccessflag = 0;
+		break;
+	default:
+		break;
 	}
 
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.ByteWidth = size;
 	bufferDesc.BindFlags = bindFlags;
-	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.CPUAccessFlags = cpuaccessflag;
 	bufferDesc.MiscFlags = 0;
 	bufferDesc.StructureByteStride = 0;
 

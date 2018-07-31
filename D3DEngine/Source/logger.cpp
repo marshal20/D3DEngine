@@ -16,9 +16,9 @@ namespace logger
 		*out << msg << std::endl;
 	}
 
-	void customLog(const char* msg, const char* file_name, int line_number)
+	void customLog(const char* msg, int code, const char* file_name, int line_number)
 	{
-		*out << msg << "\n '----> " << file_name << ":" << line_number << "\n";
+		*out << msg << "\t code: 0x" << (void*)code << "\n '----> " << file_name << ":" << line_number << "\n";
 	}
 
 } // log
