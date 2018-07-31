@@ -53,7 +53,7 @@ int main()
 			wind.close();
 
 		// toggle fullscreen mode
-		if (inputsys.isKeyPressed(VK_F11))
+		if (inputsys.isKeyPressed('F') || inputsys.isKeyPressed(VK_F11))
 		{
 			static bool fullscreen = false;
 			fullscreen = !fullscreen;
@@ -64,7 +64,7 @@ int main()
 
 		d3d11Device.beginScene(0.25f, 0.5f, 0.25f, 1.0f);
 
-		if (inputsys.isKeyDown(VK_F2))
+		if (inputsys.isKeyDown('G'))
 			d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
 		renderer.render();
