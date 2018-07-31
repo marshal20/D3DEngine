@@ -1,6 +1,6 @@
 #pragma once
 
-
+/*
 template<typename T>
 class ImplPtr
 {
@@ -53,6 +53,7 @@ private:
 	T* m_ptr = nullptr;
 	bool m_coppied = false;
 };
+*/
 
 
 template<typename T>
