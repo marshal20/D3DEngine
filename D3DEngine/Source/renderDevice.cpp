@@ -175,7 +175,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	// END RETHINK*/
 
 	setRestrizerOptions({RestrizerOptions::CullMode::Back, 
-						RestrizerOptions::FillMode::Solid, false, false, false});
+						RestrizerOptions::FillMode::Solid, false, true, false});
 	setViewport(m_outputmode.width, m_outputmode.height);
 }
 
@@ -268,6 +268,12 @@ void RenderDevice::setRestrizerOptions(const RestrizerOptions& resOpt)
 	rasterDesc.MultisampleEnable = resOpt.multisampleEnable;
 	rasterDesc.ScissorEnable = resOpt.scissorEnable;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	if (m_buffers->pRasterState)
+	{
+		m_buffers->pRasterState->Release();
+		m_buffers->pRasterState = nullptr;
+	}
 
 	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
 	m_impl->pContext->RSSetState(m_buffers->pRasterState);
