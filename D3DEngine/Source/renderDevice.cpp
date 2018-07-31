@@ -51,7 +51,6 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	D3D_FEATURE_LEVEL featureLevel;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	InterPtr<ID3D11Texture2D> pBackBuffer;
-	D3D11_RASTERIZER_DESC rasterDesc;
 	bool isWindowed;
 
 	m_impl->pDevice = nullptr;
@@ -175,22 +174,8 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	m_impl->pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_buffers->pDepthStencilView);
 	// END RETHINK*/
 
-
-	// resterizing options
-	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
-	rasterDesc.DepthBias = 0;
-	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = true;
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.MultisampleEnable = false;
-	rasterDesc.ScissorEnable = false;
-	rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
-	m_impl->pContext->RSSetState(m_buffers->pRasterState);
-
+	setRestrizerOptions({RestrizerOptions::CullMode::Back, 
+						RestrizerOptions::FillMode::Solid, false, false, false});
 	setViewport(m_outputmode.width, m_outputmode.height);
 }
 
@@ -236,6 +221,56 @@ void RenderDevice::setViewport(int width, int height)
 	viewport.TopLeftY = 0.0f;
 
 	m_impl->pContext->RSSetViewports(1, &viewport);
+}
+
+void RenderDevice::setRestrizerOptions(const RestrizerOptions& resOpt)
+{
+	D3D11_RASTERIZER_DESC rasterDesc;
+	D3D11_CULL_MODE cullmode;
+	D3D11_FILL_MODE fillmode;
+
+	cullmode = D3D11_CULL_BACK;
+	switch (resOpt.cullmode)
+	{
+	case RestrizerOptions::CullMode::Back:
+		cullmode = D3D11_CULL_BACK;
+		break;
+	case RestrizerOptions::CullMode::Front:
+		cullmode = D3D11_CULL_FRONT;
+		break;
+	case RestrizerOptions::CullMode::None:
+		cullmode = D3D11_CULL_NONE;
+		break;
+	default:
+		break;
+	}
+
+	fillmode = D3D11_FILL_SOLID;
+	switch (resOpt.fillmode)
+	{
+	case RestrizerOptions::FillMode::Solid:
+		fillmode = D3D11_FILL_SOLID;
+		break;
+	case RestrizerOptions::FillMode::Wireframe:
+		fillmode = D3D11_FILL_WIREFRAME;
+		break;
+	default:
+		break;
+	}
+
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = cullmode;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = fillmode;
+	rasterDesc.FrontCounterClockwise = resOpt.frontCounterClockwise;
+	rasterDesc.MultisampleEnable = resOpt.multisampleEnable;
+	rasterDesc.ScissorEnable = resOpt.scissorEnable;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
+	m_impl->pContext->RSSetState(m_buffers->pRasterState);
 }
 
 void RenderDevice::setFullscreenState(bool enabled)

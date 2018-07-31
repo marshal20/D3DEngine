@@ -32,6 +32,18 @@ struct OutputMode
 	Rational RefreshRate;
 };
 
+struct RestrizerOptions
+{
+	enum class CullMode	{ Front = 1, Back, None };
+	enum class FillMode { Solid = 1, Wireframe, };
+
+	CullMode cullmode;
+	FillMode fillmode;
+	bool frontCounterClockwise;
+	bool multisampleEnable;
+	bool scissorEnable;
+};
+
 class RenderDevice
 {
 public:
@@ -44,6 +56,7 @@ public:
 	void endScene();
 
 	void setViewport(int width, int height);
+	void setRestrizerOptions(const RestrizerOptions& resOpt);
 	void setFullscreenState(bool enabled);
 
 	static AdapterInfo getAdapterInfo();
