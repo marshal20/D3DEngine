@@ -4,7 +4,7 @@
 #include "checks.h"
 #include "strutil.h"
 
-const WindowOptions WIND_OPT_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
+const WindowOptions Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
@@ -31,11 +31,10 @@ Window::~Window()
 
 }
 
-void Window::init(const std::string& name, const WindowOptions* options)
+void Window::init(const std::string& name, const WindowOptions& options)
 {
 	// settingup
-	if (!options) options = &WIND_OPT_DEF;
-	m_options = *options;
+	m_options = options;
 	m_closed = false;
 	main_window = this;
 

@@ -26,7 +26,7 @@ public:
 	Window(const Window& other) = delete;
 	~Window();
 
-	void init(const std::string& name = "UNNAMED", const WindowOptions* options = 0);
+	void init(const std::string& name = "UNNAMED", const WindowOptions& options = windowoptions_DEF);
 	void cleanup();
 
 	void update();
@@ -50,4 +50,6 @@ private:
 	WindowOptions m_options;
 	bool m_closed = true;
 	int m_screenWidth, m_screenHeight;
+
+	static const WindowOptions windowoptions_DEF;
 };

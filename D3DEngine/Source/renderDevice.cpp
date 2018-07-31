@@ -191,7 +191,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 	D3D11CALL(m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState));
 	m_impl->pContext->RSSetState(m_buffers->pRasterState);
 
-
+	setViewport(m_outputmode.width, m_outputmode.height);
 }
 
 void RenderDevice::cleanup()

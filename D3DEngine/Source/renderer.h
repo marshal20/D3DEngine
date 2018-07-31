@@ -15,7 +15,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	void init(RenderDevice* targetdevice);
+	void init(RenderDevice& targetdevice);
 	void cleanup();
 
 	void render();

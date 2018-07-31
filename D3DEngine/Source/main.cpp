@@ -43,8 +43,7 @@ int main()
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
-	d3d11Device.setViewport(800, 600);
-	renderer.init(&d3d11Device);
+	renderer.init(d3d11Device);
 
 	while (!wind.isClosed())
 	{

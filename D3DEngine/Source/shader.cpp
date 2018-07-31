@@ -25,9 +25,9 @@ Shader::~Shader()
 
 }
 
-void Shader::init(RenderDevice* renderDevice, const std::string& vertex, const std::string& pixel)
+void Shader::init(RenderDevice& targetdevice, const std::string& vertex, const std::string& pixel)
 {
-	m_devicehandle.copy(renderDevice->getImplementation());
+	m_devicehandle.copy(targetdevice.getImplementation());
 	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;

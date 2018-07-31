@@ -10,7 +10,7 @@ public:
 	Shader();
 	~Shader();
 
-	void init(RenderDevice* renderDevice, const std::string& vertex, const std::string& pixel);
+	void init(RenderDevice& targetdevice, const std::string& vertex, const std::string& pixel);
 	void cleanup();
 
 	void render(unsigned int indexCount);

@@ -19,9 +19,9 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::init(RenderDevice* targetdevice)
+void Renderer::init(RenderDevice& targetdevice)
 {
-	m_devicehandle.copy(targetdevice->getImplementation());
+	m_devicehandle.copy(targetdevice.getImplementation());
 
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexSubsourceData, indexSubsourceData;
