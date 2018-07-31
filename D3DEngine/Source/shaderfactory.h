@@ -7,6 +7,6 @@ namespace ShaderFactory
 {
 	extern Shader* getShader(const std::string& name);
 
-	extern void addShader(RenderDevice& renderDevice, const std::string shaderName, const std::string& vertexpath, const std::string& pixelpath);
+	extern void addShader(const std::string shaderName, Shader* shaderPtr);
 	extern void releaseShaders();
 }

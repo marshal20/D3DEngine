@@ -18,13 +18,8 @@ namespace ShaderFactory
 		return nullptr;
 	}
 
-	void addShader(RenderDevice& renderDevice, const std::string shaderName, const std::string& vertexpath, const std::string& pixelpath)
+	void addShader(const std::string shaderName, Shader* shaderPtr)
 	{
-		Shader* shaderPtr;
-
-		shaderPtr = new Shader;
-		shaderPtr->init(renderDevice, vertexpath, pixelpath);
-
 		auto newShader = std::make_pair(shaderName, shaderPtr);
 		i_shadersMap.insert(newShader);
 	}
