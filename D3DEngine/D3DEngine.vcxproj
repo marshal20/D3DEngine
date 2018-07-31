@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\buffer.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\logger.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\buffer.h" />
     <ClInclude Include="Source\pointerutil.h" />
     <ClInclude Include="Source\input.h" />
     <ClInclude Include="Source\checks.h" />

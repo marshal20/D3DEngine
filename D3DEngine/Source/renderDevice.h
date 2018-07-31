@@ -66,6 +66,7 @@ public:
 private:
 	friend class Renderer;
 	friend class Shader;
+	friend class Buffer;
 	std::shared_ptr<RenderDeviceImpl> getImplementation();
 
 private:

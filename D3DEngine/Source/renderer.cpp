@@ -5,12 +5,13 @@
 #include "checks.h"
 #include "renderdeviceImpl.h"
 #include "pointerutil.h"
+#include "buffer.h"
 
 
 struct Renderer::RendererBuffers
 {
-	InterPtr<ID3D11Buffer> pVertexBuffer;
-	InterPtr<ID3D11Buffer> pIndexBuffer;
+	Buffer vertexBuffer;
+	Buffer indexBuffer;
 };
 
 Renderer::Renderer()
@@ -27,8 +28,6 @@ void Renderer::init(RenderDevice& targetdevice)
 {
 	m_devicehandle = targetdevice.getImplementation();
 
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexSubsourceData, indexSubsourceData;
 	VertexType* vertexData;
 	unsigned long* indexData;
 	unsigned int vertexCount, indexCount;
@@ -55,49 +54,12 @@ void Renderer::init(RenderDevice& targetdevice)
 	indexData[4] = 0;  // Bottom left.
 	indexData[5] = 2;  // Top right.
 
-	// vertex buffer
-	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType) * 4;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// vertex subsource
-	vertexSubsourceData.pSysMem = vertexData;
-	vertexSubsourceData.SysMemPitch = 0;
-	vertexSubsourceData.SysMemSlicePitch = 0;
-
-	// vertexbuffer creating
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&vertexBufferDesc, &vertexSubsourceData, &m_buffers->pVertexBuffer));
-
-	// index buffer
-	ZeroMemory(&indexBufferDesc, sizeof(indexBufferDesc));
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(unsigned long) * 6;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// index subsource
-	indexSubsourceData.pSysMem = indexData;
-	indexSubsourceData.SysMemPitch = 0;
-	indexSubsourceData.SysMemSlicePitch = 0;
-
-	// index buffer creating
-	D3D11CALL(m_devicehandle->pDevice->CreateBuffer(&indexBufferDesc, &indexSubsourceData, &m_buffers->pIndexBuffer));
+	m_buffers->vertexBuffer.init(targetdevice, sizeof(VertexType) * 4, (char*)vertexData, Buffer::Type::Vertex);
+	m_buffers->indexBuffer.init(targetdevice, sizeof(unsigned long) * 6, (char*)indexData, Buffer::Type::Index);
 
 	// free out buffers
 	delete[] vertexData;
 	delete[] indexData;
-
-	// RETHINK
-
-
-	// END RETHINK
-
 
 	m_shader = ShaderFactory::getShader("Simple");
 }
@@ -109,15 +71,18 @@ void Renderer::cleanup()
 
 void Renderer::render()
 {
+	ID3D11Buffer* pVertexBuffer;
 	unsigned int stride;
 	unsigned int offset;
+
 
 	stride = sizeof(VertexType);
 	offset = 0;
 
-	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &m_buffers->pVertexBuffer, &stride, &offset);
+	pVertexBuffer = (ID3D11Buffer*)m_buffers->vertexBuffer.getInternal();
+	m_devicehandle->pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 
-	m_devicehandle->pContext->IASetIndexBuffer(m_buffers->pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	m_devicehandle->pContext->IASetIndexBuffer((ID3D11Buffer*)m_buffers->indexBuffer.getInternal(), DXGI_FORMAT_R32_UINT, 0);
 
 	m_devicehandle->pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
