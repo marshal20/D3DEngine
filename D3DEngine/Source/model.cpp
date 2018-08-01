@@ -28,9 +28,6 @@ void Model::init()
 	VertexType* vertexData;
 	unsigned long* indexData;
 	unsigned int vertexCount;
-	float width;
-
-	width = 0.5f;
 
 	vertexCount = 4;
 	m_indexCount = 6;
@@ -38,13 +35,13 @@ void Model::init()
 	vertexData = new VertexType[vertexCount];
 	indexData = new unsigned long[m_indexCount];
 
-	vertexData[0].position = DirectX::XMFLOAT4(-width, -width, 0.0f, 1.0f);  // Bottom left.
+	vertexData[0].position = DirectX::XMFLOAT4(-1.0f, -1.0f, 0.0f, 1.0f);  // Bottom left.
 	vertexData[0].color = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-	vertexData[1].position = DirectX::XMFLOAT4(-width, +width, 0.0f, 1.0f);  // Top left.
+	vertexData[1].position = DirectX::XMFLOAT4(-1.0f, +1.0f, 0.0f, 1.0f);  // Top left.
 	vertexData[1].color = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vertexData[2].position = DirectX::XMFLOAT4(+width, +width, 0.0f, 1.0f);  // Top right.
+	vertexData[2].position = DirectX::XMFLOAT4(+1.0f, +1.0f, 0.0f, 1.0f);  // Top right.
 	vertexData[2].color = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
-	vertexData[3].position = DirectX::XMFLOAT4(+width, -width, 0.0f, 1.0f);  // Bottom right.
+	vertexData[3].position = DirectX::XMFLOAT4(+1.0f, -1.0f, 0.0f, 1.0f);  // Bottom right.
 	vertexData[3].color = DirectX::XMFLOAT3(0.3f, 0.3f, 0.3f);
 
 	indexData[0] = 0;  // Bottom left.

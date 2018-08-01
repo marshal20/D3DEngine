@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\buffer.cpp" />
+    <ClCompile Include="Source\camera.cpp" />
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\logger.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\camera.h" />
     <ClInclude Include="Source\model.h" />
     <ClInclude Include="Source\vertexlayout.h" />
     <ClInclude Include="Source\buffer.h" />
@@ -178,7 +180,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\simple.ps" />
-    <None Include="Resources\Shaders\simple.vs" />
+    <None Include="Resources\Shaders\simple.vs">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,7 +1,9 @@
 
-cbuffer globalBuffer
+cbuffer MatrixBuffer
 {
-	float4 posOff;
+	matrix worldMatrix;
+    matrix viewMatrix;
+    matrix projectionMatrix;
 };
 
 struct VertexInputType
@@ -21,7 +23,12 @@ PixelInputType main(VertexInputType input)
 {
     PixelInputType output;
     
-	output.position = input.position + posOff;
+	input.position.w = 1.0f;
+
+    output.position = mul(input.position, worldMatrix);
+    output.position = mul(output.position, viewMatrix);
+    output.position = mul(output.position, projectionMatrix);
+
     output.color = float4(input.color, 1.0);
 	
     return output;

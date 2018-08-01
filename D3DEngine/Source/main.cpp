@@ -3,6 +3,7 @@
 #include "input.h"
 #include "renderdevice.h"
 #include "renderer.h"
+#include "camera.h"
 
 void magnificent_exit()
 {
@@ -37,7 +38,7 @@ void loadShaders()
 	simpleLayout.push<float>(3, "COLOR");
 
 	simpleShader = new Shader;
-	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout, sizeof(DirectX::XMFLOAT4));
+	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout, sizeof(Renderer::MatrixBuffer));
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 
@@ -51,7 +52,8 @@ int main()
 	RenderDevice d3d11Device;
 	Renderer renderer;
 	Model model;
-	DirectX::XMFLOAT4 posOffset;
+	Camera camera;
+	DirectX::XMFLOAT3 cameraPos;
 
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
@@ -59,7 +61,7 @@ int main()
 	loadShaders();
 	renderer.init();
 	model.init();
-	posOffset = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 
 	while (!wind.isClosed())
 	{
@@ -78,25 +80,27 @@ int main()
 			d3d11Device.setFullscreenState(fullscreen);
 		}
 
+		// movement
 		const float moveSpeed = 0.1f;
 		if (inputsys.isKeyDown(VK_RIGHT))
-			posOffset.x += moveSpeed;
+			cameraPos.x += moveSpeed;
 		if (inputsys.isKeyDown(VK_LEFT))
-			posOffset.x -= moveSpeed;
+			cameraPos.x -= moveSpeed;
 		if (inputsys.isKeyDown(VK_UP))
-			posOffset.y += moveSpeed;
+			cameraPos.y += moveSpeed;
 		if (inputsys.isKeyDown(VK_DOWN))
-			posOffset.y -= moveSpeed;
+			cameraPos.y -= moveSpeed;
+		if (inputsys.isKeyDown('I'))
+			cameraPos.z += moveSpeed;
+		if (inputsys.isKeyDown('O'))
+			cameraPos.z -= moveSpeed;
 
-		std::cout << posOffset.x << " " << posOffset.y << std::endl;
+		std::cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << std::endl;
 
-		d3d11Device.beginScene(0.25f, 0.5f, 0.25f, 1.0f);
+		d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
-		if (inputsys.isKeyDown('G'))
-			d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
-
-		
-		renderer.render(model, posOffset);
+		camera.setPosition(cameraPos);
+		renderer.render(model, camera);
 
 		d3d11Device.endScene();
 

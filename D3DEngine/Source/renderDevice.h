@@ -1,9 +1,11 @@
 #pragma once
+#include "window.h"
+
 #include <string>
 #include <vector>
-#include "window.h"
 #include <memory>
 
+#include <DirectXMath.h>
 
 struct RenderDeviceImpl;
 
@@ -58,6 +60,7 @@ public:
 	void setViewport(int width, int height);
 	void setRestrizerOptions(const RestrizerOptions& resOpt);
 	void setFullscreenState(bool enabled);
+	float getAspectRatio() const;
 
 	static AdapterInfo getAdapterInfo();
 	static std::vector<OutputMode> getOutputModes();

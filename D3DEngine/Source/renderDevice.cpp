@@ -305,10 +305,11 @@ void RenderDevice::setFullscreenState(bool enabled)
 		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);
 }
 
-/*std::shared_ptr<RenderDeviceImpl> RenderDevice::getImplementation()
+float RenderDevice::getAspectRatio() const
 {
-	return m_impl;
-}*/
+	return (float)m_outputmode.width / (float)m_outputmode.height;
+}
+
 
 // STATIC FUNCTIONS
 
