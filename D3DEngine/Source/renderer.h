@@ -3,6 +3,7 @@
 #include "shaderfactory.h"
 #include "model.h"
 #include "camera.h"
+#include "buffer.h"
 
 #include <directxmath.h>
 
@@ -26,5 +27,9 @@ public:
 	void render(const Model& model, const Camera& camera);
 
 private:
+	void updateConstantBuffers(Buffer& constantBuffer, const Renderer::MatrixBuffer* value);
+
+private:
 	Shader* m_shader;
+	Buffer m_constantBuffer;
 };

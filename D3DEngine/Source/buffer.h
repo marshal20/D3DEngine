@@ -29,4 +29,5 @@ private:
 	std::unique_ptr<BufferBuffers> m_buffers;
 	Type m_type;
 	Map m_map;
+	size_t m_size;
 };

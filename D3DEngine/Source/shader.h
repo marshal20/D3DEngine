@@ -10,11 +10,10 @@ public:
 	Shader();
 	~Shader();
 
-	void init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout, const size_t constantBufferSize);
+	void init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout);
 	void cleanup();
 
-	void setConstantBufferValue(char* value, const size_t size);
-	void render(unsigned int indexCount);
+	void use();
 
 private:
 	struct ShaderBuffers;

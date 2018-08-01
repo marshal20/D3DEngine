@@ -34,6 +34,7 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 
 	m_type = type;
 	m_map = map;
+	m_size = size;
 
 	bindFlags = D3D11_BIND_VERTEX_BUFFER;
 	switch (m_type)
@@ -73,7 +74,7 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 
 	//ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = usage;
-	bufferDesc.ByteWidth = size;
+	bufferDesc.ByteWidth = m_size;
 	bufferDesc.BindFlags = bindFlags;
 	bufferDesc.CPUAccessFlags = cpuaccessflag;
 	bufferDesc.MiscFlags = 0;

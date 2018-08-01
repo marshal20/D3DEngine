@@ -87,7 +87,7 @@ void GameSystem::loadShaders()
 	simpleLayout.push<float>(3, "COLOR");
 
 	simpleShader = new Shader;
-	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout, sizeof(Renderer::MatrixBuffer));
+	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout);
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 

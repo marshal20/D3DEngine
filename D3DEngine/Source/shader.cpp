@@ -9,7 +9,6 @@
 #include "renderdevicehandle.h"
 #include "pointerutil.h"
 #include "strutil.h"
-#include "buffer.h"
 
 #include <vector>
 #include <fstream>
@@ -20,7 +19,6 @@ struct Shader::ShaderBuffers
 	InterPtr<ID3D11VertexShader> pVertexShader;
 	InterPtr<ID3D11PixelShader> pPixelShader;
 	InterPtr<ID3D11InputLayout> pLayout;
-	Buffer constantBuffer;
 };
 
 std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout);
@@ -36,7 +34,7 @@ Shader::~Shader()
 
 }
 
-void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout, const size_t constantBufferSize)
+void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout)
 {	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
@@ -54,37 +52,18 @@ void Shader::init(const std::string& vertex, const std::string& pixel, const Ver
 	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(&vertexLayout[0], vertexLayout.size(),
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout));
 	
-	m_buffers->constantBuffer.init(constantBufferSize, nullptr, Buffer::Type::Constant);
-
 }
 
 void Shader::cleanup()
 {
-	m_buffers->constantBuffer.cleanup();
+
 }
 
-void Shader::setConstantBufferValue(char* value, const size_t size)
+void Shader::use()
 {
-	char* mappedBuffer;
-	mappedBuffer = (char*)m_buffers->constantBuffer.map();
-	memcpy(mappedBuffer, value, size);
-	m_buffers->constantBuffer.unmap();
-}
-
-void Shader::render(unsigned int indexCount)
-{
-	ID3D11Buffer* constantBuffer;
-
-	// constant buffers
-	constantBuffer = (ID3D11Buffer*)m_buffers->constantBuffer.getInternal();
-	DeviceHandle::pContext->VSSetConstantBuffers(0, 1, &constantBuffer);
-
-
 	DeviceHandle::pContext->IASetInputLayout(m_buffers->pLayout);
 	DeviceHandle::pContext->VSSetShader(m_buffers->pVertexShader, NULL, 0);
 	DeviceHandle::pContext->PSSetShader(m_buffers->pPixelShader, NULL, 0);
-
-	DeviceHandle::pContext->DrawIndexed(indexCount, 0, 0);
 }
 
 
@@ -157,14 +136,14 @@ void compileShaders(const char* vsname, const char* psname, ID3D10Blob** vsbuffe
 		vsbuffer, &errorMessage);
 	if (FAILED(hr))
 	{
-		ENGINE_ERROR((char*)errorMessage->GetBufferPointer(), hr);
+		ENGINE_ERROR_C((char*)errorMessage->GetBufferPointer(), hr);
 	}
 
 	hr = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		psbuffer, &errorMessage);
 	if (FAILED(hr))
 	{
-		ENGINE_ERROR((char*)errorMessage->GetBufferPointer(), hr);
+		ENGINE_ERROR_C((char*)errorMessage->GetBufferPointer(), hr);
 	}
 
 	delete[] vsFilename;
