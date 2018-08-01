@@ -190,6 +190,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow)
 
 	setViewport(m_outputmode.width, m_outputmode.height);
 	
+	DeviceHandle::pRenderDevice = this;
 	DeviceHandle::pDevice = m_impl->pDevice;
 	DeviceHandle::pContext = m_impl->pContext;
 }
