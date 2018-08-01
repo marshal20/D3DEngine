@@ -63,6 +63,12 @@ void Model::init()
 	delete[] indexData;
 }
 
+void Model::cleanup()
+{
+	m_buffers->vertexBuffer.cleanup();
+	m_buffers->indexBuffer.cleanup();
+}
+
 void Model::bind() const
 {
 	ID3D11Buffer* pVertexBuffer;

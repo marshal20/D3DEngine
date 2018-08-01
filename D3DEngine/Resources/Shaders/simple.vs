@@ -1,4 +1,9 @@
 
+cbuffer globalBuffer
+{
+	float4 posOff;
+};
+
 struct VertexInputType
 {
     float4 position : POSITION;
@@ -16,8 +21,8 @@ PixelInputType main(VertexInputType input)
 {
     PixelInputType output;
     
-	output.position = input.position;
+	output.position = input.position + posOff;
     output.color = float4(input.color, 1.0);
-
+	
     return output;
 }

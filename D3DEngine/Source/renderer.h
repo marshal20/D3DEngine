@@ -15,7 +15,7 @@ public:
 	void init();
 	void cleanup();
 
-	void render(const Model& model);
+	void render(const Model& model, const DirectX::XMFLOAT4& Brightness);
 
 private:
 	Shader* m_shader;

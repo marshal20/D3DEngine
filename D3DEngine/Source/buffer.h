@@ -5,7 +5,7 @@
 class Buffer
 {
 public:
-	enum class Type { Vertex, Index };
+	enum class Type { Vertex, Index, Constant };
 	enum class Map { Write, None};
 
 public:
@@ -15,8 +15,12 @@ public:
 	void init(const size_t size, const char* pData, Type type, Map map = Map::None);
 	void cleanup();
 
+	void* map();
+	void unmap();
+
 private:
 	friend class Renderer;
+	friend class Shader;
 	friend class Model;
 	void* getInternal();
 

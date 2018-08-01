@@ -37,7 +37,7 @@ void loadShaders()
 	simpleLayout.push<float>(3, "COLOR");
 
 	simpleShader = new Shader;
-	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout);
+	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout, sizeof(DirectX::XMFLOAT4));
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 
@@ -51,6 +51,7 @@ int main()
 	RenderDevice d3d11Device;
 	Renderer renderer;
 	Model model;
+	DirectX::XMFLOAT4 posOffset;
 
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
@@ -58,6 +59,7 @@ int main()
 	loadShaders();
 	renderer.init();
 	model.init();
+	posOffset = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	while (!wind.isClosed())
 	{
@@ -76,12 +78,25 @@ int main()
 			d3d11Device.setFullscreenState(fullscreen);
 		}
 
+		const float moveSpeed = 0.1f;
+		if (inputsys.isKeyDown(VK_RIGHT))
+			posOffset.x += moveSpeed;
+		if (inputsys.isKeyDown(VK_LEFT))
+			posOffset.x -= moveSpeed;
+		if (inputsys.isKeyDown(VK_UP))
+			posOffset.y += moveSpeed;
+		if (inputsys.isKeyDown(VK_DOWN))
+			posOffset.y -= moveSpeed;
+
+		std::cout << posOffset.x << " " << posOffset.y << std::endl;
+
 		d3d11Device.beginScene(0.25f, 0.5f, 0.25f, 1.0f);
 
 		if (inputsys.isKeyDown('G'))
 			d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
-		renderer.render(model);
+		
+		renderer.render(model, posOffset);
 
 		d3d11Device.endScene();
 
@@ -89,6 +104,7 @@ int main()
 		Sleep(50);
 	}
 
+	model.cleanup();
 	renderer.cleanup();
 	ShaderFactory::releaseShaders();
 	d3d11Device.cleanup();

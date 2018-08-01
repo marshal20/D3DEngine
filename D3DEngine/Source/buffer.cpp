@@ -10,6 +10,7 @@
 struct Buffer::BufferBuffers
 {
 	InterPtr<ID3D11Buffer> pBuffer;
+	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 };
 
 Buffer::Buffer()
@@ -26,6 +27,8 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA subsourceData;
+	D3D11_SUBRESOURCE_DATA* pSubsourceData;
+	D3D11_USAGE usage;
 	UINT bindFlags;
 	UINT cpuaccessflag;
 
@@ -46,20 +49,30 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 	}
 
 	cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
+	usage = D3D11_USAGE_DYNAMIC;
 	switch (m_map)
 	{
 	case Map::Write:
 		cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
+		usage = D3D11_USAGE_DYNAMIC;
 		break;
 	case Map::None:
 		cpuaccessflag = 0;
+		usage = D3D11_USAGE_DEFAULT;
 		break;
 	default:
 		break;
 	}
 
-	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	if (m_type == Buffer::Type::Constant)
+	{
+		usage = D3D11_USAGE_DYNAMIC;
+		bindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
+	}
+
+	//ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = usage;
 	bufferDesc.ByteWidth = size;
 	bufferDesc.BindFlags = bindFlags;
 	bufferDesc.CPUAccessFlags = cpuaccessflag;
@@ -70,12 +83,29 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 	subsourceData.SysMemPitch = 0;
 	subsourceData.SysMemSlicePitch = 0;
 
-	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&bufferDesc, &subsourceData, &m_buffers->pBuffer));
+	pSubsourceData = pData == nullptr ? nullptr : &subsourceData;
+
+	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&bufferDesc, pSubsourceData, &m_buffers->pBuffer));
+
+	ZeroMemory(&m_buffers->mappedSubresource, sizeof(m_buffers->mappedSubresource));
 }
 
 void Buffer::cleanup()
 {
 
+}
+
+void* Buffer::map()
+{
+	
+	D3D11CALL(DeviceHandle::pContext->Map(m_buffers->pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_buffers->mappedSubresource));
+
+	return m_buffers->mappedSubresource.pData;
+}
+
+void Buffer::unmap()
+{
+	DeviceHandle::pContext->Unmap(m_buffers->pBuffer, 0);
 }
 
 void* Buffer::getInternal()

@@ -9,6 +9,7 @@
 #include "renderdevicehandle.h"
 #include "pointerutil.h"
 #include "strutil.h"
+#include "buffer.h"
 
 #include <vector>
 #include <fstream>
@@ -19,7 +20,7 @@ struct Shader::ShaderBuffers
 	InterPtr<ID3D11VertexShader> pVertexShader;
 	InterPtr<ID3D11PixelShader> pPixelShader;
 	InterPtr<ID3D11InputLayout> pLayout;
-	InterPtr<ID3D11Buffer> pMatrixBuffer;
+	Buffer constantBuffer;
 };
 
 std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout);
@@ -35,12 +36,11 @@ Shader::~Shader()
 
 }
 
-void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout)
+void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout, const size_t constantBufferSize)
 {	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
 	std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayout;
-	D3D11_BUFFER_DESC matrixBufferDesc;
 
 	compileShaders(vertex.c_str(), pixel.c_str(), &vertexShaderBuffer, &pixelShaderBuffer);
 	
@@ -53,63 +53,38 @@ void Shader::init(const std::string& vertex, const std::string& pixel, const Ver
 
 	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(&vertexLayout[0], vertexLayout.size(),
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout));
-	//
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
-
-	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_buffers->pMatrixBuffer));
+	
+	m_buffers->constantBuffer.init(constantBufferSize, nullptr, Buffer::Type::Constant);
 
 }
 
 void Shader::cleanup()
 {
+	m_buffers->constantBuffer.cleanup();
+}
 
+void Shader::setConstantBufferValue(char* value, const size_t size)
+{
+	char* mappedBuffer;
+	mappedBuffer = (char*)m_buffers->constantBuffer.map();
+	memcpy(mappedBuffer, value, size);
+	m_buffers->constantBuffer.unmap();
 }
 
 void Shader::render(unsigned int indexCount)
 {
-	/*D3D11_MAPPED_SUBRESOURCE mappedResource;
-	DirectX::XMMATRIX* dataPtr = new DirectX::XMMATRIX;
-	unsigned int bufferNumber;
+	ID3D11Buffer* constantBuffer;
 
-
-	// Transpose the matrices to prepare them for the shader.
-	DirectX::XMMATRIX projection = DirectX::XMMatrixPerspectiveFovLH(3.14/4.0, 800.0/600.0, 0.1, 1000.0);
-
-	// Lock the constant buffer so it can be written to.
-	D3D11CALL(m_devicehandle->pContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-
-	// Get a pointer to the data in the constant buffer.
-	dataPtr = (DirectX::XMMATRIX*)mappedResource.pData;
-
-	// Copy the matrices into the constant buffer.
-	*dataPtr = projection;
-
-	// Unlock the constant buffer.
-	m_devicehandle->pContext->Unmap(m_matrixBuffer, 0);
-
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
-
-	// Finanly set the constant buffer in the vertex shader with the updated values.
-	m_devicehandle->pContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-	*/
+	// constant buffers
+	constantBuffer = (ID3D11Buffer*)m_buffers->constantBuffer.getInternal();
+	DeviceHandle::pContext->VSSetConstantBuffers(0, 1, &constantBuffer);
 
 
 	DeviceHandle::pContext->IASetInputLayout(m_buffers->pLayout);
-
-	// Set the vertex and pixel shaders that will be used to render this triangle.
 	DeviceHandle::pContext->VSSetShader(m_buffers->pVertexShader, NULL, 0);
 	DeviceHandle::pContext->PSSetShader(m_buffers->pPixelShader, NULL, 0);
 
-	// Render the triangle.
 	DeviceHandle::pContext->DrawIndexed(indexCount, 0, 0);
-
-
 }
 
 

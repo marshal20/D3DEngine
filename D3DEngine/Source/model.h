@@ -16,6 +16,7 @@ public:
 	~Model();
 
 	void init();
+	void cleanup();
 	void bind() const;
 
 private:
