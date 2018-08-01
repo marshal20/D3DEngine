@@ -50,12 +50,14 @@ int main()
 	InputSystem inputsys;
 	RenderDevice d3d11Device;
 	Renderer renderer;
+	Model model;
 
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
 	loadShaders();
 	renderer.init();
+	model.init();
 
 	while (!wind.isClosed())
 	{
@@ -79,7 +81,7 @@ int main()
 		if (inputsys.isKeyDown('G'))
 			d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
-		renderer.render();
+		renderer.render(model);
 
 		d3d11Device.endScene();
 

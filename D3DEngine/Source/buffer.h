@@ -17,6 +17,7 @@ public:
 
 private:
 	friend class Renderer;
+	friend class Model;
 	void* getInternal();
 
 private:
