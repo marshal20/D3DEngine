@@ -39,10 +39,14 @@ void Renderer::init()
 	vertexData = new VertexType[vertexCount];
 	indexData = new unsigned long[indexCount];
 
-	vertexData[0].pos = DirectX::XMFLOAT3(-width, -width, 0.0f);  // Bottom left.
-	vertexData[1].pos = DirectX::XMFLOAT3(-width, +width, 0.0f);  // Top left.
-	vertexData[2].pos = DirectX::XMFLOAT3(+width, +width, 0.0f);  // Top right.
-	vertexData[3].pos = DirectX::XMFLOAT3(+width, -width, 0.0f);  // Bottom right.
+	vertexData[0].position = DirectX::XMFLOAT4(-width, -width, 0.0f, 1.0f);  // Bottom left.
+	vertexData[0].color = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+	vertexData[1].position = DirectX::XMFLOAT4(-width, +width, 0.0f, 1.0f);  // Top left.
+	vertexData[1].color = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+	vertexData[2].position = DirectX::XMFLOAT4(+width, +width, 0.0f, 1.0f);  // Top right.
+	vertexData[2].color = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
+	vertexData[3].position = DirectX::XMFLOAT4(+width, -width, 0.0f, 1.0f);  // Bottom right.
+	vertexData[3].color = DirectX::XMFLOAT3(0.3f, 0.3f, 0.3f);
 
 	indexData[0] = 0;  // Bottom left.
 	indexData[1] = 1;  // Top left.
@@ -52,8 +56,8 @@ void Renderer::init()
 	indexData[4] = 0;  // Bottom left.
 	indexData[5] = 2;  // Top right.
 
-	m_buffers->vertexBuffer.init(sizeof(VertexType) * 4, (char*)vertexData, Buffer::Type::Vertex);
-	m_buffers->indexBuffer.init(sizeof(unsigned long) * 6, (char*)indexData, Buffer::Type::Index);
+	m_buffers->vertexBuffer.init(sizeof(VertexType) * vertexCount, (char*)vertexData, Buffer::Type::Vertex);
+	m_buffers->indexBuffer.init(sizeof(unsigned long) * indexCount, (char*)indexData, Buffer::Type::Index);
 
 	// free out buffers
 	delete[] vertexData;

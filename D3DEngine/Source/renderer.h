@@ -8,7 +8,8 @@ class Renderer
 {
 	struct VertexType
 	{
-		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT4 position;
+		DirectX::XMFLOAT3 color;
 	};
 public:
 	Renderer();

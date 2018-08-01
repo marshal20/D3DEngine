@@ -160,6 +160,7 @@
     <ClCompile Include="Source\window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\vertexlayout.h" />
     <ClInclude Include="Source\buffer.h" />
     <ClInclude Include="Source\pointerutil.h" />
     <ClInclude Include="Source\input.h" />

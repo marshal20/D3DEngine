@@ -10,6 +10,10 @@
 #include "pointerutil.h"
 #include "strutil.h"
 
+#include <vector>
+#include <fstream>
+
+
 struct Shader::ShaderBuffers
 {
 	InterPtr<ID3D11VertexShader> pVertexShader;
@@ -17,6 +21,9 @@ struct Shader::ShaderBuffers
 	InterPtr<ID3D11InputLayout> pLayout;
 	InterPtr<ID3D11Buffer> pMatrixBuffer;
 };
+
+std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout);
+void compileShaders(const char* vsname, const char* psname, ID3D10Blob** vsbuffer, ID3D10Blob** psbuffer);
 
 Shader::Shader()
 {
@@ -28,44 +35,25 @@ Shader::~Shader()
 
 }
 
-void Shader::init(const std::string& vertex, const std::string& pixel)
+void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout)
 {	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[1];
-	unsigned int numElements;
+	std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayout;
 	D3D11_BUFFER_DESC matrixBufferDesc;
-	wchar_t* vsFilename;
-	wchar_t* psFilename;
 
-	vsFilename = create_wcharstr(vertex.c_str());
-	psFilename = create_wcharstr(pixel.c_str());
-
-	D3D11CALL(D3DCompileFromFile(vsFilename, NULL, NULL, "SimpleVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
-		&vertexShaderBuffer, NULL));
-	D3D11CALL(D3DCompileFromFile(psFilename, NULL, NULL, "SimplePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
-		&pixelShaderBuffer, NULL));
-
+	compileShaders(vertex.c_str(), pixel.c_str(), &vertexShaderBuffer, &pixelShaderBuffer);
 	
 	D3D11CALL(DeviceHandle::pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
 		vertexShaderBuffer->GetBufferSize(), NULL, &m_buffers->pVertexShader));
 	D3D11CALL(DeviceHandle::pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(),
 		pixelShaderBuffer->GetBufferSize(), NULL, &m_buffers->pPixelShader));
 
-	// setup the layout
-	polygonLayout[0].SemanticName = "POSITION";
-	polygonLayout[0].SemanticIndex = 0;
-	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	polygonLayout[0].InputSlot = 0;
-	polygonLayout[0].AlignedByteOffset = 0;
-	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-	polygonLayout[0].InstanceDataStepRate = 0;
+	vertexLayout = getLayout(layout);
 
-	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
-	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(polygonLayout, numElements,
+	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(&vertexLayout[0], vertexLayout.size(),
 		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout));
-	
+	//
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(DirectX::XMMATRIX);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -75,8 +63,6 @@ void Shader::init(const std::string& vertex, const std::string& pixel)
 
 	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&matrixBufferDesc, NULL, &m_buffers->pMatrixBuffer));
 
-	delete[] vsFilename;
-	delete[] psFilename;
 }
 
 void Shader::cleanup()
@@ -124,4 +110,88 @@ void Shader::render(unsigned int indexCount)
 	DeviceHandle::pContext->DrawIndexed(indexCount, 0, 0);
 
 
+}
+
+
+// HELPER FUNCTIONS
+
+DXGI_FORMAT getFormatOfElement(const VertexLayout::Element& element)
+{
+	switch (element.type)
+	{
+	case VertexLayout::Type::FLOAT:
+		switch (element.count)
+		{
+		case 1: return DXGI_FORMAT_R32_FLOAT;
+		case 2: return DXGI_FORMAT_R32G32_FLOAT;
+		case 3: return DXGI_FORMAT_R32G32B32_FLOAT;
+		case 4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+		default: return  DXGI_FORMAT_R32_TYPELESS;
+		}
+
+	case VertexLayout::Type::INT:
+		switch (element.count)
+		{
+		case 1: return DXGI_FORMAT_R32_SINT;
+		case 2: return DXGI_FORMAT_R32G32_SINT;
+		case 3: return DXGI_FORMAT_R32G32B32_SINT;
+		case 4: return DXGI_FORMAT_R32G32B32A32_SINT;
+		default: return  DXGI_FORMAT_R32_TYPELESS;
+		}
+	default: return  DXGI_FORMAT_R32_TYPELESS;
+	}
+}
+
+std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout)
+{
+	std::vector<D3D11_INPUT_ELEMENT_DESC> inputElementsLayout;
+
+	inputElementsLayout.reserve(layout.elements.size());
+
+	for (unsigned int i = 0; i < layout.elements.size(); i++)
+	{
+		D3D11_INPUT_ELEMENT_DESC curInputElement;
+		const VertexLayout::Element& element = layout.elements[i];
+
+		curInputElement.SemanticName = element.name.c_str();
+		curInputElement.SemanticIndex = 0;
+		curInputElement.Format = getFormatOfElement(element);
+		curInputElement.InputSlot = 0;
+		curInputElement.AlignedByteOffset = (i == 0) ? 0 : D3D11_APPEND_ALIGNED_ELEMENT;
+		curInputElement.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		curInputElement.InstanceDataStepRate = 0;
+
+		inputElementsLayout.push_back(curInputElement);
+	}
+
+	return inputElementsLayout;
+}
+
+
+void compileShaders(const char* vsname, const char* psname, ID3D10Blob** vsbuffer, ID3D10Blob** psbuffer)
+{
+	wchar_t* vsFilename;
+	wchar_t* psFilename;
+	InterPtr<ID3D10Blob> errorMessage;
+	HRESULT hr;
+
+	vsFilename = create_wcharstr(vsname);
+	psFilename = create_wcharstr(psname);
+
+	hr = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+		vsbuffer, &errorMessage);
+	if (FAILED(hr))
+	{
+		ENGINE_ERROR((char*)errorMessage->GetBufferPointer(), hr);
+	}
+
+	hr = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+		psbuffer, &errorMessage);
+	if (FAILED(hr))
+	{
+		ENGINE_ERROR((char*)errorMessage->GetBufferPointer(), hr);
+	}
+
+	delete[] vsFilename;
+	delete[] psFilename;
 }

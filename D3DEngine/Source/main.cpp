@@ -31,9 +31,13 @@ void experimental()
 void loadShaders()
 {
 	Shader* simpleShader;
+	VertexLayout simpleLayout;
+
+	simpleLayout.push<float>(4, "POSITION");
+	simpleLayout.push<float>(3, "COLOR");
 
 	simpleShader = new Shader;
-	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps");
+	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout);
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 
