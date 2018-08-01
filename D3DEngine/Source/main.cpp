@@ -29,7 +29,56 @@ void experimental()
 	std::cout << "---------------------" << std::endl << std::endl;
 }
 
-void loadShaders()
+
+DirectX::XMFLOAT3 normalize(const DirectX::XMFLOAT3& value)
+{
+	DirectX::XMFLOAT3 normalized;
+
+	normalized = value;
+	float valueMagnitude = sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
+	if (valueMagnitude != 0.0f)
+	{
+		normalized.x = value.x / valueMagnitude;
+		normalized.y = value.y / valueMagnitude;
+		normalized.z = value.z / valueMagnitude;
+	}
+
+	return normalized;
+}
+
+class GameSystem
+{
+public:
+	GameSystem() 
+	{
+
+	}
+
+	~GameSystem()
+	{
+
+	}
+
+	void run();
+
+private:
+	void loadShaders();
+	void init();
+	void cleanup();
+	void input();
+	void render();
+
+private:
+	Window wind;
+	InputSystem inputsys;
+	RenderDevice d3d11Device;
+	Renderer renderer;
+	Model model;
+	Camera camera;
+	DirectX::XMFLOAT3 cameraPos;
+};
+
+void GameSystem::loadShaders()
 {
 	Shader* simpleShader;
 	VertexLayout simpleLayout;
@@ -42,19 +91,8 @@ void loadShaders()
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 
-int main()
+void GameSystem::init()
 {
-	std::cout << "hello world..." << std::endl;
-	experimental();
-	
-	Window wind;
-	InputSystem inputsys;
-	RenderDevice d3d11Device;
-	Renderer renderer;
-	Model model;
-	Camera camera;
-	DirectX::XMFLOAT3 cameraPos;
-
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
@@ -62,57 +100,88 @@ int main()
 	renderer.init();
 	model.init();
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
+}
 
-	while (!wind.isClosed())
-	{
-		wind.update();
-
-		if (inputsys.isKeyDown(VK_ESCAPE))
-			wind.close();
-
-		// toggle fullscreen mode
-		if (inputsys.isKeyPressed('F') || inputsys.isKeyPressed(VK_F11))
-		{
-			static bool fullscreen = false;
-			fullscreen = !fullscreen;
-			std::cout << (fullscreen ? "Going fullscreen" : "Going windowed") << std::endl;
-			wind.setFullscreenState(fullscreen);
-			d3d11Device.setFullscreenState(fullscreen);
-		}
-
-		// movement
-		const float moveSpeed = 0.1f;
-		if (inputsys.isKeyDown(VK_RIGHT))
-			cameraPos.x += moveSpeed;
-		if (inputsys.isKeyDown(VK_LEFT))
-			cameraPos.x -= moveSpeed;
-		if (inputsys.isKeyDown(VK_UP))
-			cameraPos.y += moveSpeed;
-		if (inputsys.isKeyDown(VK_DOWN))
-			cameraPos.y -= moveSpeed;
-		if (inputsys.isKeyDown('I'))
-			cameraPos.z += moveSpeed;
-		if (inputsys.isKeyDown('O'))
-			cameraPos.z -= moveSpeed;
-
-		std::cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << std::endl;
-
-		d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
-
-		camera.setPosition(cameraPos);
-		renderer.render(model, camera);
-
-		d3d11Device.endScene();
-
-		inputsys.end();
-		Sleep(50);
-	}
-
+void GameSystem::cleanup()
+{
 	model.cleanup();
 	renderer.cleanup();
 	ShaderFactory::releaseShaders();
 	d3d11Device.cleanup();
 	wind.cleanup();
+}
+
+void GameSystem::input()
+{
+	if (inputsys.isKeyDown(VK_ESCAPE))
+		wind.close();
+
+	// toggle fullscreen mode
+	if (inputsys.isKeyPressed('F') || inputsys.isKeyPressed(VK_F11))
+	{
+		static bool fullscreen = false;
+		fullscreen = !fullscreen;
+		std::cout << (fullscreen ? "Going fullscreen" : "Going windowed") << std::endl;
+		wind.setFullscreenState(fullscreen);
+		d3d11Device.setFullscreenState(fullscreen);
+	}
+
+	// movement
+	const float movementSpeed = 0.1f;
+	DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
+	if (inputsys.isKeyDown(VK_RIGHT))
+		movementDirection.x += 1.0f;
+	if (inputsys.isKeyDown(VK_LEFT))
+		movementDirection.x -= 1.0f;
+	if (inputsys.isKeyDown(VK_UP))
+		movementDirection.y += 1.0f;
+	if (inputsys.isKeyDown(VK_DOWN))
+		movementDirection.y -= 1.0f;
+	if (inputsys.isKeyDown('I'))
+		movementDirection.z += 1.0f;
+	if (inputsys.isKeyDown('O'))
+		movementDirection.z -= 1.0f;
+	movementDirection = normalize(movementDirection);
+	cameraPos.x += movementDirection.x * movementSpeed;
+	cameraPos.y += movementDirection.y * movementSpeed;
+	cameraPos.z += movementDirection.z * movementSpeed;
+}
+
+void GameSystem::render()
+{
+	d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
+
+	camera.setPosition(cameraPos);
+	renderer.render(model, camera);
+
+	d3d11Device.endScene();
+}
+
+void GameSystem::run()
+{
+	init();
+
+	while (!wind.isClosed())
+	{
+		wind.update();
+
+		input();
+		render();
+
+		inputsys.end();
+		Sleep(50);
+	}
+
+	cleanup();
+}
+
+int main()
+{
+	experimental();
+	
+	GameSystem gameSystem;
+
+	gameSystem.run();
 
 	magnificent_exit();
 	return 0;
