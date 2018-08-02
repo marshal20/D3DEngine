@@ -21,6 +21,11 @@ void Camera::setRotation(const DirectX::XMFLOAT3& rot)
 	m_rot = rot;
 }
 
+void Camera::setFov(float valueRad)
+{
+	m_fov = valueRad;
+}
+
 DirectX::XMFLOAT3 Camera::getPosition()
 {
 	return m_pos;
@@ -29,6 +34,11 @@ DirectX::XMFLOAT3 Camera::getPosition()
 DirectX::XMFLOAT3 Camera::getRotation()
 {
 	return m_rot;
+}
+
+float Camera::getFov() const
+{
+	return m_fov;
 }
 
 DirectX::XMMATRIX Camera::getView() const

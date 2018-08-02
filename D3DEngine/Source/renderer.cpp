@@ -72,7 +72,7 @@ Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera)
 	matrixBuffer.world = DirectX::XMMatrixIdentity();
 	matrixBuffer.view = camera.getView();
 
-	fov = (45.0f) * 3.14f / 180.0f; // fov = 45 degree
+	fov = camera.getFov();
 	aspectRatio = DeviceHandle::pRenderDevice->getAspectRatio();
 
 	matrixBuffer.projection= DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, 0.1f, 1000.0f);

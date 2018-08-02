@@ -46,6 +46,16 @@ DirectX::XMFLOAT3 normalize(const DirectX::XMFLOAT3& value)
 	return normalized;
 }
 
+float clamp(float value, float min, float max)
+{
+	if (value < min)
+		return min;
+	else if (value > max)
+		return max;
+	else
+		return value;
+}
+
 class GameSystem
 {
 public:
@@ -76,6 +86,7 @@ private:
 	Model model;
 	Camera camera;
 	DirectX::XMFLOAT3 cameraPos;
+	float fovDeg = 45.0f;
 };
 
 void GameSystem::loadShaders()
@@ -126,7 +137,7 @@ void GameSystem::input()
 		d3d11Device.setFullscreenState(fullscreen);
 	}
 
-	// movement
+	// camera movement
 	const float movementSpeed = 0.1f;
 	DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
 	if (inputsys.isKeyDown(VK_RIGHT))
@@ -145,13 +156,22 @@ void GameSystem::input()
 	cameraPos.x += movementDirection.x * movementSpeed;
 	cameraPos.y += movementDirection.y * movementSpeed;
 	cameraPos.z += movementDirection.z * movementSpeed;
+
+	// fov control
+	if (inputsys.isKeyDown(VK_ADD))
+		fovDeg += 1.0f;
+	if (inputsys.isKeyDown(VK_SUBTRACT))
+		fovDeg -= 1.0f;
+	fovDeg = clamp(fovDeg, 45.0f, 90.0f);
+
+	camera.setPosition(cameraPos);
+	camera.setFov(fovDeg * 3.14f / 180.0f);
 }
 
 void GameSystem::render()
 {
 	d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
-	camera.setPosition(cameraPos);
 	renderer.render(model, camera);
 
 	d3d11Device.endScene();
