@@ -84,6 +84,7 @@ private:
 	RenderDevice d3d11Device;
 	Renderer renderer;
 	Model model;
+	Texture* modelTex;
 	Camera camera;
 	DirectX::XMFLOAT3 cameraPos;
 	float fovDeg = 45.0f;
@@ -96,6 +97,7 @@ void GameSystem::loadShaders()
 
 	simpleLayout.push<float>(4, "POSITION");
 	simpleLayout.push<float>(3, "COLOR");
+	simpleLayout.push<float>(2, "COORD");
 
 	simpleShader = new Shader;
 	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout);
@@ -109,12 +111,15 @@ void GameSystem::init()
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
 	loadShaders();
 	renderer.init();
-	model.init();
+	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/test.png"));
+	model.init(modelTex);
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 }
 
 void GameSystem::cleanup()
 {
+	modelTex->cleanup();
+	delete modelTex;
 	model.cleanup();
 	renderer.cleanup();
 	ShaderFactory::releaseShaders();

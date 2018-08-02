@@ -40,6 +40,9 @@ void Renderer::render(const Model& model, const Camera& camera)
 
 	m_shader->use();
 
+	// TODO: create sampler state
+	//DeviceHandle::pContext->PSSetSamplers(...);
+
 	model.bind();
 	DeviceHandle::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DeviceHandle::pContext->DrawIndexed(model.getIndexCount(), 0, 0);
