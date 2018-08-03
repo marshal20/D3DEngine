@@ -8,7 +8,7 @@
 #include "buffer.h"
 
 
-Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera);
+Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera, const DirectX::XMMATRIX& modelTransform);
 
 Renderer::Renderer()
 {
@@ -35,7 +35,7 @@ void Renderer::render(const Model& model, const Camera& camera)
 {
 	MatrixBuffer constantBuffer;
 
-	constantBuffer = calcMatrixBuffer(camera);
+	constantBuffer = calcMatrixBuffer(camera, model.getTransformMatrix());
 	updateConstantBuffers(m_constantBuffer, &constantBuffer);
 
 	m_shader->use();
@@ -50,7 +50,6 @@ void Renderer::render(const Model& model, const Camera& camera)
 
 void Renderer::updateConstantBuffers(Buffer& constantBuffer, const Renderer::MatrixBuffer* value)
 {
-	Renderer::MatrixBuffer* mappedBuffer;
 	ID3D11Buffer* pConstantBuffer;
 
 	// updating data
@@ -64,12 +63,13 @@ void Renderer::updateConstantBuffers(Buffer& constantBuffer, const Renderer::Mat
 
 // HELPER FUNCTIONS
 
-Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera)
+Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera, const DirectX::XMMATRIX& modelTransform)
 {
 	Renderer::MatrixBuffer matrixBuffer;
 	float fov;
 	float aspectRatio;
 
+	matrixBuffer.model = modelTransform;
 	matrixBuffer.world = DirectX::XMMatrixIdentity();
 	matrixBuffer.view = camera.getView();
 
@@ -79,6 +79,7 @@ Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera)
 	matrixBuffer.projection= DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, 0.1f, 1000.0f);
 
 	// transpose all matrices
+	matrixBuffer.model = DirectX::XMMatrixTranspose(matrixBuffer.model);
 	matrixBuffer.world = DirectX::XMMatrixTranspose(matrixBuffer.world);
 	matrixBuffer.view = DirectX::XMMatrixTranspose(matrixBuffer.view);
 	matrixBuffer.projection = DirectX::XMMatrixTranspose(matrixBuffer.projection);

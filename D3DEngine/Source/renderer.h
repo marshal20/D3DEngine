@@ -13,6 +13,7 @@ class Renderer
 public:
 	struct MatrixBuffer
 	{
+		DirectX::XMMATRIX model;
 		DirectX::XMMATRIX world;
 		DirectX::XMMATRIX view;
 		DirectX::XMMATRIX projection;
