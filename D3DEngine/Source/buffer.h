@@ -18,6 +18,8 @@ public:
 	void* map();
 	void unmap();
 
+	void updateData(void* data);
+
 private:
 	friend class Renderer;
 	friend class Shader;

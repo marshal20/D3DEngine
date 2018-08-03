@@ -42,7 +42,7 @@ void Renderer::render(const Model& model, const Camera& camera)
 
 	// TODO: create sampler state
 	//DeviceHandle::pContext->PSSetSamplers(...);
-
+	
 	model.bind();
 	DeviceHandle::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	DeviceHandle::pContext->DrawIndexed(model.getIndexCount(), 0, 0);
@@ -54,13 +54,11 @@ void Renderer::updateConstantBuffers(Buffer& constantBuffer, const Renderer::Mat
 	ID3D11Buffer* pConstantBuffer;
 
 	// updating data
-	mappedBuffer = (Renderer::MatrixBuffer*)constantBuffer.map();
-	memcpy(mappedBuffer, value, sizeof(Renderer::MatrixBuffer));
-	constantBuffer.unmap();
+	constantBuffer.updateData((void*)value);
 
 	// using the buffer
 	pConstantBuffer = (ID3D11Buffer*)constantBuffer.getInternal();
-		DeviceHandle::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer);
+	DeviceHandle::pContext->VSSetConstantBuffers(0, 1, &pConstantBuffer);
 }
 
 

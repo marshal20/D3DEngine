@@ -45,6 +45,9 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 	case Type::Index:
 		bindFlags = D3D11_BIND_INDEX_BUFFER;
 		break;
+	case Type::Constant:
+		bindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		break;
 	default:
 		break;
 	}
@@ -65,14 +68,7 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 		break;
 	}
 
-	if (m_type == Buffer::Type::Constant)
-	{
-		usage = D3D11_USAGE_DYNAMIC;
-		bindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cpuaccessflag = D3D11_CPU_ACCESS_WRITE;
-	}
-
-	//ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
 	bufferDesc.Usage = usage;
 	bufferDesc.ByteWidth = m_size;
 	bufferDesc.BindFlags = bindFlags;
@@ -107,6 +103,22 @@ void* Buffer::map()
 void Buffer::unmap()
 {
 	DeviceHandle::pContext->Unmap(m_buffers->pBuffer, 0);
+}
+
+void Buffer::updateData(void* data)
+{
+	if (m_map == Map::None)
+	{
+		DeviceHandle::pContext->UpdateSubresource(m_buffers->pBuffer, 0, nullptr, data, 0, 0);
+	}
+	else
+	{
+		void* mappedBuffer;
+
+		mappedBuffer = map();
+		memcpy(mappedBuffer, data, m_size);
+		unmap();
+	}
 }
 
 void* Buffer::getInternal()

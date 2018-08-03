@@ -4,6 +4,7 @@
 #include "renderdevice.h"
 #include "renderer.h"
 #include "camera.h"
+#include "mesh.h"
 
 void magnificent_exit()
 {
@@ -56,6 +57,19 @@ float clamp(float value, float min, float max)
 		return value;
 }
 
+Mesh cubeMesh()
+{
+	return {
+		{
+			{ DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 1.0f) },
+			{ DirectX::XMFLOAT3(-1.0f, +1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f) },
+			{ DirectX::XMFLOAT3(+1.0f, +1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 0.0f) },
+			{ DirectX::XMFLOAT3(+1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 1.0f) }
+		},
+		{0, 1, 2, 3, 0, 2}
+	};
+}
+
 class GameSystem
 {
 public:
@@ -95,8 +109,7 @@ void GameSystem::loadShaders()
 	Shader* simpleShader;
 	VertexLayout simpleLayout;
 
-	simpleLayout.push<float>(4, "POSITION");
-	simpleLayout.push<float>(3, "COLOR");
+	simpleLayout.push<float>(3, "POSITION");
 	simpleLayout.push<float>(2, "COORD");
 
 	simpleShader = new Shader;
@@ -112,7 +125,7 @@ void GameSystem::init()
 	loadShaders();
 	renderer.init();
 	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/test.png"));
-	model.init(modelTex);
+	model.init(cubeMesh(), modelTex);
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 }
 

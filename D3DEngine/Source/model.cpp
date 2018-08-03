@@ -5,7 +5,6 @@
 #include "buffer.h"
 #include "renderdevicehandle.h"
 
-
 struct Model::ModelBuffers
 {
 	Buffer vertexBuffer;
@@ -23,49 +22,19 @@ Model::~Model()
 
 }
 
-void Model::init(Texture* texture)
+void Model::init(const Mesh& mesh, Texture* texture)
 {
-	VertexType* vertexData;
-	unsigned long* indexData;
-	unsigned int vertexCount;
+	const Mesh::Vertex* vertexData;
+	const unsigned long* indexData;
 
-	vertexCount = 4;
-	m_indexCount = 6;
 	m_texture = texture;
+	m_indexCount = mesh.indexData.size();
 
-	vertexData = new VertexType[vertexCount];
-	indexData = new unsigned long[m_indexCount];
+	vertexData = &mesh.vertexData[0];
+	indexData = &mesh.indexData[0];
 
-	vertexData[0].position = DirectX::XMFLOAT4(-1.0f, -1.0f, 0.0f, 1.0f);  // Bottom left.
-	vertexData[0].color = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-	vertexData[0].coord = DirectX::XMFLOAT2(0.0f, 1.0f);
-
-	vertexData[1].position = DirectX::XMFLOAT4(-1.0f, +1.0f, 0.0f, 1.0f);  // Top left.
-	vertexData[1].color = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-	vertexData[1].coord = DirectX::XMFLOAT2(0.0f, 0.0f);
-
-	vertexData[2].position = DirectX::XMFLOAT4(+1.0f, +1.0f, 0.0f, 1.0f);  // Top right.
-	vertexData[2].color = DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f);
-	vertexData[2].coord = DirectX::XMFLOAT2(1.0f, 0.0f);
-
-	vertexData[3].position = DirectX::XMFLOAT4(+1.0f, -1.0f, 0.0f, 1.0f);  // Bottom right.
-	vertexData[3].color = DirectX::XMFLOAT3(0.3f, 0.3f, 0.3f);
-	vertexData[3].coord = DirectX::XMFLOAT2(1.0f, 1.0f);
-
-	indexData[0] = 0;  // Bottom left.
-	indexData[1] = 1;  // Top left.
-	indexData[2] = 2;  // Top right.
-
-	indexData[3] = 3;  // Bottom right.
-	indexData[4] = 0;  // Bottom left.
-	indexData[5] = 2;  // Top right.
-
-	m_buffers->vertexBuffer.init(sizeof(VertexType) * vertexCount, (char*)vertexData, Buffer::Type::Vertex);
-	m_buffers->indexBuffer.init(sizeof(unsigned long) * m_indexCount, (char*)indexData, Buffer::Type::Index);
-
-	// free out buffers
-	delete[] vertexData;
-	delete[] indexData;
+	m_buffers->vertexBuffer.init(sizeof(Mesh::Vertex) * mesh.vertexData.size(), (const char*)vertexData, Buffer::Type::Vertex);
+	m_buffers->indexBuffer.init(sizeof(unsigned long) * mesh.indexData.size(), (const char*)indexData, Buffer::Type::Index);
 }
 
 void Model::cleanup()
@@ -82,7 +51,7 @@ void Model::bind() const
 	unsigned int offset;
 
 
-	stride = sizeof(VertexType);
+	stride = sizeof(Mesh::Vertex);
 	offset = 0;
 
 	pVertexBuffer = (ID3D11Buffer*)m_buffers->vertexBuffer.getInternal();

@@ -153,6 +153,7 @@
     <ClCompile Include="Source\input.cpp" />
     <ClCompile Include="Source\logger.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\mesh.cpp" />
     <ClCompile Include="Source\model.cpp" />
     <ClCompile Include="Source\renderdevice.cpp" />
     <ClCompile Include="Source\renderdevicehandle.cpp" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="Source\3rdparty\stb_image\stb_image.h" />
     <ClInclude Include="Source\camera.h" />
+    <ClInclude Include="Source\mesh.h" />
     <ClInclude Include="Source\model.h" />
     <ClInclude Include="Source\resourcemanager.h" />
     <ClInclude Include="Source\texture.h" />
