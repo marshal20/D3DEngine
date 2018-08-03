@@ -40,6 +40,43 @@ namespace Resource
 		return rawBinaryFile;
 	}
 
+	RawTextHandle loadTextFile(const std::string& filePath)
+	{
+		RawTextHandle rawTextHandle;
+		std::ifstream inFile;
+		size_t fileSize;
+		char* dataPtr;
+		char* text;
+
+		inFile.open(filePath.c_str());
+		if (inFile.is_open() == false)
+		{
+			std::string error_message = std::string("Open file failed: ") + filePath;
+			ENGINE_ERROR(error_message.c_str());
+		}
+
+		// determine file size.
+		inFile.seekg(0, std::ios::ios_base::end);
+		fileSize = (size_t)inFile.tellg();
+		inFile.seekg(0, std::ios::ios_base::beg);
+		fileSize -= (size_t)inFile.tellg();
+
+		text = new char[fileSize + 1];
+
+		inFile.read(text, fileSize);
+
+		text[fileSize] = '\0';
+
+		inFile.close();
+
+		rawTextHandle.text = std::make_shared<std::string>();
+		*rawTextHandle.text = text;
+
+		delete[] text;
+
+		return rawTextHandle;
+	}
+
 	RawImageHandle loadImage(const std::string& imagePath)
 	{
 		RawImageHandle rawImage;
