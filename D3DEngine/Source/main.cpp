@@ -58,34 +58,6 @@ float clamp(float value, float min, float max)
 		return value;
 }
 
-Mesh cubeMesh()
-{
-	return {
-		{
-			{ DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 1.0f) }, // bottom left
-			{ DirectX::XMFLOAT3(-1.0f, +1.0f, 0.0f), DirectX::XMFLOAT2(0.0f, 0.0f) }, // top left
-			{ DirectX::XMFLOAT3(+1.0f, +1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 0.0f) }, // top right
-			{ DirectX::XMFLOAT3(+1.0f, -1.0f, 0.0f), DirectX::XMFLOAT2(1.0f, 1.0f) }, // bottom right
-
-			{ DirectX::XMFLOAT3(-1.0f, -1.0f, 2.0f), DirectX::XMFLOAT2(0.0f, 1.0f) },
-			{ DirectX::XMFLOAT3(-1.0f, +1.0f, 2.0f), DirectX::XMFLOAT2(0.0f, 0.0f) },
-			{ DirectX::XMFLOAT3(+1.0f, +1.0f, 2.0f), DirectX::XMFLOAT2(1.0f, 0.0f) },
-			{ DirectX::XMFLOAT3(+1.0f, -1.0f, 2.0f), DirectX::XMFLOAT2(1.0f, 1.0f) }
-		},
-
-		{
-			0, 1, 2, 3, 0, 2, // front face
-			4, 6, 5, 7, 6, 4, // back face
-
-			3, 2, 6, 7, 3, 6, // right face
-			0, 5, 1, 4, 5, 0, // left face
-
-			5, 6, 1, 2, 1, 6, // top face
-			0, 7, 4, 7, 0, 3 // bottom face
-		}
-	};
-}
-
 class GameSystem
 {
 public:
@@ -126,6 +98,7 @@ void GameSystem::loadShaders()
 	VertexLayout simpleLayout;
 
 	simpleLayout.push<float>(3, "POSITION");
+	simpleLayout.push<float>(3, "NORMAL");
 	simpleLayout.push<float>(2, "COORD");
 
 	simpleShader = new Shader;
@@ -141,8 +114,10 @@ void GameSystem::init()
 	loadShaders();
 	renderer.init();
 	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/test.png"));
-	model.init(cubeMesh(), modelTex);
+	model.init(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
+
+	
 }
 
 void GameSystem::cleanup()

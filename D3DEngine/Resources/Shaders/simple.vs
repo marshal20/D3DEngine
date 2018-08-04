@@ -10,12 +10,14 @@ cbuffer MatrixBuffer
 struct VertexInputType
 {
     float3 position : POSITION;
+	float3 normal : NORMAL;
 	float2 coord : COORD;
 };
 
 struct PixelInputType
 {
     float4 position : SV_POSITION;
+	float3 normal : NORMAL;
 	float2 coord : COORD;
 };
 
@@ -32,6 +34,8 @@ PixelInputType main(VertexInputType input)
     output.position = mul(output.position, projectionMatrix);
 
 	output.coord = input.coord;
+
+	output.normal = input.normal;
 
     return output;
 }

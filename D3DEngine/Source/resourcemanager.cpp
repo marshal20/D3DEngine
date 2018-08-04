@@ -1,9 +1,11 @@
 #include "resourcemanager.h"
 
 #include <fstream>
+#include <sstream>
 
 #include "checks.h"
 #include "3rdparty\stb_image\stb_image.h"
+#include "3rdparty\tiny_obj_loader\tiny_obj_loader.h"
 
 namespace Resource
 {
@@ -45,7 +47,6 @@ namespace Resource
 		RawTextHandle rawTextHandle;
 		std::ifstream inFile;
 		size_t fileSize;
-		char* dataPtr;
 		char* text;
 
 		inFile.open(filePath.c_str());
@@ -109,6 +110,55 @@ namespace Resource
 
 	Mesh loadMesh(const std::string& meshPath)
 	{
-		return Mesh();
+		Mesh finalMesh;
+		RawTextHandle rawOBJtext;
+		std::stringstream OBJContents;
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::string err;
+
+		rawOBJtext = loadTextFile(meshPath);
+
+		OBJContents << *rawOBJtext.text;
+
+		// tinyobj loading
+		if (!tinyobj::LoadObj(&attrib, &shapes, nullptr, &err, &OBJContents))
+		{
+			std::string error_message = std::string("can't load OBJ file: ") + err;
+			ENGINE_ERROR(error_message.c_str());
+		}
+
+		// reserve some space.
+		finalMesh.vertexData.reserve(finalMesh.indexData.size());
+		finalMesh.indexData.reserve(finalMesh.indexData.size());
+
+		for (auto& index : shapes[0].mesh.indices)
+		{
+			int vertexIndex;
+			int normalIndex;
+			int texcoordIndex;
+
+			finalMesh.vertexData.push_back(Mesh::Vertex());
+			Mesh::Vertex& curVertex = finalMesh.vertexData.back();
+
+			vertexIndex = index.vertex_index * 3;
+			normalIndex = index.normal_index * 3;
+			texcoordIndex = index.texcoord_index * 2;
+
+			curVertex.position.x = attrib.vertices[vertexIndex + 0];
+			curVertex.position.y = attrib.vertices[vertexIndex + 1];
+			curVertex.position.z = attrib.vertices[vertexIndex + 2];
+			
+			curVertex.normal.x = attrib.normals[normalIndex + 0];
+			curVertex.normal.y = attrib.normals[normalIndex + 1];
+			curVertex.normal.z = attrib.normals[normalIndex + 2];
+			
+			curVertex.texCoord.x = attrib.texcoords[texcoordIndex + 0];
+			curVertex.texCoord.y = attrib.texcoords[texcoordIndex + 1];
+
+			finalMesh.indexData.push_back(finalMesh.vertexData.size()-1);
+		}
+
+		return finalMesh;
 	}
 }
