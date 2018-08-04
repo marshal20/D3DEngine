@@ -148,7 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\3rdparty\stb_image\stb_image.c" />
-    <ClCompile Include="Source\blendstate.cpp" />
+    <ClCompile Include="Source\states.cpp" />
     <ClCompile Include="Source\buffer.cpp" />
     <ClCompile Include="Source\camera.cpp" />
     <ClCompile Include="Source\input.cpp" />
@@ -168,7 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\3rdparty\stb_image\stb_image.h" />
-    <ClInclude Include="Source\blendstate.h" />
+    <ClInclude Include="Source\states.h" />
     <ClInclude Include="Source\camera.h" />
     <ClInclude Include="Source\mesh.h" />
     <ClInclude Include="Source\model.h" />

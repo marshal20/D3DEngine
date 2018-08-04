@@ -106,4 +106,9 @@ namespace Resource
 
 		return rawImage;
 	}
+
+	Mesh loadMesh(const std::string& meshPath)
+	{
+		return Mesh();
+	}
 }

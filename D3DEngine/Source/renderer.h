@@ -4,6 +4,7 @@
 #include "model.h"
 #include "camera.h"
 #include "buffer.h"
+#include "states.h"
 
 #include <directxmath.h>
 
@@ -32,5 +33,6 @@ private:
 
 private:
 	Shader* m_shader;
-	Buffer m_constantBuffer;
+	Buffer m_matricesBuffer;
+	BlendState m_blendState;
 };

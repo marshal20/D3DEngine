@@ -66,7 +66,7 @@
     <ClCompile Include="Source\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\blendstate.cpp">
+    <ClCompile Include="Source\states.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,10 +128,10 @@
     <ClInclude Include="Source\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\blendstate.h">
+    <ClInclude Include="Source\transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Source\transform.h">
+    <ClInclude Include="Source\states.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

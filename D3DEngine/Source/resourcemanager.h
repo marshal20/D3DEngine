@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "mesh.h"
+
 namespace Resource
 {
 	struct RawBinaryHandle
@@ -28,4 +30,5 @@ namespace Resource
 	extern RawBinaryHandle loadFile(const std::string& filePath);
 	extern RawTextHandle loadTextFile(const std::string& filePath);
 	extern RawImageHandle loadImage(const std::string& imagePath);
+	extern Mesh loadMesh(const std::string& meshPath);
 }
