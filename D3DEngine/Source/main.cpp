@@ -113,9 +113,9 @@ void GameSystem::init()
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
 	loadShaders();
 	renderer.init();
-	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/wood.png"));
-	//model.init(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
-	model.init(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
+	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/maze.png"));
+	model.init(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
+	//model.init(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 }
 
