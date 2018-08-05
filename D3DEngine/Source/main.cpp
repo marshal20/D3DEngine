@@ -96,13 +96,18 @@ void GameSystem::loadShaders()
 {
 	Shader* simpleShader;
 	VertexLayout simpleLayout;
+	Resource::RawTextHandle vertexShaderContents;
+	Resource::RawTextHandle pixelShaderContents;
+
+	vertexShaderContents = Resource::loadTextFile("Resources/Shaders/simple.vs");
+	pixelShaderContents = Resource::loadTextFile("Resources/Shaders/simple.ps");
 
 	simpleLayout.push<float>(3, "POSITION");
 	simpleLayout.push<float>(3, "NORMAL");
 	simpleLayout.push<float>(2, "COORD");
 
 	simpleShader = new Shader;
-	simpleShader->init("Resources/Shaders/simple.vs", "Resources/Shaders/simple.ps", simpleLayout);
+	simpleShader->init(*vertexShaderContents.text, *pixelShaderContents.text, simpleLayout);
 	ShaderFactory::addShader("Simple", simpleShader);
 }
 

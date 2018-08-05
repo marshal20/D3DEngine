@@ -21,8 +21,10 @@ struct Shader::ShaderBuffers
 	InterPtr<ID3D11InputLayout> pLayout;
 };
 
+enum class ShaderType {vs = 1, ps, gs};
+
 std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout);
-void compileShaders(const char* vsname, const char* psname, ID3D10Blob** vsbuffer, ID3D10Blob** psbuffer);
+void compileShader(const char* contents, ID3D10Blob** ppShaderBuffer, ShaderType type);
 
 Shader::Shader()
 {
@@ -34,13 +36,14 @@ Shader::~Shader()
 
 }
 
-void Shader::init(const std::string& vertex, const std::string& pixel, const VertexLayout& layout)
+void Shader::init(const std::string& vertexContents, const std::string& pixelContents, const VertexLayout& layout)
 {	
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
 	std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayout;
 
-	compileShaders(vertex.c_str(), pixel.c_str(), &vertexShaderBuffer, &pixelShaderBuffer);
+	compileShader(vertexContents.c_str(), &vertexShaderBuffer, ShaderType::vs);
+	compileShader(pixelContents.c_str(), &pixelShaderBuffer, ShaderType::ps);
 	
 	D3D11CALL(DeviceHandle::pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
 		vertexShaderBuffer->GetBufferSize(), NULL, &m_buffers->pVertexShader));
@@ -121,31 +124,26 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> getLayout(const VertexLayout& layout)
 	return inputElementsLayout;
 }
 
-
-void compileShaders(const char* vsname, const char* psname, ID3D10Blob** vsbuffer, ID3D10Blob** psbuffer)
+const char* shaderTypeTochar(ShaderType type)
 {
-	wchar_t* vsFilename;
-	wchar_t* psFilename;
+	switch (type)
+	{
+	case ShaderType::vs: return "vs_5_0";
+	case ShaderType::ps: return "ps_5_0";
+	case ShaderType::gs: return "gs_5_0";
+	default: return "";
+	}
+}
+
+void compileShader(const char* contents, ID3D10Blob** ppShaderBuffer, ShaderType type)
+{
 	InterPtr<ID3D10Blob> errorMessage;
 	HRESULT hr;
 
-	vsFilename = create_wcharstr(vsname);
-	psFilename = create_wcharstr(psname);
-
-	hr = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
-		vsbuffer, &errorMessage);
+	hr = D3DCompile(contents, strlen(contents), NULL, NULL, NULL, "main", shaderTypeTochar(type),
+		D3D10_SHADER_ENABLE_STRICTNESS, 0, ppShaderBuffer, &errorMessage);
 	if (FAILED(hr))
 	{
 		ENGINE_ERROR_C((char*)errorMessage->GetBufferPointer(), hr);
 	}
-
-	hr = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
-		psbuffer, &errorMessage);
-	if (FAILED(hr))
-	{
-		ENGINE_ERROR_C((char*)errorMessage->GetBufferPointer(), hr);
-	}
-
-	delete[] vsFilename;
-	delete[] psFilename;
 }

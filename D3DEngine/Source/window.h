@@ -1,33 +1,35 @@
 #pragma once
 #include <string>
-#include "input.h"
-#include "pointerutil.h"
 #include <memory>
 
+#include "input.h"
+#include "pointerutil.h"
 
-struct WindowOptions
-{
-	bool fullscreen;
-	bool border;
-	bool cursor;
-	bool resizable;
-	bool centered;
-
-	int x;
-	int y;
-	int width; // 0 for fullwidth
-	int height; // 0 for fullheight
-};
 
 class Window
 {
+public:
+	struct Options
+	{
+		bool fullscreen;
+		bool border;
+		bool cursor;
+		bool resizable;
+		bool centered;
+
+		int x;
+		int y;
+		int width; // 0 for fullwidth
+		int height; // 0 for fullheight
+	};
+
 public:
 	
 	Window();
 	Window(const Window& other) = delete;
 	~Window();
 
-	void init(const std::string& name = "UNNAMED", const WindowOptions& options = windowoptions_DEF);
+	void init(const std::string& name = "UNNAMED", const Options& options = windowoptions_DEF);
 	void cleanup();
 
 	void update();
@@ -48,9 +50,9 @@ private:
 	std::unique_ptr<NativeHandle> m_handle;
 
 	InputSystem* m_inputsystem = nullptr;
-	WindowOptions m_options;
+	Options m_options;
 	bool m_closed = true;
 	int m_screenWidth, m_screenHeight;
 
-	static const WindowOptions windowoptions_DEF;
+	static const Options windowoptions_DEF;
 };

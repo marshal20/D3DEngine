@@ -7,14 +7,14 @@
 #include "strutil.h"
 
 
-const WindowOptions Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
+const Window::Options Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
 Window* main_window = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 void setScreenRes(int width, int height);
-DWORD calcStyle(const WindowOptions& options);
-void calcScreenDimentions(const WindowOptions& options, int& width, int& height);
-void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height);
+DWORD calcStyle(const Window::Options& options);
+void calcScreenDimentions(const Window::Options& options, int& width, int& height);
+void calcWindowPos(const Window::Options& options, int& x, int& y, int& width, int& height);
 void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height);
 
 struct Window::NativeHandle
@@ -34,7 +34,7 @@ Window::~Window()
 
 }
 
-void Window::init(const std::string& name, const WindowOptions& options)
+void Window::init(const std::string& name, const Options& options)
 {
 	// settingup
 	m_options = options;
@@ -245,7 +245,7 @@ void setScreenRes(int width, int height)
 	ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
 }
 
-DWORD calcStyle(const WindowOptions& options)
+DWORD calcStyle(const Window::Options& options)
 {
 	DWORD style;
 
@@ -260,7 +260,7 @@ DWORD calcStyle(const WindowOptions& options)
 	return style;
 }
 
-void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
+void calcScreenDimentions(const Window::Options& options, int& width, int& height)
 {
 	width = options.width;
 	height = options.height;
@@ -272,7 +272,7 @@ void calcScreenDimentions(const WindowOptions& options, int& width, int& height)
 		height = GetSystemMetrics(SM_CYSCREEN);
 }
 
-void calcWindowPos(const WindowOptions& options, int& x, int& y, int& width, int& height)
+void calcWindowPos(const Window::Options& options, int& x, int& y, int& width, int& height)
 {
 	if (options.fullscreen)
 	{
