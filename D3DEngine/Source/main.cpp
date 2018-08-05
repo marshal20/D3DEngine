@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "mesh.h"
 #include "transform.h"
+#include "framelimiter.h"
 
 void magnificent_exit()
 {
@@ -90,6 +91,7 @@ private:
 	Camera camera;
 	DirectX::XMFLOAT3 cameraPos;
 	float fovDeg = 45.0f;
+	FrameLimiter frameLimiter;
 };
 
 void GameSystem::loadShaders()
@@ -211,6 +213,18 @@ void GameSystem::input()
 
 		t += 0.1f;
 	}
+
+	// FPS
+	{
+		static float elapsedTime = 0.0f;
+
+		elapsedTime += frameLimiter.getLastFramTime();
+		if (elapsedTime > 1.0f)
+		{
+			std::cout << 1.0 / frameLimiter.getLastFramTime() << std::endl;
+			elapsedTime = 0.0f;
+		}
+	}
 }
 
 void GameSystem::render()
@@ -234,7 +248,7 @@ void GameSystem::run()
 		render();
 
 		inputsys.end();
-		Sleep(50);
+		frameLimiter.end();
 	}
 
 	cleanup();

@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Source\3rdparty\stb_image\stb_image.c" />
     <ClCompile Include="Source\3rdparty\tiny_obj_loader\tiny_obj_loader.cc" />
+    <ClCompile Include="Source\framelimiter.cpp" />
     <ClCompile Include="Source\states.cpp" />
     <ClCompile Include="Source\buffer.cpp" />
     <ClCompile Include="Source\camera.cpp" />
@@ -170,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="Source\3rdparty\stb_image\stb_image.h" />
     <ClInclude Include="Source\3rdparty\tiny_obj_loader\tiny_obj_loader.h" />
+    <ClInclude Include="Source\framelimiter.h" />
     <ClInclude Include="Source\states.h" />
     <ClInclude Include="Source\camera.h" />
     <ClInclude Include="Source\mesh.h" />
