@@ -13,7 +13,7 @@ public:
 	void start();
 	void end();
 
-	float getLastFramTime();
+	double getLastFramTime();
 
 private:
 	struct FrameLimiterBuffers;

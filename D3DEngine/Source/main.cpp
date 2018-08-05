@@ -1,4 +1,5 @@
 #include <iostream>
+
 #include "window.h"
 #include "input.h"
 #include "renderdevice.h"
@@ -194,7 +195,8 @@ void GameSystem::input()
 
 		static float t = 0.0f;
 
-		modelTransform.scale = DirectX::XMFLOAT3(sin(t)*0.5f + 0.5f, sin(t)*0.5f + 0.5f, sin(t)*0.5f + 0.5f);
+		float scaleValue = sin(t)*0.5f + 0.5f;
+		modelTransform.scale = DirectX::XMFLOAT3(scaleValue, scaleValue, scaleValue);
 		modelTransform.rotation = DirectX::XMFLOAT3(t * 15, t * 15, t * 15);
 		{
 			const float movementSpeed = 0.1f;
@@ -213,7 +215,7 @@ void GameSystem::input()
 			modelTransform.position.z += movementDirection.z * movementSpeed;
 		}
 
-		t += 2.5 * deltaTime;
+		t += 2.5f * deltaTime;
 	}
 
 	// FPS
@@ -221,11 +223,11 @@ void GameSystem::input()
 		static float elapsedTime = 1.0f;
 		float lastFrameTime;
 
-		lastFrameTime = frameLimiter.getLastFramTime();
+		lastFrameTime = (float)frameLimiter.getLastFramTime();
 		elapsedTime += lastFrameTime;
 		if (elapsedTime > 1.0f)
 		{
-			std::cout << lastFrameTime * 1000.0 << " ms, @ " << (int)(1.0 / lastFrameTime) << " FPS" << std::endl;
+			std::cout << lastFrameTime * 1000.0f << " ms, @ " << (int)(1.0f / lastFrameTime) << " FPS" << std::endl;
 			elapsedTime = 0.0f;
 		}
 	}
@@ -246,7 +248,7 @@ void GameSystem::run()
 
 	while (!wind.isClosed())
 	{
-		deltaTime = frameLimiter.getLastFramTime();
+		deltaTime = (float)frameLimiter.getLastFramTime();
 		wind.update();
 
 		input();

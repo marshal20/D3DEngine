@@ -60,7 +60,7 @@ void FrameLimiter::end()
 	m_buffers->lastFrameTime = elapsed_milli.count();
 }
 
-float FrameLimiter::getLastFramTime()
+double FrameLimiter::getLastFramTime()
 {
 	return m_buffers->lastFrameTime / 1000.0;
 }
