@@ -92,6 +92,7 @@ private:
 	DirectX::XMFLOAT3 cameraPos;
 	float fovDeg = 45.0f;
 	FrameLimiter frameLimiter;
+	float deltaTime = 0.0f;
 };
 
 void GameSystem::loadShaders()
@@ -154,7 +155,7 @@ void GameSystem::input()
 
 	// camera movement
 	{
-		const float movementSpeed = 0.1f;
+		const float movementSpeed = 2.0f;
 		DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
 		if (inputsys.isKeyDown(VK_RIGHT))
 			movementDirection.x += 1.0f;
@@ -169,17 +170,18 @@ void GameSystem::input()
 		if (inputsys.isKeyDown('O'))
 			movementDirection.z -= 1.0f;
 		movementDirection = normalize(movementDirection);
-		cameraPos.x += movementDirection.x * movementSpeed;
-		cameraPos.y += movementDirection.y * movementSpeed;
-		cameraPos.z += movementDirection.z * movementSpeed;
+		cameraPos.x += movementDirection.x * movementSpeed * deltaTime;
+		cameraPos.y += movementDirection.y * movementSpeed * deltaTime;
+		cameraPos.z += movementDirection.z * movementSpeed * deltaTime;
 	}
 
 	// fov control
 	{
+		const float fovSpeed = 4.0f;
 		if (inputsys.isKeyDown(VK_ADD))
-			fovDeg += 1.0f;
+			fovDeg += fovSpeed * deltaTime;
 		if (inputsys.isKeyDown(VK_SUBTRACT))
-			fovDeg -= 1.0f;
+			fovDeg -= fovSpeed * deltaTime;
 		fovDeg = clamp(fovDeg, 45.0f, 90.0f);
 
 		camera.setPosition(cameraPos);
@@ -211,17 +213,19 @@ void GameSystem::input()
 			modelTransform.position.z += movementDirection.z * movementSpeed;
 		}
 
-		t += 0.1f;
+		t += 2.5 * deltaTime;
 	}
 
 	// FPS
 	{
-		static float elapsedTime = 0.0f;
+		static float elapsedTime = 1.0f;
+		float lastFrameTime;
 
-		elapsedTime += frameLimiter.getLastFramTime();
+		lastFrameTime = frameLimiter.getLastFramTime();
+		elapsedTime += lastFrameTime;
 		if (elapsedTime > 1.0f)
 		{
-			std::cout << 1.0 / frameLimiter.getLastFramTime() << std::endl;
+			std::cout << lastFrameTime * 1000.0 << " ms, @ " << (int)(1.0 / lastFrameTime) << " FPS" << std::endl;
 			elapsedTime = 0.0f;
 		}
 	}
@@ -242,6 +246,7 @@ void GameSystem::run()
 
 	while (!wind.isClosed())
 	{
+		deltaTime = frameLimiter.getLastFramTime();
 		wind.update();
 
 		input();
