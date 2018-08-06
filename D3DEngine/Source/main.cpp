@@ -189,6 +189,30 @@ void GameSystem::input()
 		camera.setFov(fovDeg * 3.14f / 180.0f);
 	}
 
+	// camera mouse control
+	{
+		static bool lockingControl = false;
+		static DirectX::XMFLOAT3 cameraRot = { 0.0f, 0.0f, 0.0f };
+		DirectX::XMFLOAT2 deltaMousePos = inputsys.getDeltaMousePos();
+
+		std::cout << deltaMousePos.x << " " << deltaMousePos.y << std::endl;
+
+		if (inputsys.isKeyPressed('L'))
+		{
+			lockingControl = !lockingControl;
+			wind.setLockMouse(lockingControl);
+		}
+
+		if (lockingControl)
+		{
+			const float lockingSpeed = 0.1f;
+
+			cameraRot.x += deltaMousePos.x * lockingSpeed;
+			cameraRot.y += deltaMousePos.y * lockingSpeed;
+		}
+
+		camera.setRotation(cameraRot);
+	}
 
 	// model tranform
 	{
