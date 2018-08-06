@@ -2,7 +2,7 @@
 Experimenting with D3D11 API by making a simple 3d model loader.
 
 ## TODO:
-- [ ] add advanced camera movments.
+- [ ] separate camera movments into CameraMover class.
 - [ ] separate vertex and pixel shaders from each other and create PipeLine class.
 - [ ] abstract render target.
 - [ ] abstract SetShaderResource(...).
