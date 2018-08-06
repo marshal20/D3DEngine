@@ -38,8 +38,9 @@ public:
 
 	void setInputSystem(InputSystem* inputsys);
 	void setFullscreenState(bool enabled);
+	void setLockMouse(bool lock);
 
-	bool HandleMessage(unsigned int umessage, unsigned int wparam);
+	bool HandleMessage(unsigned int umessage, unsigned int wparam, long lparam);
 
 private:
 	friend class RenderDevice;
@@ -53,6 +54,7 @@ private:
 	Options m_options;
 	bool m_closed = true;
 	int m_screenWidth, m_screenHeight;
+	bool m_mouseLock = false;
 
 	static const Options windowoptions_DEF;
 };

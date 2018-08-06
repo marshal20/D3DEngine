@@ -30,6 +30,9 @@ void InputSystem::end()
 		if (key == keyState::released)
 			key = keyState::up;
 	}
+
+	m_dx = 0;
+	m_dy = 0;
 }
 
 bool InputSystem::isKeyDown(int key)
@@ -52,6 +55,16 @@ bool InputSystem::isKeyReleased(int key)
 	return m_keys[key] == keyState::released;
 }
 
+DirectX::XMFLOAT2 InputSystem::getMousePos()
+{
+	return { (float)m_x, (float)m_y };
+}
+
+DirectX::XMFLOAT2 InputSystem::getDeltaMousePos()
+{
+	return { (float)m_dx, (float)m_dy };
+}
+
 void InputSystem::keydown(int key)
 {
 	if(m_keys[key] != keyState::down)
@@ -61,4 +74,12 @@ void InputSystem::keydown(int key)
 void InputSystem::keyup(int key)
 {
 	m_keys[key] = keyState::released;
+}
+
+void InputSystem::mousemove(int x, int y, int dx, int dy)
+{
+	m_dx = dx;
+	m_dy = dy;
+	m_x = x;
+	m_y = y;
 }

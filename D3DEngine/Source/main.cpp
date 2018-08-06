@@ -189,6 +189,7 @@ void GameSystem::input()
 		camera.setFov(fovDeg * 3.14f / 180.0f);
 	}
 
+
 	// model tranform
 	{
 		Transform& modelTransform = model.transform();
@@ -231,6 +232,7 @@ void GameSystem::input()
 			elapsedTime = 0.0f;
 		}
 	}
+
 }
 
 void GameSystem::render()

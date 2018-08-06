@@ -2,6 +2,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <Windowsx.h>
 
 #include "checks.h"
 #include "strutil.h"
@@ -16,6 +17,7 @@ DWORD calcStyle(const Window::Options& options);
 void calcScreenDimentions(const Window::Options& options, int& width, int& height);
 void calcWindowPos(const Window::Options& options, int& x, int& y, int& width, int& height);
 void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height);
+void setMousePosRelative(HWND hwnd, int x, int y);
 
 struct Window::NativeHandle
 {
@@ -95,6 +97,7 @@ void Window::init(const std::string& name, const Options& options)
 	// Hide the mouse cursor.
 	if (!m_options.cursor) ShowCursor(false);
 
+
 	return;
 }
 
@@ -161,27 +164,27 @@ void Window::setFullscreenState(bool enabled)
 		ChangeDisplaySettings(NULL, 0);
 }
 
-bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
+void Window::setLockMouse(bool lock)
 {
+	m_mouseLock = lock;
+	ShowCursor(!m_mouseLock);
+	RECT clipRect;
+	GetWindowRect(m_handle->hwnd, &clipRect);
+	if (m_mouseLock)
+		ClipCursor(&clipRect);
+	else
+		ClipCursor(NULL);
+}
+
+bool Window::HandleMessage(unsigned int umessage, unsigned int wparam, long lparam)
+{
+	int xPos = GET_X_LPARAM(lparam);
+	int yPos = GET_Y_LPARAM(lparam);
+	static int lastxPos = xPos;
+	static int lastyPos = yPos;
+
 	switch (umessage)
 	{
-	/*case WM_ACTIVATEAPP: // leaving this code commented just if i need it back.
-	{
-		return false;
-		if (!m_options.fullscreen) return false;
-
-		if (LOWORD(wparam) == WA_INACTIVE)
-		{
-			ChangeDisplaySettings(NULL, 0);
-		}
-
-		if (LOWORD(wparam) == WA_ACTIVE)
-		{
-			setScreenRes(m_screenWidth, m_screenHeight);
-		}
-		return true;
-	}*/
-
 	case WM_KEYDOWN:
 		if (m_inputsystem) 
 			m_inputsystem->keydown((unsigned int)wparam); 
@@ -190,6 +193,19 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam)
 	case WM_KEYUP:
 		if (m_inputsystem) 
 			m_inputsystem->keyup((unsigned int)wparam); 
+		return true;
+
+	case WM_MOUSEMOVE:
+		if (m_inputsystem)
+			m_inputsystem->mousemove(xPos, yPos, xPos - lastxPos, yPos - lastyPos);
+		lastxPos = xPos;
+		lastyPos = yPos;
+		if (m_mouseLock)
+		{
+			setMousePosRelative(m_handle->hwnd, m_screenWidth / 2, m_screenHeight / 2);
+			lastxPos = m_screenWidth / 2;
+			lastyPos = m_screenHeight / 2;
+		}
 		return true;
 
 	default:
@@ -223,7 +239,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 	default:
 	{
-		if (main_window->HandleMessage(umessage, wparam))
+		if (main_window->HandleMessage(umessage, wparam, lparam))
 			return 0;
 		
 		return DefWindowProc(hwnd, umessage, wparam, lparam);
@@ -300,4 +316,12 @@ void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& w
 
 	width = wr.right - wr.left;
 	height = wr.bottom - wr.top;
+}
+
+void setMousePosRelative(HWND hwnd, int x, int y)
+{
+	POINT pos = { x, y };
+	ClientToScreen(hwnd, &pos);
+	SetCursorPos(pos.x, pos.y);
+
 }
