@@ -207,8 +207,8 @@ void GameSystem::input()
 		{
 			const float lockingSpeed = 0.1f;
 
-			cameraRot.x += deltaMousePos.x * lockingSpeed;
-			cameraRot.y += deltaMousePos.y * lockingSpeed;
+			cameraRot.x += deltaMousePos.y * lockingSpeed;
+			cameraRot.y += deltaMousePos.x * lockingSpeed;
 		}
 
 		camera.setRotation(cameraRot);
