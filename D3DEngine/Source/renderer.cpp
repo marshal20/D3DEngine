@@ -8,11 +8,13 @@
 #include "buffer.h"
 
 
-Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera, const DirectX::XMMATRIX& modelTransform);
+Renderer::MatrixBuffer calcMatrixBuffer(const Camera* camera, const DirectX::XMMATRIX& modelTransform);
 
 Renderer::Renderer()
 {
-
+	m_shader = ShaderFactory::getShader("Simple");
+	m_matricesBuffer = std::make_unique<Buffer>(sizeof(MatrixBuffer), nullptr, Buffer::Type::Constant);
+	m_blendState = std::make_unique<BlendState>();
 }
 
 Renderer::~Renderer()
@@ -20,35 +22,23 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::init()
-{
-	m_shader = ShaderFactory::getShader("Simple");
-	m_matricesBuffer.init(sizeof(MatrixBuffer), nullptr, Buffer::Type::Constant);
-	m_blendState.init();
-}
-
-void Renderer::cleanup()
-{
-	m_matricesBuffer.cleanup();
-}
-
-void Renderer::render(const Model& model, const Camera& camera)
+void Renderer::render(const Model* model, const Camera* camera)
 {
 	MatrixBuffer constantBuffer;
 
-	constantBuffer = calcMatrixBuffer(camera, model.getTransformMatrix());
-	updateConstantBuffers(m_matricesBuffer, &constantBuffer);
+	constantBuffer = calcMatrixBuffer(camera, model->getTransformMatrix());
+	updateConstantBuffers(*m_matricesBuffer, &constantBuffer);
 
 	m_shader->use();
 
 	// TODO: create sampler state
 	//DeviceHandle::pContext->PSSetSamplers(...);
 	//DeviceHandle::pContext->OMSetBlendState(...)
-	m_blendState.use();
+	m_blendState->use();
 
-	model.bind();
+	model->bind();
 	DeviceHandle::pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	DeviceHandle::pContext->DrawIndexed(model.getIndexCount(), 0, 0);
+	DeviceHandle::pContext->DrawIndexed(model->getIndexCount(), 0, 0);
 }
 
 void Renderer::updateConstantBuffers(Buffer& matricesBuffer, const Renderer::MatrixBuffer* value)
@@ -66,7 +56,7 @@ void Renderer::updateConstantBuffers(Buffer& matricesBuffer, const Renderer::Mat
 
 // HELPER FUNCTIONS
 
-Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera, const DirectX::XMMATRIX& modelTransform)
+Renderer::MatrixBuffer calcMatrixBuffer(const Camera* camera, const DirectX::XMMATRIX& modelTransform)
 {
 	Renderer::MatrixBuffer matrixBuffer;
 	float fov;
@@ -74,9 +64,9 @@ Renderer::MatrixBuffer calcMatrixBuffer(const Camera& camera, const DirectX::XMM
 
 	matrixBuffer.model = modelTransform;
 	matrixBuffer.world = DirectX::XMMatrixIdentity();
-	matrixBuffer.view = camera.getView();
+	matrixBuffer.view = camera->getView();
 
-	fov = camera.getFov();
+	fov = camera->getFov();
 	aspectRatio = DeviceHandle::pRenderDevice->getAspectRatio();
 
 	matrixBuffer.projection= DirectX::XMMatrixPerspectiveFovLH(fov, aspectRatio, 0.1f, 1000.0f);

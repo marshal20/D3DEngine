@@ -26,12 +26,12 @@ void Camera::setFov(float valueRad)
 	m_fov = valueRad;
 }
 
-DirectX::XMFLOAT3 Camera::getPosition()
+DirectX::XMFLOAT3 Camera::getPosition() const
 {
 	return m_pos;
 }
 
-DirectX::XMFLOAT3 Camera::getRotation()
+DirectX::XMFLOAT3 Camera::getRotation() const
 {
 	return m_rot;
 }

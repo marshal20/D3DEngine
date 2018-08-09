@@ -3,19 +3,19 @@
 
 #include <DirectXMath.h>
 
-#include "texture.h"
 #include "mesh.h"
+#include "buffer.h"
+#include "texture.h"
 #include "transform.h"
 
 
 class Model
 {
 public:
-	Model();
-	~Model();
+	Model() = default;
+	Model(const Mesh& mesh, Texture* texture);
+	~Model() = default;
 
-	void init(const Mesh& mesh, Texture* texture);
-	void cleanup();
 	void bind() const;
 
 	Transform& transform();
@@ -26,8 +26,8 @@ private:
 	DirectX::XMMATRIX getTransformMatrix() const;
 
 private:
-	struct ModelBuffers;
-	std::unique_ptr<ModelBuffers> m_buffers;
+	std::unique_ptr<Buffer> m_vertexBuffer;
+	std::unique_ptr<Buffer> m_indexBuffer;
 	int m_indexCount = 0;
 	Texture* m_texture;
 	Transform m_transform;

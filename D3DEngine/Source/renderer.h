@@ -23,16 +23,13 @@ public:
 	Renderer();
 	~Renderer();
 
-	void init();
-	void cleanup();
-
-	void render(const Model& model, const Camera& camera);
+	void render(const Model* model, const Camera* camera);
 
 private:
 	void updateConstantBuffers(Buffer& constantBuffer, const Renderer::MatrixBuffer* value);
 
 private:
 	Shader* m_shader;
-	Buffer m_matricesBuffer;
-	BlendState m_blendState;
+	std::unique_ptr<Buffer> m_matricesBuffer;
+	std::unique_ptr<BlendState> m_blendState;
 };

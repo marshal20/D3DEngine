@@ -84,18 +84,19 @@ private:
 	void render();
 
 private:
-	Window wind;
+	std::unique_ptr<Window> wind;
 	InputSystem inputsys;
-	RenderDevice d3d11Device;
-	Renderer renderer;
-	Model model;
+	std::unique_ptr<RenderDevice> d3d11Device;
+	std::unique_ptr<Renderer> renderer;
+	std::unique_ptr<Model> model;
 	Texture* modelTex;
+	Logger logger;
+
+	FrameLimiter frameLimiter;
 	Camera camera;
 	DirectX::XMFLOAT3 cameraPos;
 	float fovDeg = 45.0f;
-	FrameLimiter frameLimiter;
 	float deltaTime = 0.0f;
-	Logger logger;
 };
 
 void GameSystem::loadShaders()
@@ -120,32 +121,27 @@ void GameSystem::loadShaders()
 void GameSystem::init()
 {
 	logger.addOut(&std::cout);
-	wind.init("D3D11Engine");
-	wind.setInputSystem(&inputsys);
-	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
+	wind = std::make_unique<Window>("D3D11Engine");
+	wind->setInputSystem(&inputsys);
+	d3d11Device = std::make_unique<RenderDevice>(RenderDevice::matchOutputMode(800, 600), *wind);
 	loadShaders();
-	renderer.init();
+	renderer = std::make_unique<Renderer>();
 	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/maze.png"));
-	model.init(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
+	model = std::make_unique<Model>(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
 	//model.init(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
 	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 }
 
 void GameSystem::cleanup()
 {
-	modelTex->cleanup();
 	delete modelTex;
-	model.cleanup();
-	renderer.cleanup();
 	ShaderFactory::releaseShaders();
-	d3d11Device.cleanup();
-	wind.cleanup();
 }
 
 void GameSystem::input()
 {
 	if (inputsys.isKeyDown(VK_ESCAPE))
-		wind.close();
+		wind->close();
 
 	// toggle fullscreen mode
 	if (inputsys.isKeyPressed('F') || inputsys.isKeyPressed(VK_F11))
@@ -153,8 +149,8 @@ void GameSystem::input()
 		static bool fullscreen = false;
 		fullscreen = !fullscreen;
 		std::cout << (fullscreen ? "Going fullscreen" : "Going windowed") << std::endl;
-		wind.setFullscreenState(fullscreen);
-		d3d11Device.setFullscreenState(fullscreen);
+		wind->setFullscreenState(fullscreen);
+		d3d11Device->setFullscreenState(fullscreen);
 	}
 
 	// camera movement
@@ -201,7 +197,7 @@ void GameSystem::input()
 		if (inputsys.isKeyPressed('L'))
 		{
 			lockingControl = !lockingControl;
-			wind.setLockMouse(lockingControl);
+			wind->setLockMouse(lockingControl);
 		}
 
 		if (lockingControl)
@@ -217,7 +213,7 @@ void GameSystem::input()
 
 	// model tranform
 	{
-		Transform& modelTransform = model.transform();
+		Transform& modelTransform = model->transform();
 
 		static float t = 0.0f;
 
@@ -262,21 +258,21 @@ void GameSystem::input()
 
 void GameSystem::render()
 {
-	d3d11Device.beginScene(0.25f, 0.25f, 0.25f, 1.0f);
+	d3d11Device->beginScene(0.25f, 0.25f, 0.25f, 1.0f);
 
-	renderer.render(model, camera);
+	renderer->render(model.get(), &camera);
 
-	d3d11Device.endScene();
+	d3d11Device->endScene();
 }
 
 void GameSystem::run()
 {
 	init();
 
-	while (!wind.isClosed())
+	while (!wind->isClosed())
 	{
 		deltaTime = (float)frameLimiter.getLastFramTime();
-		wind.update();
+		wind->update();
 
 		input();
 		render();

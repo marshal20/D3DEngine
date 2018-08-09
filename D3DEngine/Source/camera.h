@@ -7,15 +7,12 @@ public:
 	Camera();
 	~Camera();
 
-	//void init();
-	//void cleanup();
-
 	void setPosition(const DirectX::XMFLOAT3& pos);
 	void setRotation(const DirectX::XMFLOAT3& rot);
 	void setFov(float valueRad);
 
-	DirectX::XMFLOAT3 getPosition();
-	DirectX::XMFLOAT3 getRotation();
+	DirectX::XMFLOAT3 getPosition() const;
+	DirectX::XMFLOAT3 getRotation() const;
 	float getFov() const;
 
 	DirectX::XMMATRIX getView() const;

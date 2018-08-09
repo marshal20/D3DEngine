@@ -1,10 +1,17 @@
 #pragma once
+// This file holdes all classes that manage states:
+// - BlendState
+// - DepthStencilState
 
 #include <memory>
 
+#include "pointerutil.h"
+
+struct ID3D11BlendState;
+struct ID3D11DepthStencilState;
+
 /* 
 TODO: 
-- blend state
 - sampler state
 */
 
@@ -13,15 +20,22 @@ class BlendState
 {
 public:
 	BlendState();
-	~BlendState();
-
-	void init();
-	void cleanup();
+	~BlendState() = default;
 
 	void use();
 
 private:
-	struct BlendStateBuffers;
-	std::unique_ptr<BlendStateBuffers> m_buffers;
+	InterPtr<ID3D11BlendState> m_pBlendState;
+};
 
+class DepthStencilState
+{
+public:
+	DepthStencilState();
+	~DepthStencilState() = default;
+
+	void use();
+
+private:
+	InterPtr<ID3D11DepthStencilState> m_pDepthStencilState;
 };

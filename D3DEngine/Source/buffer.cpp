@@ -6,24 +6,8 @@
 #include "renderdevicehandle.h"
 #include "checks.h"
 
-
-struct Buffer::BufferBuffers
-{
-	InterPtr<ID3D11Buffer> pBuffer;
-	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-};
-
-Buffer::Buffer()
-{
-	m_buffers = std::make_unique<BufferBuffers>();
-}
-
-Buffer::~Buffer()
-{
-
-}
-
-void Buffer::init(const size_t size, const char* pData, Type type, Map map)
+Buffer::Buffer(const size_t size, const char* pData, Type type, Map map) :
+	m_type(type), m_map(map), m_size(size)
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	D3D11_SUBRESOURCE_DATA subsourceData;
@@ -32,10 +16,6 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 	UINT bindFlags;
 	UINT cpuaccessflag;
 	HRESULT hr;
-
-	m_type = type;
-	m_map = map;
-	m_size = size;
 
 	bindFlags = D3D11_BIND_VERTEX_BUFFER;
 	switch (m_type)
@@ -83,37 +63,41 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 
 	pSubsourceData = pData == nullptr ? nullptr : &subsourceData;
 
-	hr = DeviceHandle::pDevice->CreateBuffer(&bufferDesc, pSubsourceData, &m_buffers->pBuffer);
+	hr = DeviceHandle::pDevice->CreateBuffer(&bufferDesc, pSubsourceData, &m_pBuffer);
 	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateBuffer(...) failed.");
-
-	ZeroMemory(&m_buffers->mappedSubresource, sizeof(m_buffers->mappedSubresource));
 }
 
-void Buffer::cleanup()
+Buffer::Buffer(const Buffer& other) : Buffer(other.m_size, nullptr, other.m_type, other.m_map)
+{
+	DeviceHandle::pContext->CopyResource(m_pBuffer, other.m_pBuffer);
+}
+
+Buffer::~Buffer()
 {
 
 }
 
 void* Buffer::map()
 {
+	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	HRESULT hr;
 
-	hr = DeviceHandle::pContext->Map(m_buffers->pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_buffers->mappedSubresource);
+	hr = DeviceHandle::pContext->Map(m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
 	checks::D3D11CALL_WRN(hr, "ID3D11DeviceContext::Map(...) failed.");
 
-	return m_buffers->mappedSubresource.pData;
+	return mappedSubresource.pData;
 }
 
 void Buffer::unmap()
 {
-	DeviceHandle::pContext->Unmap(m_buffers->pBuffer, 0);
+	DeviceHandle::pContext->Unmap(m_pBuffer, 0);
 }
 
 void Buffer::updateData(void* data)
 {
 	if (m_map == Map::None)
 	{
-		DeviceHandle::pContext->UpdateSubresource(m_buffers->pBuffer, 0, nullptr, data, 0, 0);
+		DeviceHandle::pContext->UpdateSubresource(m_pBuffer, 0, nullptr, data, 0, 0);
 	}
 	else
 	{
@@ -127,5 +111,5 @@ void Buffer::updateData(void* data)
 
 void* Buffer::getInternal()
 {
-	return m_buffers->pBuffer;
+	return m_pBuffer;
 }

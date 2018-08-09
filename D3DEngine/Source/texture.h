@@ -2,25 +2,50 @@
 #include <memory>
 
 #include "resourcemanager.h"
+#include "pointerutil.h"
+
+struct ID3D11Texture2D;
+struct ID3D11ShaderResourceView;
+struct ID3D11DepthStencilView;
+
+// Texture
 
 class Texture
 {
 public:
-	Texture();
+	Texture(unsigned int width, unsigned int height, const char* data);
+	Texture(const Texture& other);
 	~Texture();
-
-	void init(unsigned int width, unsigned int height, const char* data, int channels = 4);
-	void cleanup();
 
 	static Texture* fromRaw(const Resource::RawImageHandle& imageHandle);
 
 private:
 	friend class Model;
-	void* getView();
+	friend class RenderDevice;
+	ID3D11ShaderResourceView* getView();
 
 private:
-	struct TextureBuffers;
-	std::unique_ptr<TextureBuffers> m_buffers;
+	InterPtr<ID3D11Texture2D> m_pTexture;
+	InterPtr<ID3D11ShaderResourceView> m_pView;
 	int m_width, m_height;
-	int m_channels;
+};
+
+// DepthStencilTexture
+
+class DepthStencilTexture
+{
+public:
+	DepthStencilTexture(unsigned int width, unsigned int height);
+	DepthStencilTexture(const DepthStencilTexture& other);
+	~DepthStencilTexture();
+
+private:
+	friend class Model;
+	friend class RenderDevice;
+	ID3D11DepthStencilView* getView();
+
+private:
+	InterPtr<ID3D11Texture2D> m_pTexture;
+	InterPtr<ID3D11DepthStencilView> m_pView;
+	int m_width, m_height;
 };

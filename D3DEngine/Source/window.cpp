@@ -19,60 +19,39 @@ void calcWindowPos(const Window::Options& options, int& x, int& y, int& width, i
 void calcWindowDimentions(DWORD style, int screenWidth, int screenHeight, int& width, int& height);
 void setMousePosRelative(HWND hwnd, int x, int y);
 
-struct Window::NativeHandle
+
+Window::Window(const std::string& name, const Options& options) :
+	m_options(options), m_closed(false)
 {
-	HWND hwnd = nullptr;
-	HINSTANCE hinstance = nullptr;
-	wchar_t* application_name = nullptr;
-};
-
-Window::Window()
-{
-	m_handle = std::make_unique<NativeHandle>();
-}
-
-Window::~Window()
-{
-
-}
-
-void Window::init(const std::string& name, const Options& options)
-{
-	// settingup
-	m_options = options;
-	m_closed = false;
-	main_window = this;
-
-	// local variables
 	WNDCLASSEX wc;
 	DWORD window_style;
 	int window_width; int window_height;
 	int window_x, window_y;
 
-	m_handle->application_name = create_wcharstr(name.c_str());
+	m_application_name = create_wcharstr(name.c_str());
 
 	// Get the instance of this application.
-	m_handle->hinstance = GetModuleHandle(NULL);
+	m_hinstance = GetModuleHandle(NULL);
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	wc.lpfnWndProc = WndProc; //WndProc
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
-	wc.hInstance = m_handle->hinstance;
+	wc.hInstance = m_hinstance;
 	wc.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wc.hIconSm = wc.hIcon;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = NULL;
-	wc.lpszClassName = m_handle->application_name;
+	wc.lpszClassName = m_application_name;
 	wc.cbSize = sizeof(WNDCLASSEX);
 
 	// Register the window class.
 	RegisterClassEx(&wc);
 
 	calcScreenDimentions(m_options, m_screenWidth, m_screenHeight);
-	if(m_options.fullscreen) 
+	if (m_options.fullscreen)
 		setScreenRes(m_screenWidth, m_screenHeight);
 
 	// calculations
@@ -80,44 +59,38 @@ void Window::init(const std::string& name, const Options& options)
 	calcWindowDimentions(window_style, m_screenWidth, m_screenHeight, window_width, window_height);
 	calcWindowPos(m_options, window_x, window_y, window_width, window_height);
 
-	m_handle->hwnd = CreateWindow(m_handle->application_name, m_handle->application_name,
+	m_hwnd = CreateWindow(m_application_name, m_application_name,
 		window_style,
-		window_x, window_y, window_width, window_height, NULL, NULL, m_handle->hinstance, NULL);
+		window_x, window_y, window_width, window_height, NULL, NULL, m_hinstance, NULL);
 
-	if (!m_handle->hwnd)
+	if (!m_hwnd)
 	{
 		checks::ENGINE_ERR("can't initialize window.");
 	}
 
 	// Bring the window up on the screen and set it as main focus.
-	ShowWindow(m_handle->hwnd, SW_SHOW);
-	SetForegroundWindow(m_handle->hwnd);
-	SetFocus(m_handle->hwnd);
+	ShowWindow(m_hwnd, SW_SHOW);
+	SetForegroundWindow(m_hwnd);
+	SetFocus(m_hwnd);
 
 	// Hide the mouse cursor.
 	if (!m_options.cursor) ShowCursor(false);
 
-
-	return;
+	main_window = this;
 }
 
-void Window::cleanup()
+Window::~Window()
 {
-	if (m_handle->hwnd)
-	{
-		DestroyWindow(m_handle->hwnd);
-		UnregisterClass(m_handle->application_name, m_handle->hinstance);
-		m_handle->hwnd = 0;
+	if (m_hwnd) {
+		DestroyWindow(m_hwnd);
+		UnregisterClass(m_application_name, m_hinstance);
 	}
 
-	if (m_handle->application_name)
-	{
-		delete[] m_handle->application_name;
-		m_handle->application_name = 0;
+	if (m_application_name) {
+		delete[] m_application_name;
 	}
-
-	m_closed = true;
 }
+
 
 void Window::update()
 {
@@ -134,13 +107,14 @@ void Window::update()
 
 	if (msg.message == WM_QUIT)
 	{
-		m_closed = true;
+		close();
 	}
 
 }
 
 void Window::close()
 {
+	ShowWindow(m_hwnd, HIDE_WINDOW);
 	m_closed = true;
 }
 
@@ -169,7 +143,7 @@ void Window::setLockMouse(bool lock)
 	m_mouseLock = lock;
 	ShowCursor(!m_mouseLock);
 	RECT clipRect;
-	GetWindowRect(m_handle->hwnd, &clipRect);
+	GetWindowRect(m_hwnd, &clipRect);
 	if (m_mouseLock)
 		ClipCursor(&clipRect);
 	else
@@ -202,7 +176,7 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam, long lpar
 		lastyPos = yPos;
 		if (m_mouseLock)
 		{
-			setMousePosRelative(m_handle->hwnd, m_screenWidth / 2, m_screenHeight / 2);
+			setMousePosRelative(m_hwnd, m_screenWidth / 2, m_screenHeight / 2);
 			lastxPos = m_screenWidth / 2;
 			lastyPos = m_screenHeight / 2;
 		}
@@ -213,9 +187,9 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam, long lpar
 	}
 }
 
-void* Window::getNativeHandle()
+HWND Window::getNativeHandle()
 {
-	return (void*)(m_handle->hwnd);
+	return m_hwnd;
 }
 
 

@@ -1,5 +1,7 @@
 #pragma once
 #include "window.h"
+#include "texture.h"
+#include "states.h"
 
 #include <string>
 #include <vector>
@@ -7,7 +9,9 @@
 
 #include <DirectXMath.h>
 
-struct RenderDeviceImpl;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct IDXGISwapChain;
 
 struct AdapterInfo
 {
@@ -49,10 +53,8 @@ struct RestrizerOptions
 class RenderDevice
 {
 public:
-	RenderDevice();
+	RenderDevice(const OutputMode& outputmode, Window& outputWindow);
 	~RenderDevice();
-	void init(const OutputMode& outputmode, Window& outputWindow, int MSAA_count = 1);
-	void cleanup();
 
 	void beginScene(float r, float g, float b, float a);
 	void endScene();
@@ -67,10 +69,14 @@ public:
 	static OutputMode matchOutputMode(unsigned int width, unsigned int height);
 
 private:
-	struct RenderDeviceImpl;
-	std::shared_ptr<RenderDeviceImpl> m_impl;
+	InterPtr<ID3D11Device> m_pDevice;
+	InterPtr<ID3D11DeviceContext> m_pContext;
+	InterPtr<IDXGISwapChain> m_pSwapchain;
+
 	struct RenderDeviceBuffers;
 	std::unique_ptr<RenderDeviceBuffers> m_buffers;
+	std::unique_ptr<DepthStencilTexture> m_pRenderTargetDepthStencil;
+	std::unique_ptr<DepthStencilState> m_pDepthStencilState;
 
 	bool m_vsync_enabled = false;
 	bool m_fullscreen = false;

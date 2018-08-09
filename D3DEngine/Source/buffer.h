@@ -2,6 +2,8 @@
 #include <memory>
 #include "renderdevice.h"
 
+struct ID3D11Buffer;
+
 class Buffer
 {
 public:
@@ -9,11 +11,9 @@ public:
 	enum class Map { Write, None};
 
 public:
-	Buffer();
+	Buffer(const size_t size, const char* pData, Type type, Map map = Map::None);
+	Buffer(const Buffer& other);
 	~Buffer();
-
-	void init(const size_t size, const char* pData, Type type, Map map = Map::None);
-	void cleanup();
 
 	void* map();
 	void unmap();
@@ -27,8 +27,7 @@ private:
 	void* getInternal();
 
 private:
-	struct BufferBuffers;
-	std::unique_ptr<BufferBuffers> m_buffers;
+	InterPtr<ID3D11Buffer> m_pBuffer;
 	Type m_type;
 	Map m_map;
 	size_t m_size;

@@ -5,6 +5,8 @@
 #include "input.h"
 #include "pointerutil.h"
 
+typedef HWND__* HWND;
+typedef HINSTANCE__* HINSTANCE;
 
 class Window
 {
@@ -25,12 +27,9 @@ public:
 
 public:
 	
-	Window();
+	Window(const std::string& name = "UNNAMED", const Options& options = windowoptions_DEF);
 	Window(const Window& other) = delete;
 	~Window();
-
-	void init(const std::string& name = "UNNAMED", const Options& options = windowoptions_DEF);
-	void cleanup();
 
 	void update();
 	void close();
@@ -44,11 +43,12 @@ public:
 
 private:
 	friend class RenderDevice;
-	void* getNativeHandle();
+	HWND getNativeHandle();
 
 private:
-	struct NativeHandle;
-	std::unique_ptr<NativeHandle> m_handle;
+	HWND m_hwnd = nullptr;
+	HINSTANCE m_hinstance = nullptr;
+	wchar_t* m_application_name = nullptr;
 
 	InputSystem* m_inputsystem = nullptr;
 	Options m_options;

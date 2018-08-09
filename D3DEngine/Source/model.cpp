@@ -5,42 +5,19 @@
 #include "buffer.h"
 #include "renderdevicehandle.h"
 
-struct Model::ModelBuffers
-{
-	Buffer vertexBuffer;
-	Buffer indexBuffer;
-};
-
-
-Model::Model()
-{
-	m_buffers = std::make_unique<ModelBuffers>();
-}
-
-Model::~Model()
-{
-
-}
-
-void Model::init(const Mesh& mesh, Texture* texture)
+Model::Model(const Mesh& mesh, Texture* texture) : 
+	m_texture(texture)
 {
 	const Mesh::Vertex* vertexData;
 	const unsigned long* indexData;
 
-	m_texture = texture;
 	m_indexCount = mesh.indexData.size();
 
 	vertexData = &mesh.vertexData[0];
 	indexData = &mesh.indexData[0];
 
-	m_buffers->vertexBuffer.init(sizeof(Mesh::Vertex) * mesh.vertexData.size(), (const char*)vertexData, Buffer::Type::Vertex);
-	m_buffers->indexBuffer.init(sizeof(unsigned long) * mesh.indexData.size(), (const char*)indexData, Buffer::Type::Index);
-}
-
-void Model::cleanup()
-{
-	m_buffers->vertexBuffer.cleanup();
-	m_buffers->indexBuffer.cleanup();
+	m_vertexBuffer = std::make_unique<Buffer>(sizeof(Mesh::Vertex) * mesh.vertexData.size(), (const char*)vertexData, Buffer::Type::Vertex);
+	m_indexBuffer = std::make_unique<Buffer>(sizeof(unsigned long) * mesh.indexData.size(), (const char*)indexData, Buffer::Type::Index);
 }
 
 void Model::bind() const
@@ -54,10 +31,10 @@ void Model::bind() const
 	stride = sizeof(Mesh::Vertex);
 	offset = 0;
 
-	pVertexBuffer = (ID3D11Buffer*)m_buffers->vertexBuffer.getInternal();
+	pVertexBuffer = (ID3D11Buffer*)m_vertexBuffer->getInternal();
 	DeviceHandle::pContext->IASetVertexBuffers(0, 1, &pVertexBuffer, &stride, &offset);
 
-	DeviceHandle::pContext->IASetIndexBuffer((ID3D11Buffer*)m_buffers->indexBuffer.getInternal(), DXGI_FORMAT_R32_UINT, 0);
+	DeviceHandle::pContext->IASetIndexBuffer((ID3D11Buffer*)m_indexBuffer->getInternal(), DXGI_FORMAT_R32_UINT, 0);
 
 	pTex = (ID3D11ShaderResourceView*)m_texture->getView();
 

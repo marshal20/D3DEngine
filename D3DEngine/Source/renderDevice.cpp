@@ -3,42 +3,21 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <d3d11.h>
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "dxgi.lib")
 
 #include "checks.h"
 #include "renderdevicehandle.h"
 #include "pointerutil.h"
 
-struct RenderDevice::RenderDeviceImpl
-{
-	InterPtr<ID3D11Device> pDevice;
-	InterPtr<ID3D11DeviceContext> pContext;
-	InterPtr<IDXGISwapChain> pSwapchain;
-};
-
 struct RenderDevice::RenderDeviceBuffers
 {
 	InterPtr<ID3D11RenderTargetView> pRenderTargetView;
 	InterPtr<ID3D11RasterizerState> pRasterState;
-	InterPtr<ID3D11Texture2D> pDepthStencilBuffer;
-	InterPtr<ID3D11DepthStencilState> pDepthStencilState;
-	InterPtr<ID3D11DepthStencilView> pDepthStencilView;
 };
 
-RenderDevice::RenderDevice()
+RenderDevice::RenderDevice(const OutputMode& outputmode, Window& outputWindow)
 {
-	m_impl = std::make_shared<RenderDeviceImpl>();
 	m_buffers = std::make_unique<RenderDeviceBuffers>();
-}
 
-RenderDevice::~RenderDevice()
-{
-
-}
-
-void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int MSAA_count)
-{
 	m_outputmode = outputmode;
 
 	/*IDXGIFactory* factory;
@@ -64,13 +43,7 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	InterPtr<ID3D11Texture2D> pBackBuffer;
 	bool isWindowed;
-	unsigned int MSAA_quality;
 	HRESULT hr;
-
-	m_impl->pDevice = nullptr;
-	m_impl->pContext = nullptr;
-	m_impl->pSwapchain = nullptr;
-	m_buffers->pRenderTargetView = nullptr;
 
 	isWindowed = !outputWindow.m_options.fullscreen;
 	m_fullscreen = !isWindowed;
@@ -80,12 +53,12 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int 
 
 	featureLevel = D3D_FEATURE_LEVEL_11_0;
 	hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL,
-		&featureLevel, 1, D3D11_SDK_VERSION, &m_impl->pDevice, NULL, &m_impl->pContext);
+		&featureLevel, 1, D3D11_SDK_VERSION, &m_pDevice, NULL, &m_pContext);
 	checks::D3D11CALL_ERR(hr, "D3D11CreateDevice(...) failed.");
 
-	hr = m_impl->pDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, MSAA_count, &MSAA_quality);
+	/*hr = m_impl->pDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, MSAA_count, &MSAA_quality);
 	checks::D3D11CALL_WRN(hr, "ID3D11Device::CheckMultisampleQualityLevels(...) failed.");
-	MSAA_quality = (MSAA_quality > 0) ? MSAA_quality - 1 : 0;
+	MSAA_quality = (MSAA_quality > 0) ? MSAA_quality - 1 : 0;*/
 
 	// setting up the swap chain description.
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
@@ -103,8 +76,8 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int 
 	}
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.OutputWindow = (HWND)outputWindow.getNativeHandle();
-	swapChainDesc.SampleDesc.Count = MSAA_count;
-	swapChainDesc.SampleDesc.Quality = MSAA_quality;
+	swapChainDesc.SampleDesc.Count = 1;
+	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Windowed = isWindowed;
 
 	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -112,113 +85,50 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int 
 	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapChainDesc.Flags = 0;
 
-	hr = pFactory->CreateSwapChain(m_impl->pDevice, &swapChainDesc, &m_impl->pSwapchain);
+	hr = pFactory->CreateSwapChain(m_pDevice, &swapChainDesc, &m_pSwapchain);
 	checks::D3D11CALL_ERR(hr, "IDXGIFactory::CreateSwapChain(...) failed.");
 
+	// setting public device
+	DeviceHandle::pRenderDevice = this;
+	DeviceHandle::pDevice = m_pDevice;
+	DeviceHandle::pContext = m_pContext;
+
 	// render target view
-	m_impl->pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+	m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
-	hr = m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView);
+	hr = m_pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView);
 	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateRenderTargetView(...) failed.");
-
-
-	// RETHINK // THIS MAKES IT RUN
-	D3D11_TEXTURE2D_DESC depthBufferDesc;
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 
 	pBackBuffer->Release();
 	pBackBuffer = 0;
 
-	// Initialize the description of the depth buffer.
-	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+	m_pDepthStencilState = std::make_unique<DepthStencilState>();
+	m_pDepthStencilState->use();
 
-	// Set up the description of the depth buffer.
-	depthBufferDesc.Width = m_outputmode.width;
-	depthBufferDesc.Height = m_outputmode.height;
-	depthBufferDesc.MipLevels = 1;
-	depthBufferDesc.ArraySize = 1;
-	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = MSAA_count;
-	depthBufferDesc.SampleDesc.Quality = MSAA_quality;
-	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthBufferDesc.CPUAccessFlags = 0;
-	depthBufferDesc.MiscFlags = 0;
-
-	// Create the texture for the depth buffer using the filled out description.
-	hr = m_impl->pDevice->CreateTexture2D(&depthBufferDesc, NULL, &m_buffers->pDepthStencilBuffer);
-	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateTexture2D(...) failed.");
-
-	// Initialize the description of the stencil state.
-	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-
-	// Set up the description of the stencil state.
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-	depthStencilDesc.StencilEnable = true;
-	depthStencilDesc.StencilReadMask = 0xFF;
-	depthStencilDesc.StencilWriteMask = 0xFF;
-
-	// Stencil operations if pixel is front-facing.
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	// Stencil operations if pixel is back-facing.
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	// Create the depth stencil state.
-	hr = m_impl->pDevice->CreateDepthStencilState(&depthStencilDesc, &m_buffers->pDepthStencilState);
-	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateDepthStencilState(...) failed.");
-
-	// Set the depth stencil state.
-	m_impl->pContext->OMSetDepthStencilState(m_buffers->pDepthStencilState, 1);
-
-	// Initialize the depth stencil view.
-	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-
-	// Set up the depth stencil view description.
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-	// Create the depth stencil view.
-	hr = m_impl->pDevice->CreateDepthStencilView(m_buffers->pDepthStencilBuffer, &depthStencilViewDesc, &m_buffers->pDepthStencilView);
-	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateDepthStencilView(...) failed.");
+	m_pRenderTargetDepthStencil = std::make_unique<DepthStencilTexture>(m_outputmode.width, m_outputmode.height);
 
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	m_impl->pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_buffers->pDepthStencilView);
-	// END RETHINK*/
+	m_pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_pRenderTargetDepthStencil->getView());
 
-	setRestrizerOptions({RestrizerOptions::CullMode::Back, 
-						RestrizerOptions::FillMode::Solid, false, true, false});
+	setRestrizerOptions({ RestrizerOptions::CullMode::Back,
+		RestrizerOptions::FillMode::Solid, false, true, false });
 
 	setViewport(m_outputmode.width, m_outputmode.height);
-	
-	DeviceHandle::pRenderDevice = this;
-	DeviceHandle::pDevice = m_impl->pDevice;
-	DeviceHandle::pContext = m_impl->pContext;
 }
 
-void RenderDevice::cleanup()
+RenderDevice::~RenderDevice()
 {
 	setFullscreenState(false);
 }
+
 
 void RenderDevice::beginScene(float r, float g, float b, float a)
 {
 	float color[4] = {r, g, b, a};
 
-	m_impl->pContext->ClearRenderTargetView(m_buffers->pRenderTargetView, color);
+	m_pContext->ClearRenderTargetView(m_buffers->pRenderTargetView, color);
 
-	m_impl->pContext->ClearDepthStencilView(m_buffers->pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_pContext->ClearDepthStencilView((ID3D11DepthStencilView*)m_pRenderTargetDepthStencil->getView(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	return;
 }
@@ -227,11 +137,11 @@ void RenderDevice::endScene()
 {
 	if (m_vsync_enabled)
 	{
-		m_impl->pSwapchain->Present(1, 0);
+		m_pSwapchain->Present(1, 0);
 	}
 	else
 	{
-		m_impl->pSwapchain->Present(0, 0);
+		m_pSwapchain->Present(0, 0);
 	}
 
 	return;
@@ -248,7 +158,7 @@ void RenderDevice::setViewport(int width, int height)
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 
-	m_impl->pContext->RSSetViewports(1, &viewport);
+	m_pContext->RSSetViewports(1, &viewport);
 }
 
 void RenderDevice::setRestrizerOptions(const RestrizerOptions& resOpt)
@@ -304,20 +214,22 @@ void RenderDevice::setRestrizerOptions(const RestrizerOptions& resOpt)
 		m_buffers->pRasterState = nullptr;
 	}
 
-	hr = m_impl->pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState);
+	hr = m_pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState);
 	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateRasterizerState(...) failed.");
 
-	m_impl->pContext->RSSetState(m_buffers->pRasterState);
+	m_pContext->RSSetState(m_buffers->pRasterState);
 }
 
 void RenderDevice::setFullscreenState(bool enabled)
 {
 	m_fullscreen = enabled;
 
-	if(m_fullscreen)
-		m_impl->pSwapchain->SetFullscreenState(true, NULL);
-	else
-		m_impl->pSwapchain->SetFullscreenState(FALSE, NULL);
+	if (m_fullscreen) {
+		m_pSwapchain->SetFullscreenState(true, NULL);
+	}
+	else {
+		m_pSwapchain->SetFullscreenState(FALSE, NULL);
+	}
 }
 
 float RenderDevice::getAspectRatio() const
