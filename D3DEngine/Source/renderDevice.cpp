@@ -8,6 +8,7 @@
 #include "renderdevicehandle.h"
 #include "pointerutil.h"
 
+// TODO : RenderTarget class, ResterizerState class
 struct RenderDevice::RenderDeviceBuffers
 {
 	InterPtr<ID3D11RenderTargetView> pRenderTargetView;
