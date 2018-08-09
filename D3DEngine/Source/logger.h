@@ -8,9 +8,9 @@ public:
 	static Logger* MainLogger;
 
 public:
-	Logger() = default;
+	Logger();
 	Logger(const Logger& other) = default;
-	~Logger() = default;
+	~Logger();
 
 	static void LOG(int level, const char* msg);
 	static void CUSTOMLOG(int level, const char* msg, int code);

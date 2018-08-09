@@ -5,6 +5,17 @@
 
 Logger* Logger::MainLogger = nullptr;
 
+Logger::Logger()
+{
+	MainLogger = this;
+}
+
+Logger::~Logger()
+{
+	if (MainLogger == this)
+		MainLogger = nullptr;
+}
+
 void Logger::LOG(int level, const char* msg)
 {
 	if (MainLogger)
@@ -22,7 +33,7 @@ void Logger::log(int level, const char* msg)
 {
 	if (level > m_loglevel) return;
 	for (std::ostream* out : m_outs)
-		*out << msg << std::endl;
+		*out << "-LOG(" << level << "): " <<  msg << std::endl;
 }
 
 void Logger::setLevel(int level)
