@@ -1,10 +1,27 @@
 #pragma once
 #include <ostream>
+#include <vector>
 
-namespace logger
+class Logger
 {
-	extern void setTarget(std::ostream& target);
-	extern void log(const char* msg);
-	extern void customLog(const char* msg, int code, const char* file_name, int line_number);
+public:
+	static Logger* MainLogger;
 
-} // log
+public:
+	Logger() = default;
+	Logger(const Logger& other) = default;
+	~Logger() = default;
+
+	static void LOG(int level, const char* msg);
+	static void CUSTOMLOG(int level, const char* msg, int code);
+
+	void log(int level, const char* msg);
+
+	void setLevel(int level);
+	void addOut(std::ostream* out);
+
+private:
+	std::vector<std::ostream*> m_outs;
+	int m_loglevel = 4;
+
+};

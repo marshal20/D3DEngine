@@ -31,6 +31,7 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 	D3D11_USAGE usage;
 	UINT bindFlags;
 	UINT cpuaccessflag;
+	HRESULT hr;
 
 	m_type = type;
 	m_map = map;
@@ -82,7 +83,8 @@ void Buffer::init(const size_t size, const char* pData, Type type, Map map)
 
 	pSubsourceData = pData == nullptr ? nullptr : &subsourceData;
 
-	D3D11CALL(DeviceHandle::pDevice->CreateBuffer(&bufferDesc, pSubsourceData, &m_buffers->pBuffer));
+	hr = DeviceHandle::pDevice->CreateBuffer(&bufferDesc, pSubsourceData, &m_buffers->pBuffer);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateBuffer(...) failed.");
 
 	ZeroMemory(&m_buffers->mappedSubresource, sizeof(m_buffers->mappedSubresource));
 }
@@ -94,8 +96,10 @@ void Buffer::cleanup()
 
 void* Buffer::map()
 {
-	
-	D3D11CALL(DeviceHandle::pContext->Map(m_buffers->pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_buffers->mappedSubresource));
+	HRESULT hr;
+
+	hr = DeviceHandle::pContext->Map(m_buffers->pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_buffers->mappedSubresource);
+	checks::D3D11CALL_WRN(hr, "ID3D11DeviceContext::Map(...) failed.");
 
 	return m_buffers->mappedSubresource.pData;
 }

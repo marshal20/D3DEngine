@@ -86,7 +86,7 @@ void Window::init(const std::string& name, const Options& options)
 
 	if (!m_handle->hwnd)
 	{
-		ENGINE_ERROR("can't initialize window.");
+		checks::ENGINE_ERR("can't initialize window.");
 	}
 
 	// Bring the window up on the screen and set it as main focus.

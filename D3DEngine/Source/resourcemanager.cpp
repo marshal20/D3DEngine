@@ -20,7 +20,7 @@ namespace Resource
 		if (inFile.is_open() == false)
 		{
 			std::string error_message = std::string("Open file failed: ") + filePath;
-			ENGINE_ERROR(error_message.c_str());
+			checks::ENGINE_WRN(error_message.c_str());
 		}
 
 		// determine file size.
@@ -52,7 +52,7 @@ namespace Resource
 		if (inFile.is_open() == false)
 		{
 			std::string error_message = std::string("Open file failed: ") + filePath;
-			ENGINE_ERROR(error_message.c_str());
+			checks::ENGINE_WRN(error_message.c_str());
 		}
 
 		std::string curLine;
@@ -83,7 +83,7 @@ namespace Resource
 			&rawImage.width, &rawImage.height, &rawImage.channels, 4);
 		if (dataPtr == nullptr)
 		{
-			ENGINE_ERROR("Failed to load image data.");
+			checks::ENGINE_WRN("Failed to load image data.");
 		}
 
 		rawImage.channels = 4;
@@ -115,7 +115,7 @@ namespace Resource
 		if (!tinyobj::LoadObj(&attrib, &shapes, nullptr, &err, &OBJContents))
 		{
 			std::string error_message = std::string("can't load OBJ file: ") + err;
-			ENGINE_ERROR(error_message.c_str());
+			checks::ENGINE_WRN(error_message.c_str());
 		}
 
 		// reserve some space.

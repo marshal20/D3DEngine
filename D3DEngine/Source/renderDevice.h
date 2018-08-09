@@ -51,7 +51,7 @@ class RenderDevice
 public:
 	RenderDevice();
 	~RenderDevice();
-	void init(const OutputMode& outputmode, Window& outputWindow);
+	void init(const OutputMode& outputmode, Window& outputWindow, int MSAA_count = 1);
 	void cleanup();
 
 	void beginScene(float r, float g, float b, float a);

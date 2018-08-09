@@ -41,20 +41,24 @@ void Shader::init(const std::string& vertexContents, const std::string& pixelCon
 	InterPtr<ID3D10Blob> vertexShaderBuffer;
 	InterPtr<ID3D10Blob> pixelShaderBuffer;
 	std::vector<D3D11_INPUT_ELEMENT_DESC> vertexLayout;
+	HRESULT hr;
 
 	compileShader(vertexContents.c_str(), &vertexShaderBuffer, ShaderType::vs);
 	compileShader(pixelContents.c_str(), &pixelShaderBuffer, ShaderType::ps);
 	
-	D3D11CALL(DeviceHandle::pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
-		vertexShaderBuffer->GetBufferSize(), NULL, &m_buffers->pVertexShader));
-	D3D11CALL(DeviceHandle::pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(),
-		pixelShaderBuffer->GetBufferSize(), NULL, &m_buffers->pPixelShader));
+	hr = DeviceHandle::pDevice->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
+		vertexShaderBuffer->GetBufferSize(), NULL, &m_buffers->pVertexShader);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateVertexShader(...) failed");
+
+	hr = DeviceHandle::pDevice->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(),
+		pixelShaderBuffer->GetBufferSize(), NULL, &m_buffers->pPixelShader);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreatePixelShader(...) failed");
 
 	vertexLayout = getLayout(layout);
 
-	D3D11CALL(DeviceHandle::pDevice->CreateInputLayout(&vertexLayout[0], vertexLayout.size(),
-		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout));
-	
+	hr = DeviceHandle::pDevice->CreateInputLayout(&vertexLayout[0], vertexLayout.size(),
+		vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_buffers->pLayout);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateInputLayout(...) failed");
 }
 
 void Shader::cleanup()
@@ -144,6 +148,6 @@ void compileShader(const char* contents, ID3D10Blob** ppShaderBuffer, ShaderType
 		D3D10_SHADER_ENABLE_STRICTNESS, 0, ppShaderBuffer, &errorMessage);
 	if (FAILED(hr))
 	{
-		ENGINE_ERROR_C((char*)errorMessage->GetBufferPointer(), hr);
+		checks::ENGINE_WRN((char*)errorMessage->GetBufferPointer(), hr);
 	}
 }

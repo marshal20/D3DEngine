@@ -33,6 +33,7 @@ void Texture::init(unsigned int width, unsigned int height, const char* data, in
 	D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
 	DXGI_FORMAT imageFormat;
 	size_t bufferSize;
+	HRESULT hr;
 
 	imageFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	switch (m_channels)
@@ -57,19 +58,20 @@ void Texture::init(unsigned int width, unsigned int height, const char* data, in
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-	D3D11CALL(DeviceHandle::pDevice->CreateTexture2D(&textureDesc, nullptr, &m_buffers->pTexture));
+	hr = DeviceHandle::pDevice->CreateTexture2D(&textureDesc, nullptr, &m_buffers->pTexture);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateTexture2D(...) failed.");
 
 	resourceViewDesc.Format = textureDesc.Format;
 	resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	resourceViewDesc.Texture2D.MostDetailedMip = 0;
 	resourceViewDesc.Texture2D.MipLevels = 0xFFFFFFFF; // -1
 
-	D3D11CALL(DeviceHandle::pDevice->CreateShaderResourceView(m_buffers->pTexture, &resourceViewDesc, &m_buffers->pView));
+	hr = DeviceHandle::pDevice->CreateShaderResourceView(m_buffers->pTexture, &resourceViewDesc, &m_buffers->pView);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateShaderResourceView(...) failed.");
 
 	bufferSize = sizeof(char) * m_channels * m_width;
 
-	if (data)
-	{
+	if (data) {
 		DeviceHandle::pContext->UpdateSubresource(m_buffers->pTexture, NULL, nullptr, data, bufferSize, NULL);
 	}
 

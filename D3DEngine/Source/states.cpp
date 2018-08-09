@@ -25,6 +25,7 @@ BlendState::~BlendState()
 void BlendState::init()
 {
 	D3D11_BLEND_DESC blendDesc;
+	HRESULT hr;
 
 	ZeroMemory(&blendDesc, sizeof(blendDesc));
 	blendDesc.AlphaToCoverageEnable = false;
@@ -39,7 +40,8 @@ void BlendState::init()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	D3D11CALL(DeviceHandle::pDevice->CreateBlendState(&blendDesc, &m_buffers->pBlendState));
+	hr = DeviceHandle::pDevice->CreateBlendState(&blendDesc, &m_buffers->pBlendState);
+	checks::D3D11CALL_WRN(hr, "ID3D11Device::CreateBlendState(...) failed.");
 }
 
 void BlendState::cleanup()

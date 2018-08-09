@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "logger.h"
 #include "window.h"
 #include "input.h"
 #include "renderdevice.h"
@@ -94,6 +95,7 @@ private:
 	float fovDeg = 45.0f;
 	FrameLimiter frameLimiter;
 	float deltaTime = 0.0f;
+	Logger logger;
 };
 
 void GameSystem::loadShaders()
@@ -117,6 +119,7 @@ void GameSystem::loadShaders()
 
 void GameSystem::init()
 {
+	logger.addOut(&std::cout);
 	wind.init("D3D11Engine");
 	wind.setInputSystem(&inputsys);
 	d3d11Device.init(RenderDevice::matchOutputMode(800, 600), wind);
@@ -194,8 +197,6 @@ void GameSystem::input()
 		static bool lockingControl = false;
 		static DirectX::XMFLOAT3 cameraRot = { 0.0f, 0.0f, 0.0f };
 		DirectX::XMFLOAT2 deltaMousePos = inputsys.getDeltaMousePos();
-
-		std::cout << deltaMousePos.x << " " << deltaMousePos.y << std::endl;
 
 		if (inputsys.isKeyPressed('L'))
 		{
