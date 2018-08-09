@@ -127,10 +127,6 @@ void RenderDevice::init(const OutputMode& outputmode, Window& outputWindow, int 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 
-/*	checks::D3D11CALL_WRN(
-		m_impl->pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView)
-		, "ID3D11Device::CreateRenderTargetView(...) failed.");*/
-
 	pBackBuffer->Release();
 	pBackBuffer = 0;
 
