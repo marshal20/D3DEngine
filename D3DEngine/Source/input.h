@@ -13,13 +13,13 @@ public:
 
 	void end();
 
-	bool isKeyDown(int key);
-	bool isKeyUp(int key);
-	bool isKeyPressed(int key);
-	bool isKeyReleased(int key);
+	bool isKeyDown(int key) const;
+	bool isKeyUp(int key) const;
+	bool isKeyPressed(int key) const;
+	bool isKeyReleased(int key) const;
 
-	DirectX::XMFLOAT2 getMousePos();
-	DirectX::XMFLOAT2 getDeltaMousePos();
+	DirectX::XMFLOAT2 getMousePos() const;
+	DirectX::XMFLOAT2 getDeltaMousePos() const;
 
 private:
 	friend class Window;

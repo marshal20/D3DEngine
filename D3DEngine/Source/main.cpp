@@ -6,6 +6,7 @@
 #include "renderdevice.h"
 #include "renderer.h"
 #include "camera.h"
+#include "cameramover.h"
 #include "mesh.h"
 #include "transform.h"
 #include "framelimiter.h"
@@ -32,23 +33,6 @@ void experimental()
 	std::cout << "System Mem (ded): " << GPU.DedicatedSystemMemory / 1024 / 1024 << std::endl;
 	std::cout << "Shared Mem: " << GPU.SharedSystemMemory / 1024 / 1024 << std::endl;
 	std::cout << "---------------------" << std::endl << std::endl;
-}
-
-
-DirectX::XMFLOAT3 normalize(const DirectX::XMFLOAT3& value)
-{
-	DirectX::XMFLOAT3 normalized;
-
-	normalized = value;
-	float valueMagnitude = sqrt(value.x * value.x + value.y * value.y + value.z * value.z);
-	if (valueMagnitude != 0.0f)
-	{
-		normalized.x = value.x / valueMagnitude;
-		normalized.y = value.y / valueMagnitude;
-		normalized.z = value.z / valueMagnitude;
-	}
-
-	return normalized;
 }
 
 float clamp(float value, float min, float max)
@@ -94,7 +78,7 @@ private:
 
 	FrameLimiter frameLimiter;
 	Camera camera;
-	DirectX::XMFLOAT3 cameraPos;
+	CameraMover cameraMover;
 	float fovDeg = 45.0f;
 	float deltaTime = 0.0f;
 };
@@ -129,7 +113,6 @@ void GameSystem::init()
 	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/maze.png"));
 	model = std::make_unique<Model>(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
 	//model.init(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
-	cameraPos = DirectX::XMFLOAT3(0.0f, 0.0f, -5.0f);
 }
 
 void GameSystem::cleanup()
@@ -153,29 +136,20 @@ void GameSystem::input()
 		d3d11Device->setFullscreenState(fullscreen);
 	}
 
-	// camera movement
+	// Camera control
 	{
-		const float movementSpeed = 2.0f;
-		DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
-		if (inputsys.isKeyDown(VK_RIGHT))
-			movementDirection.x += 1.0f;
-		if (inputsys.isKeyDown(VK_LEFT))
-			movementDirection.x -= 1.0f;
-		if (inputsys.isKeyDown(VK_UP))
-			movementDirection.y += 1.0f;
-		if (inputsys.isKeyDown(VK_DOWN))
-			movementDirection.y -= 1.0f;
-		if (inputsys.isKeyDown('I'))
-			movementDirection.z += 1.0f;
-		if (inputsys.isKeyDown('O'))
-			movementDirection.z -= 1.0f;
-		movementDirection = normalize(movementDirection);
-		cameraPos.x += movementDirection.x * movementSpeed * deltaTime;
-		cameraPos.y += movementDirection.y * movementSpeed * deltaTime;
-		cameraPos.z += movementDirection.z * movementSpeed * deltaTime;
+		static bool lockingControl = false;
+		if (inputsys.isKeyPressed('L')) {
+			lockingControl = !lockingControl;
+			wind->setLockMouse(lockingControl);
+			cameraMover.setLocking(lockingControl);
+		}
+
+		cameraMover.processInput(inputsys, deltaTime);
+		cameraMover.apply(camera);
 	}
 
-	// fov control
+	// FOV control
 	{
 		const float fovSpeed = 4.0f;
 		if (inputsys.isKeyDown(VK_ADD))
@@ -184,34 +158,10 @@ void GameSystem::input()
 			fovDeg -= fovSpeed * deltaTime;
 		fovDeg = clamp(fovDeg, 45.0f, 90.0f);
 
-		camera.setPosition(cameraPos);
 		camera.setFov(fovDeg * 3.14f / 180.0f);
 	}
 
-	// camera mouse control
-	{
-		static bool lockingControl = false;
-		static DirectX::XMFLOAT3 cameraRot = { 0.0f, 0.0f, 0.0f };
-		DirectX::XMFLOAT2 deltaMousePos = inputsys.getDeltaMousePos();
-
-		if (inputsys.isKeyPressed('L'))
-		{
-			lockingControl = !lockingControl;
-			wind->setLockMouse(lockingControl);
-		}
-
-		if (lockingControl)
-		{
-			const float lockingSpeed = 0.1f;
-
-			cameraRot.x += deltaMousePos.y * lockingSpeed;
-			cameraRot.y += deltaMousePos.x * lockingSpeed;
-		}
-
-		camera.setRotation(cameraRot);
-	}
-
-	// model tranform
+	// model transform
 	{
 		Transform& modelTransform = model->transform();
 
@@ -220,7 +170,7 @@ void GameSystem::input()
 		float scaleValue = sin(t)*0.5f + 0.5f;
 		modelTransform.scale = DirectX::XMFLOAT3(scaleValue, scaleValue, scaleValue);
 		modelTransform.rotation = DirectX::XMFLOAT3(t * 15, t * 15, t * 15);
-		{
+		/*{
 			const float movementSpeed = 0.1f;
 			DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
 			if (inputsys.isKeyDown('D'))
@@ -235,7 +185,7 @@ void GameSystem::input()
 			modelTransform.position.x += movementDirection.x * movementSpeed;
 			modelTransform.position.y += movementDirection.y * movementSpeed;
 			modelTransform.position.z += movementDirection.z * movementSpeed;
-		}
+		}*/
 
 		t += 2.5f * deltaTime;
 	}

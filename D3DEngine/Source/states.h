@@ -1,5 +1,5 @@
 #pragma once
-// This file holdes all classes that manage states:
+// This file holds all classes that manage states:
 // - BlendState
 // - DepthStencilState
 

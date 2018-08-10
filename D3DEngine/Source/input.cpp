@@ -35,32 +35,32 @@ void InputSystem::end()
 	m_dy = 0;
 }
 
-bool InputSystem::isKeyDown(int key)
+bool InputSystem::isKeyDown(int key) const
 {
 	return m_keys[key] == keyState::down || m_keys[key] == keyState::pressed;
 }
 
-bool InputSystem::isKeyUp(int key)
+bool InputSystem::isKeyUp(int key) const
 {
 	return m_keys[key] == keyState::up || m_keys[key] == keyState::released;
 }
 
-bool InputSystem::isKeyPressed(int key)
+bool InputSystem::isKeyPressed(int key) const
 {
 	return m_keys[key] == keyState::pressed;
 }
 
-bool InputSystem::isKeyReleased(int key)
+bool InputSystem::isKeyReleased(int key) const
 {
 	return m_keys[key] == keyState::released;
 }
 
-DirectX::XMFLOAT2 InputSystem::getMousePos()
+DirectX::XMFLOAT2 InputSystem::getMousePos() const
 {
 	return { (float)m_x, (float)m_y };
 }
 
-DirectX::XMFLOAT2 InputSystem::getDeltaMousePos()
+DirectX::XMFLOAT2 InputSystem::getDeltaMousePos() const
 {
 	return { (float)m_dx, (float)m_dy };
 }
