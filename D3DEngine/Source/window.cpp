@@ -6,11 +6,12 @@
 
 #include "checks.h"
 #include "strutil.h"
+#include "renderdevicehandle.h"
 
 #include <map>
 
 
-const Window::Options Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
+const Window::Options Window::windowoptions_DEF = { false, true, true, true, true, 0, 0, 800, 600 };
 
 std::map<HWND, Window*> g_windowmap;
 
@@ -138,9 +139,16 @@ void Window::setFullscreenState(bool enabled)
 	m_options.fullscreen = enabled;
 
 	if (m_options.fullscreen)
+	{
+		m_screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		m_screenHeight = GetSystemMetrics(SM_CYSCREEN);
 		setScreenRes(m_screenWidth, m_screenHeight);
+		SetWindowPos(m_hwnd, 0, 0, 0, m_screenWidth, m_screenHeight, 0);
+	}
 	else
+	{
 		ChangeDisplaySettings(NULL, 0);
+	}
 }
 
 void Window::setLockMouse(bool lock)
@@ -184,6 +192,15 @@ bool Window::HandleMessage(unsigned int umessage, unsigned int wparam, long lpar
 			setMousePosRelative(m_hwnd, m_screenWidth / 2, m_screenHeight / 2);
 			lastxPos = m_screenWidth / 2;
 			lastyPos = m_screenHeight / 2;
+		}
+		return true;
+
+	case WM_SIZE:
+		m_screenWidth = LOWORD(lparam);
+		m_screenHeight = HIWORD(lparam);
+		if (DeviceHandle::pRenderDevice)
+		{
+			DeviceHandle::pRenderDevice->resize(m_screenWidth, m_screenHeight);
 		}
 		return true;
 

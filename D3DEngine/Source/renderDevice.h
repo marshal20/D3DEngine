@@ -69,6 +69,10 @@ public:
 	static OutputMode matchOutputMode(unsigned int width, unsigned int height);
 
 private:
+	friend class Window;
+	void resize(int width, int height);
+
+private:
 	InterPtr<ID3D11Device> m_pDevice;
 	InterPtr<ID3D11DeviceContext> m_pContext;
 	InterPtr<IDXGISwapChain> m_pSwapchain;

@@ -7,6 +7,7 @@
 #include "checks.h"
 #include "renderdevicehandle.h"
 #include "pointerutil.h"
+#include <iostream> ////////////////////
 
 // TODO : RenderTarget class, ResterizerState class
 struct RenderDevice::RenderDeviceBuffers
@@ -169,6 +170,12 @@ void RenderDevice::setRestrizerOptions(const RestrizerOptions& resOpt)
 	D3D11_FILL_MODE fillmode;
 	HRESULT hr;
 
+	if (m_buffers->pRasterState)
+	{
+		m_buffers->pRasterState->Release();
+		m_buffers->pRasterState = nullptr;
+	}
+
 	cullmode = D3D11_CULL_BACK;
 	switch (resOpt.cullmode)
 	{
@@ -236,6 +243,59 @@ void RenderDevice::setFullscreenState(bool enabled)
 float RenderDevice::getAspectRatio() const
 {
 	return (float)m_outputmode.width / (float)m_outputmode.height;
+}
+
+void RenderDevice::resize(int width, int height)
+{
+	InterPtr<ID3D11Texture2D> pBackBuffer;
+	HRESULT hr;
+	std::cout << width << " " << height << std::endl;
+
+	m_outputmode.width = width;
+	m_outputmode.height = height;
+
+	m_buffers->pRenderTargetView->Release();
+
+	m_pSwapchain->ResizeBuffers(1, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+
+	m_pSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+
+	hr = m_pDevice->CreateRenderTargetView(pBackBuffer, NULL, &m_buffers->pRenderTargetView);
+	checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateRenderTargetView(...) failed.");
+
+	pBackBuffer->Release();
+	pBackBuffer = 0;
+
+	m_pDepthStencilState = std::make_unique<DepthStencilState>();
+	m_pDepthStencilState->use();
+
+	m_pRenderTargetDepthStencil = std::make_unique<DepthStencilTexture>(m_outputmode.width, m_outputmode.height);
+
+	// Bind the render target view and depth stencil buffer to the output render pipeline.
+	m_pContext->OMSetRenderTargets(1, &m_buffers->pRenderTargetView, m_pRenderTargetDepthStencil->getView());
+
+	setRestrizerOptions({ RestrizerOptions::CullMode::Back,
+		RestrizerOptions::FillMode::Solid, false, true, false });
+
+
+
+	setViewport(m_outputmode.width, m_outputmode.height);
+
+
+
+
+
+
+	/*//hr = m_pSwapchain->ResizeBuffers(0, width, height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	//checks::D3D11CALL_WRN(hr, "ResizeBuffers");
+	setViewport(width, height);
+
+	DXGI_MODE_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Width = width;
+	desc.Width = height;
+	hr = m_pSwapchain->ResizeTarget(&desc);
+	checks::D3D11CALL_WRN(hr, "ResizeTarget");*/
 }
 
 

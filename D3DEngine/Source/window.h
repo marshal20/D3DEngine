@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <functional>
 
 #include "input.h"
 #include "pointerutil.h"
