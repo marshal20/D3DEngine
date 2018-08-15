@@ -7,9 +7,12 @@
 #include "checks.h"
 #include "strutil.h"
 
+#include <map>
+
 
 const Window::Options Window::windowoptions_DEF = { false, true, true, false, true, 0, 0, 800, 600 };
-Window* main_window = nullptr;
+
+std::map<HWND, Window*> g_windowmap;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 void setScreenRes(int width, int height);
@@ -76,7 +79,7 @@ Window::Window(const std::string& name, const Options& options) :
 	// Hide the mouse cursor.
 	if (!m_options.cursor) ShowCursor(false);
 
-	main_window = this;
+	g_windowmap.insert(std::make_pair(m_hwnd, this));
 }
 
 Window::~Window()
@@ -89,6 +92,8 @@ Window::~Window()
 	if (m_application_name) {
 		delete[] m_application_name;
 	}
+
+	g_windowmap.erase(m_hwnd);
 }
 
 
@@ -213,9 +218,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 	default:
 	{
-		if (main_window->HandleMessage(umessage, wparam, lparam))
-			return 0;
-		
+		auto found_window = g_windowmap.find(hwnd);
+		if (found_window != g_windowmap.end())
+		{
+			Window* window = found_window->second;
+
+			if (window->HandleMessage(umessage, wparam, lparam))
+				return 0;
+		}
+
 		return DefWindowProc(hwnd, umessage, wparam, lparam);
 	}
 	}

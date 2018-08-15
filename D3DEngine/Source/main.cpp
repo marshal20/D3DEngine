@@ -112,7 +112,7 @@ void GameSystem::init()
 	renderer = std::make_unique<Renderer>();
 	modelTex = Texture::fromRaw(Resource::loadImage("Resources/Images/maze.png"));
 	model = std::make_unique<Model>(Resource::loadMesh("Resources/Meshes/cube.obj"), modelTex);
-	//model.init(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
+	//model = std::make_unique<Model>(Resource::loadMesh("Resources/Meshes/monkey.obj"), modelTex);
 }
 
 void GameSystem::cleanup()
@@ -168,8 +168,8 @@ void GameSystem::input()
 		static float t = 0.0f;
 
 		float scaleValue = sin(t)*0.5f + 0.5f;
-		modelTransform.scale = DirectX::XMFLOAT3(scaleValue, scaleValue, scaleValue);
-		modelTransform.rotation = DirectX::XMFLOAT3(t * 15, t * 15, t * 15);
+		//modelTransform.scale = DirectX::XMFLOAT3(scaleValue, scaleValue, scaleValue);
+		//modelTransform.rotation = DirectX::XMFLOAT3(t * 15, t * 15, t * 15);
 		/*{
 			const float movementSpeed = 0.1f;
 			DirectX::XMFLOAT3 movementDirection = { 0.0f, 0.0f, 0.0f };
