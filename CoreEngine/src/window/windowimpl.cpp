@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "../stringutil.h"
+#include "..\utils\stringutil.h"
 
 // for reference:
 // https://msdn.microsoft.com/en-us/library/bb384843.aspx
@@ -120,15 +120,12 @@ namespace ce
 	{
 		MSG msg;
 
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (m_close) return;
+
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}
-
-		if (msg.message == WM_QUIT)
-		{
-			close();
 		}
 	}
 
@@ -251,6 +248,7 @@ namespace ce
 	}
 
 	// PRIVATE
+
 	void WindowImpl::set_size_position()
 	{
 		SetWindowPos(m_hWnd, NULL, m_position.x, m_position.y, m_size.x, m_size.y, NULL);

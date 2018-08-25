@@ -1,7 +1,6 @@
 #include <CoreEngine/window.h>
 
 #include "window\windowimpl.h"
-#include "stringutil.h"
 
 namespace ce
 {

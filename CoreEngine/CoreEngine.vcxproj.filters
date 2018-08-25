@@ -21,10 +21,10 @@
     <ClInclude Include="include\CoreEngine\window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\stringutil.h">
+    <ClInclude Include="src\window\windowimpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\window\windowimpl.h">
+    <ClInclude Include="src\utils\stringutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,10 +32,10 @@
     <ClCompile Include="src\window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\stringutil.cpp">
+    <ClCompile Include="src\window\windowimpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\window\windowimpl.cpp">
+    <ClCompile Include="src\utils\stringutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

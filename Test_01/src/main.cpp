@@ -10,11 +10,13 @@ int main()
 	while (!window.is_closed())
 	{
 		ce::math::Vec2<int> pos = window.get_position();
-		pos.x += 1;
-		window.set_position(pos);
-		window.set_name(std::string("Hello (") + 
-			std::to_string(pos.x) + ", " + 
-			std::to_string(pos.y) + ")");
+		ce::math::Vec2<int> size = window.get_size();
+		std::string name = std::string("Hello (") +
+			std::to_string(pos.x) + ", " +
+			std::to_string(pos.y) + ") " +
+			std::to_string(size.x) + "x" +
+			std::to_string(size.y);
+		window.set_name(name);
 		window.set_name(window.get_name());
 		window.update();
 

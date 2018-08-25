@@ -12,6 +12,7 @@ namespace ce
 	{
 	public:
 		Window();
+		Window(const Window& other) = delete;
 		~Window();
 
 		void init(const std::string& name, const math::Vec2<int>& size);
