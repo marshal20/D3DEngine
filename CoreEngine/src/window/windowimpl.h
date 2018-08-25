@@ -1,31 +1,34 @@
 #pragma once
-#include <string>
-#include <memory>
 
-#include "math/vec.h"
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <string>
+
+#include <CoreEngine\math\vec.h>
 
 namespace ce
 {
-	class WindowImpl;
-
-	class Window
+	class WindowImpl
 	{
 	public:
-		Window();
-		~Window();
+		WindowImpl();
+		WindowImpl(const WindowImpl& other) = delete;
+		~WindowImpl();
 
 		void init(const std::string& name, const math::Vec2<int>& size);
 		void cleanup();
+		LRESULT handle_msg(UINT message, WPARAM wParam, LPARAM lParam);
 
 		void update();
+		void close();
 		void show();
 		void hide();
-		void close();
 		void maxmize();
 		void minimize();
 
 		void set_name(const std::string& name);
 		void set_position(const math::Vec2<int>& position);
+		void set_position_centered();
 		void set_size(const math::Vec2<int>& size);
 		void set_border(bool enable);
 		void set_resizable(bool enable);
@@ -37,6 +40,17 @@ namespace ce
 		static math::Vec2<int> get_screen_size();
 
 	private:
-		std::unique_ptr<WindowImpl> m_impl;
+		void set_size_position();
+		static void set_style_state(HWND hWnd, long style, bool enable);
+
+	private:
+		HWND m_hWnd = nullptr;
+		HINSTANCE m_hInstance = nullptr;
+		wchar_t* m_class_name = nullptr;
+
+		std::string m_name;
+		math::Vec2<int> m_size;
+		math::Vec2<int> m_position;
+		bool m_close = false;
 	};
 }

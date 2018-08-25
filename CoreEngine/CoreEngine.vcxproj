@@ -22,10 +22,12 @@
     <ClInclude Include="include\CoreEngine\math\vec.h" />
     <ClInclude Include="include\CoreEngine\window.h" />
     <ClInclude Include="src\stringutil.h" />
+    <ClInclude Include="src\window\windowimpl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stringutil.cpp" />
     <ClCompile Include="src\window.cpp" />
+    <ClCompile Include="src\window\windowimpl.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

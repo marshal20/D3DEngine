@@ -7,12 +7,15 @@ int main()
 	ce::Window window;
 
 	window.init("Hello", ce::math::Vec2<int>(800, 600));
-	ce::math::Vec2<int> pos = { 50, 50 };
-	while (!window.isClosed())
+	while (!window.is_closed())
 	{
-		pos = window.getPosition();
+		ce::math::Vec2<int> pos = window.get_position();
 		pos.x += 1;
-		window.setPosition(pos);
+		window.set_position(pos);
+		window.set_name(std::string("Hello (") + 
+			std::to_string(pos.x) + ", " + 
+			std::to_string(pos.y) + ")");
+		window.set_name(window.get_name());
 		window.update();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
