@@ -131,6 +131,7 @@ namespace ce
 
 	void WindowImpl::close()
 	{
+		DestroyWindow(m_hWnd);
 		m_close = true;
 	}
 
