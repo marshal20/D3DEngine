@@ -41,9 +41,9 @@ namespace ce
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 0;
 		wcex.hInstance = m_hInstance;
-		wcex.hIcon = LoadIcon(NULL, IDI_WINLOGO);
+		wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 		wcex.lpszMenuName = NULL;
 		wcex.lpszClassName = m_class_name;
 		wcex.hIconSm = wcex.hIcon;
