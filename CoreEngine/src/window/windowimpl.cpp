@@ -240,12 +240,26 @@ namespace ce
 		return { winrc.right - winrc.left, winrc.bottom - winrc.top };
 	}
 
+	math::Vec2<int> WindowImpl::get_client_size() const
+	{
+		RECT winrc;
+
+		GetWindowRect(m_hWnd, &winrc);
+		AdjustWindowRect(&winrc, GetWindowLong(m_hWnd, GWL_STYLE), false);
+		return { winrc.right - winrc.left, winrc.bottom - winrc.top };
+	}
+
 	math::Vec2<int> WindowImpl::get_screen_size()
 	{
 		int x, y;
 		x = GetSystemMetrics(SM_CXSCREEN);
 		y = GetSystemMetrics(SM_CYSCREEN);
 		return { x, y };
+	}
+
+	HWND WindowImpl::get_hWnd() const
+	{
+		return m_hWnd;
 	}
 
 	// PRIVATE

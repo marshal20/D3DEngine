@@ -35,9 +35,11 @@ namespace ce
 		std::string get_name() const;
 		math::Vec2<int> get_position() const;
 		math::Vec2<int> get_size() const;
+		math::Vec2<int> get_client_size() const;
 		static math::Vec2<int> get_screen_size();
 
 	private:
+		friend class RenderContext;
 		std::unique_ptr<WindowImpl> m_impl;
 	};
 }

@@ -1,6 +1,6 @@
 #include <CoreEngine/window.h>
 
-#include "window\windowimpl.h"
+#include "windowimpl.h"
 
 namespace ce
 {
@@ -97,6 +97,11 @@ namespace ce
 	math::Vec2<int> Window::get_size() const
 	{
 		return m_impl->get_size();
+	}
+
+	math::Vec2<int> Window::get_client_size() const
+	{
+		return m_impl->get_client_size();
 	}
 
 	math::Vec2<int> Window::get_screen_size()

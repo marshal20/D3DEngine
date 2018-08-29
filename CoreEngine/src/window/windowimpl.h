@@ -37,7 +37,10 @@ namespace ce
 		std::string get_name() const;
 		math::Vec2<int> get_position() const;
 		math::Vec2<int> get_size() const;
+		math::Vec2<int> get_client_size() const;
 		static math::Vec2<int> get_screen_size();
+
+		HWND get_hWnd() const;
 
 	private:
 		void set_size_position();
