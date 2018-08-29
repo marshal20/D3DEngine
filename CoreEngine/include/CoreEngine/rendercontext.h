@@ -30,6 +30,9 @@ namespace ce
 		void set_viewport(const math::Vec2<int>& size);
 
 	private:
+		void init_buffers(const math::Vec2<int>& size);
+
+	private:
 		ID3D11Device* m_device = nullptr;
 		ID3D11DeviceContext* m_context = nullptr;
 		IDXGISwapChain* m_swapchain = nullptr;
@@ -37,6 +40,7 @@ namespace ce
 		ID3D11DepthStencilState* m_depth_stencil_state = nullptr; // TODO: separate.
 		ID3D11Texture2D* m_depth_texture = nullptr; // TODO: separate.
 		ID3D11DepthStencilView* m_depth_view = nullptr; // TODO: separate.
+		math::Vec2<int> m_buffer_size = { 0, 0 };
 	};
 }
 

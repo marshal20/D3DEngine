@@ -23,6 +23,7 @@
     <ClInclude Include="include\CoreEngine\window.h" />
     <ClInclude Include="include\CoreEngine\rendercontext.h" />
     <ClInclude Include="src\internalstate.h" />
+    <ClInclude Include="src\utils\safemem.h" />
     <ClInclude Include="src\utils\stringutil.h" />
     <ClInclude Include="src\window\windowimpl.h" />
   </ItemGroup>

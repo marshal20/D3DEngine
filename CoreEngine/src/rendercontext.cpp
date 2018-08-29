@@ -4,6 +4,7 @@
 
 #include "window\windowimpl.h"
 #include "internalstate.h"
+#include "utils\safemem.h"
 
 namespace ce
 {
@@ -22,6 +23,8 @@ namespace ce
 		IDXGIFactory* p_factory;
 		DXGI_SWAP_CHAIN_DESC swapChainDesc;
 		ID3D11Texture2D* pBackBuffer;
+
+		m_buffer_size = size;
 
 		feature_level = D3D_FEATURE_LEVEL_11_0;
 		hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL,
@@ -50,85 +53,20 @@ namespace ce
 		hr = p_factory->CreateSwapChain(m_device, &swapChainDesc, &m_swapchain);
 		// TODO: check hr.
 
-		m_swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
+		init_buffers(size);
 
-		hr = m_device->CreateRenderTargetView(pBackBuffer, NULL, &m_buffer_view);
-		// TODO: check hr.
-
-		pBackBuffer->Release();
-		pBackBuffer = nullptr;
-
-		// TODO: Separate depth stencil state.
-		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-		ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-		//
-		// Set up the description of the stencil state.
-		depthStencilDesc.DepthEnable = true;
-		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-		//
-		depthStencilDesc.StencilEnable = true;
-		depthStencilDesc.StencilReadMask = 0xFF;
-		depthStencilDesc.StencilWriteMask = 0xFF;
-		//
-		// Stencil operations if pixel is front-facing.
-		depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-		depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-		//
-		// Stencil operations if pixel is back-facing.
-		depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-		//
-		hr = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
-		m_context->OMSetDepthStencilState(m_depth_stencil_state, 1);
-		// END TODO
-
-		// TODO: Separate depth stencil texture.
-		D3D11_TEXTURE2D_DESC depthBufferDesc;
-		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-		//
-		depthBufferDesc.Width = size.x;
-		depthBufferDesc.Height = size.y;
-		depthBufferDesc.MipLevels = 1;
-		depthBufferDesc.ArraySize = 1;
-		depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthBufferDesc.SampleDesc.Count = 1;
-		depthBufferDesc.SampleDesc.Quality = 0;
-		depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		depthBufferDesc.CPUAccessFlags = 0;
-		depthBufferDesc.MiscFlags = 0;
-		//
-		hr = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depth_texture);
-		// TODO: check hr.
-		//
-		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		depthStencilViewDesc.Texture2D.MipSlice = 0;
-		//
-		hr = m_device->CreateDepthStencilView(m_depth_texture, &depthStencilViewDesc, &m_depth_view);
-		// TODO: check hr.
-		// END TODO
-		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_view);
-
-		p_factory->Release();
+		SAFE_RELEASE(p_factory);
 	}
 
 	void RenderContext::cleanup()
 	{
-		m_depth_view->Release();
-		m_depth_texture->Release();
-		m_depth_stencil_state->Release();
-		m_buffer_view->Release();
-		m_swapchain->Release();
-		m_context->Release();
-		m_device->Release();
-
+		SAFE_RELEASE(m_depth_view);
+		SAFE_RELEASE(m_depth_texture);
+		SAFE_RELEASE(m_depth_stencil_state);
+		SAFE_RELEASE(m_buffer_view);
+		SAFE_RELEASE(m_swapchain);
+		SAFE_RELEASE(m_context);
+		SAFE_RELEASE(m_device);
 	}
 
 	void RenderContext::set_main()
@@ -154,14 +92,37 @@ namespace ce
 
 	void RenderContext::resize(const math::Vec2<int>& size)
 	{
-		// TODO: Resize
+		if (size != m_buffer_size)
+		{
+			m_buffer_size = size;
+			init_buffers(size);
+			set_viewport(size);
+		}
+	}
+
+	void RenderContext::set_viewport(const math::Vec2<int>& size)
+	{
+		D3D11_VIEWPORT viewport;
+
+		viewport.Width = (float)size.x;
+		viewport.Height = (float)size.y;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
+		viewport.TopLeftX = 0.0f;
+		viewport.TopLeftY = 0.0f;
+
+		m_context->RSSetViewports(1, &viewport);
+	}
+
+	void RenderContext::init_buffers(const math::Vec2<int>& size)
+	{
 		ID3D11Texture2D* pBackBuffer;
 		HRESULT hr;
 
-		m_depth_texture->Release();
-		m_buffer_view->Release();
-		m_depth_stencil_state->Release();
-		m_depth_view->Release();
+		SAFE_RELEASE(m_depth_texture);
+		SAFE_RELEASE(m_buffer_view);
+		SAFE_RELEASE(m_depth_stencil_state);
+		SAFE_RELEASE(m_depth_view);
 
 		m_swapchain->ResizeBuffers(1, size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
@@ -199,6 +160,7 @@ namespace ce
 		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 		//
 		hr = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
+		// TODO: check hr.
 		m_context->OMSetDepthStencilState(m_depth_stencil_state, 1);
 		// END TODO
 
@@ -236,25 +198,6 @@ namespace ce
 
 		//setRestrizerOptions({ RestrizerOptions::CullMode::Back,
 		//	RestrizerOptions::FillMode::Solid, false, true, false });
-
-
-
-		set_viewport(size);
 	}
-
-	void RenderContext::set_viewport(const math::Vec2<int>& size)
-	{
-		D3D11_VIEWPORT viewport;
-
-		viewport.Width = (float)size.x;
-		viewport.Height = (float)size.y;
-		viewport.MinDepth = 0.0f;
-		viewport.MaxDepth = 1.0f;
-		viewport.TopLeftX = 0.0f;
-		viewport.TopLeftY = 0.0f;
-
-		m_context->RSSetViewports(1, &viewport);
-	}
-
 }
 
