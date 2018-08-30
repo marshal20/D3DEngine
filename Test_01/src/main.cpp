@@ -11,23 +11,14 @@ int main()
 	window.init("Hello", ce::math::Vec2<int>(800, 600));
 	render_context.init(&window);
 	render_context.resize(window.get_client_size());
+	render_context.set_viewport(window.get_client_size());
 
 	while (!window.is_closed())
 	{
-		ce::math::Vec2<int> pos = window.get_position();
-		ce::math::Vec2<int> size = window.get_size();
-		std::string name = std::string("Hello (") +
-			std::to_string(pos.x) + ", " +
-			std::to_string(pos.y) + ") " +
-			std::to_string(size.x) + "x" +
-			std::to_string(size.y);
-		window.set_name(name);
-		window.set_name(window.get_name());
+		window.update();
 
 		render_context.clear(1.0f, 0.0f, 0.0f, 1.0f);
 		render_context.present();
-
-		window.update();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}

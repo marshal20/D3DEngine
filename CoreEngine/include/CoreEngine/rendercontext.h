@@ -1,10 +1,12 @@
 #pragma once
 
 #include "window.h"
+#include "state\depthstencilstate.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct IDXGISwapChain;
+
 struct ID3D11RenderTargetView;
 struct ID3D11DepthStencilState; // TODO: separate.
 struct ID3D11Texture2D; // TODO: separate.
@@ -36,10 +38,13 @@ namespace ce
 		ID3D11Device* m_device = nullptr;
 		ID3D11DeviceContext* m_context = nullptr;
 		IDXGISwapChain* m_swapchain = nullptr;
+
+		DepthStencilState m_default_depth_stencil_state;
+
 		ID3D11RenderTargetView* m_buffer_view = nullptr;
-		ID3D11DepthStencilState* m_depth_stencil_state = nullptr; // TODO: separate.
 		ID3D11Texture2D* m_depth_texture = nullptr; // TODO: separate.
 		ID3D11DepthStencilView* m_depth_view = nullptr; // TODO: separate.
+
 		math::Vec2<int> m_buffer_size = { 0, 0 };
 	};
 }

@@ -30,10 +30,16 @@
     <ClInclude Include="include\CoreEngine\rendercontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\internalstate.h">
+    <ClInclude Include="src\utils\safemem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\safemem.h">
+    <ClInclude Include="src\utils\callcheck.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CoreEngine\state\depthstencilstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\state\internalstate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +56,10 @@
     <ClCompile Include="src\rendercontext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\internalstate.cpp">
+    <ClCompile Include="src\state\internalstate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\state\depthstencilstate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

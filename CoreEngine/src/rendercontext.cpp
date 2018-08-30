@@ -3,8 +3,9 @@
 #include <d3d11.h>
 
 #include "window\windowimpl.h"
-#include "internalstate.h"
+#include "state\internalstate.h"
 #include "utils\safemem.h"
+#include "utils\callcheck.h"
 
 namespace ce
 {
@@ -22,17 +23,16 @@ namespace ce
 		D3D_FEATURE_LEVEL feature_level;
 		IDXGIFactory* p_factory;
 		DXGI_SWAP_CHAIN_DESC swapChainDesc;
-		ID3D11Texture2D* pBackBuffer;
 
 		m_buffer_size = size;
 
 		feature_level = D3D_FEATURE_LEVEL_11_0;
 		hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL,
 			&feature_level, 1, D3D11_SDK_VERSION, &m_device, NULL, &m_context);
-		// TODO: check hr.
+		CHECK_HR(hr);
 
 		hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&p_factory);
-		// TODO: check hr.
+		CHECK_HR(hr);
 
 		ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 		swapChainDesc.BufferCount = 1;
@@ -51,19 +51,21 @@ namespace ce
 		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		swapChainDesc.Flags = 0;
 		hr = p_factory->CreateSwapChain(m_device, &swapChainDesc, &m_swapchain);
-		// TODO: check hr.
-
-		init_buffers(size);
+		CHECK_HR(hr);
 
 		SAFE_RELEASE(p_factory);
+
+		init_buffers(size);
 	}
 
 	void RenderContext::cleanup()
 	{
+		m_default_depth_stencil_state.cleanup();
+
 		SAFE_RELEASE(m_depth_view);
 		SAFE_RELEASE(m_depth_texture);
-		SAFE_RELEASE(m_depth_stencil_state);
 		SAFE_RELEASE(m_buffer_view);
+
 		SAFE_RELEASE(m_swapchain);
 		SAFE_RELEASE(m_context);
 		SAFE_RELEASE(m_device);
@@ -96,7 +98,7 @@ namespace ce
 		{
 			m_buffer_size = size;
 			init_buffers(size);
-			set_viewport(size);
+			//set_viewport(size);
 		}
 	}
 
@@ -119,9 +121,11 @@ namespace ce
 		ID3D11Texture2D* pBackBuffer;
 		HRESULT hr;
 
+		set_main();
+
+		m_default_depth_stencil_state.cleanup();
 		SAFE_RELEASE(m_depth_texture);
 		SAFE_RELEASE(m_buffer_view);
-		SAFE_RELEASE(m_depth_stencil_state);
 		SAFE_RELEASE(m_depth_view);
 
 		m_swapchain->ResizeBuffers(1, size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
@@ -129,41 +133,15 @@ namespace ce
 		m_swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
 
 		hr = m_device->CreateRenderTargetView(pBackBuffer, NULL, &m_buffer_view);
-		// TODO: check hr.
+		CHECK_HR(hr);
 
-		pBackBuffer->Release();
-		pBackBuffer = 0;
+		SAFE_RELEASE(pBackBuffer);
 
-		// TODO: Separate depth stencil state.
-		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-		ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
-		//
-		// Set up the description of the stencil state.
-		depthStencilDesc.DepthEnable = true;
-		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-		//
-		depthStencilDesc.StencilEnable = true;
-		depthStencilDesc.StencilReadMask = 0xFF;
-		depthStencilDesc.StencilWriteMask = 0xFF;
-		//
-		// Stencil operations if pixel is front-facing.
-		depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-		depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-		//
-		// Stencil operations if pixel is back-facing.
-		depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-		//
-		hr = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
-		// TODO: check hr.
-		m_context->OMSetDepthStencilState(m_depth_stencil_state, 1);
-		// END TODO
-
+		// Depth stencil state
+		m_default_depth_stencil_state.set_depth_enable(true);
+		m_default_depth_stencil_state.set_stencil_enable(true);
+		m_default_depth_stencil_state.init();
+		m_default_depth_stencil_state.set_main();
 
 		// TODO: Separate depth stencil texture.
 		D3D11_TEXTURE2D_DESC depthBufferDesc;
@@ -182,7 +160,7 @@ namespace ce
 		depthBufferDesc.MiscFlags = 0;
 		//
 		hr = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depth_texture);
-		// TODO: check hr.
+		CHECK_HR(hr);
 		//
 		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -190,14 +168,12 @@ namespace ce
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
 		//
 		hr = m_device->CreateDepthStencilView(m_depth_texture, &depthStencilViewDesc, &m_depth_view);
-		// TODO: check hr.
+		CHECK_HR(hr);
 		// END TODO
 
-		// Bind the render target view and depth stencil buffer to the output render pipeline.
 		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_view);
 
 		//setRestrizerOptions({ RestrizerOptions::CullMode::Back,
 		//	RestrizerOptions::FillMode::Solid, false, true, false });
 	}
 }
-

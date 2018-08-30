@@ -20,15 +20,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\CoreEngine\math\vec.h" />
+    <ClInclude Include="include\CoreEngine\state\depthstencilstate.h" />
     <ClInclude Include="include\CoreEngine\window.h" />
     <ClInclude Include="include\CoreEngine\rendercontext.h" />
-    <ClInclude Include="src\internalstate.h" />
+    <ClInclude Include="src\state\internalstate.h" />
+    <ClInclude Include="src\utils\callcheck.h" />
     <ClInclude Include="src\utils\safemem.h" />
     <ClInclude Include="src\utils\stringutil.h" />
     <ClInclude Include="src\window\windowimpl.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\internalstate.cpp" />
+    <ClCompile Include="src\state\depthstencilstate.cpp" />
+    <ClCompile Include="src\state\internalstate.cpp" />
     <ClCompile Include="src\rendercontext.cpp" />
     <ClCompile Include="src\utils\stringutil.cpp" />
     <ClCompile Include="src\window\window.cpp" />
