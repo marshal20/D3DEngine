@@ -18,7 +18,7 @@ namespace ce
 
 	}
 
-	void DepthStencilState::init()
+	void DepthStencilState::init(bool depth_enable, bool stencil_enable)
 	{
 		HRESULT hr;
 		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
@@ -28,10 +28,10 @@ namespace ce
 		ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
 		// Set up the description of the stencil state.
-		depthStencilDesc.DepthEnable = m_depth_enable;
+		depthStencilDesc.DepthEnable = depth_enable;
 		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-		depthStencilDesc.StencilEnable = m_stencil_enable;
+		depthStencilDesc.StencilEnable = stencil_enable;
 		depthStencilDesc.StencilReadMask = 0xFF;
 		depthStencilDesc.StencilWriteMask = 0xFF;
 		
@@ -61,13 +61,4 @@ namespace ce
 		ce::state::d3d::m_context->OMSetDepthStencilState(m_depth_stencil_state, 1);
 	}
 
-	void DepthStencilState::set_depth_enable(bool enable)
-	{
-		m_depth_enable = enable;
-	}
-
-	void DepthStencilState::set_stencil_enable(bool enable)
-	{
-		m_stencil_enable = enable;
-	}
 }

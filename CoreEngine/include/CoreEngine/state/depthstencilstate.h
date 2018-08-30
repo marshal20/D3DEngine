@@ -11,17 +11,11 @@ namespace ce
 		DepthStencilState();
 		~DepthStencilState();
 
-		void init();
+		void init(bool depth_enable = true, bool stencil_enable = true);
 		void cleanup();
 		void set_main();
 
-		void set_depth_enable(bool enable);
-		void set_stencil_enable(bool enable);
-
 	private:
 		ID3D11DepthStencilState* m_depth_stencil_state = nullptr;
-
-		bool m_depth_enable = true;
-		bool m_stencil_enable = true;
 	};
 }

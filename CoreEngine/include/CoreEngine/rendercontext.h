@@ -1,16 +1,15 @@
 #pragma once
 
+#include "math\vec.h"
 #include "window.h"
 #include "state\depthstencilstate.h"
+#include "texture\depthtexture.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct IDXGISwapChain;
 
 struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilState; // TODO: separate.
-struct ID3D11Texture2D; // TODO: separate.
-struct ID3D11DepthStencilView; // TODO: separate.
 
 namespace ce
 {
@@ -40,10 +39,8 @@ namespace ce
 		IDXGISwapChain* m_swapchain = nullptr;
 
 		DepthStencilState m_default_depth_stencil_state;
-
+		DepthTexture m_depth_texture;
 		ID3D11RenderTargetView* m_buffer_view = nullptr;
-		ID3D11Texture2D* m_depth_texture = nullptr; // TODO: separate.
-		ID3D11DepthStencilView* m_depth_view = nullptr; // TODO: separate.
 
 		math::Vec2<int> m_buffer_size = { 0, 0 };
 	};

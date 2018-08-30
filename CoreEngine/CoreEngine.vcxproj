@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\CoreEngine\math\vec.h" />
     <ClInclude Include="include\CoreEngine\state\depthstencilstate.h" />
+    <ClInclude Include="include\CoreEngine\texture\depthtexture.h" />
     <ClInclude Include="include\CoreEngine\window.h" />
     <ClInclude Include="include\CoreEngine\rendercontext.h" />
     <ClInclude Include="src\state\internalstate.h" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\state\depthstencilstate.cpp" />
     <ClCompile Include="src\state\internalstate.cpp" />
     <ClCompile Include="src\rendercontext.cpp" />
+    <ClCompile Include="src\texture\depthtexture.cpp" />
     <ClCompile Include="src\utils\stringutil.cpp" />
     <ClCompile Include="src\window\window.cpp" />
     <ClCompile Include="src\window\windowimpl.cpp" />

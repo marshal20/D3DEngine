@@ -61,9 +61,8 @@ namespace ce
 	void RenderContext::cleanup()
 	{
 		m_default_depth_stencil_state.cleanup();
+		m_depth_texture.cleanup();
 
-		SAFE_RELEASE(m_depth_view);
-		SAFE_RELEASE(m_depth_texture);
 		SAFE_RELEASE(m_buffer_view);
 
 		SAFE_RELEASE(m_swapchain);
@@ -83,7 +82,7 @@ namespace ce
 		float color[4] = { r, g, b, a };
 
 		m_context->ClearRenderTargetView(m_buffer_view, color);
-		m_context->ClearDepthStencilView(m_depth_view, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		m_context->ClearDepthStencilView(m_depth_texture.get_view(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	}
 
@@ -124,9 +123,8 @@ namespace ce
 		set_main();
 
 		m_default_depth_stencil_state.cleanup();
-		SAFE_RELEASE(m_depth_texture);
+		m_depth_texture.cleanup();
 		SAFE_RELEASE(m_buffer_view);
-		SAFE_RELEASE(m_depth_view);
 
 		m_swapchain->ResizeBuffers(1, size.x, size.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
@@ -138,40 +136,12 @@ namespace ce
 		SAFE_RELEASE(pBackBuffer);
 
 		// Depth stencil state
-		m_default_depth_stencil_state.set_depth_enable(true);
-		m_default_depth_stencil_state.set_stencil_enable(true);
-		m_default_depth_stencil_state.init();
+		m_default_depth_stencil_state.init(true, true);
 		m_default_depth_stencil_state.set_main();
 
-		// TODO: Separate depth stencil texture.
-		D3D11_TEXTURE2D_DESC depthBufferDesc;
-		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-		//
-		depthBufferDesc.Width = size.x;
-		depthBufferDesc.Height = size.y;
-		depthBufferDesc.MipLevels = 1;
-		depthBufferDesc.ArraySize = 1;
-		depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthBufferDesc.SampleDesc.Count = 1;
-		depthBufferDesc.SampleDesc.Quality = 0;
-		depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-		depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		depthBufferDesc.CPUAccessFlags = 0;
-		depthBufferDesc.MiscFlags = 0;
-		//
-		hr = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depth_texture);
-		CHECK_HR(hr);
-		//
-		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-		depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		depthStencilViewDesc.Texture2D.MipSlice = 0;
-		//
-		hr = m_device->CreateDepthStencilView(m_depth_texture, &depthStencilViewDesc, &m_depth_view);
-		CHECK_HR(hr);
-		// END TODO
+		m_depth_texture.init(size);
 
-		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_view);
+		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_texture.get_view());
 
 		//setRestrizerOptions({ RestrizerOptions::CullMode::Back,
 		//	RestrizerOptions::FillMode::Solid, false, true, false });
