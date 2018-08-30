@@ -3,6 +3,9 @@
 #include <stdlib.h>  
 #include <string.h>  
 
+#include <string>
+#include <iostream>
+
 namespace ce
 {
 	namespace util
@@ -14,7 +17,7 @@ namespace ce
 			wchar_t* buffer = new wchar_t[size];
 
 			size_t outSize;
-			mbstowcs_s(&outSize, buffer, size, src, size - 1);
+			mbstowcs_s(&outSize, buffer, size, src, size);
 
 			return buffer;
 		}

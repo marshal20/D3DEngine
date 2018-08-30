@@ -17,7 +17,7 @@ int main()
 	{
 		window.update();
 
-		render_context.clear(1.0f, 0.0f, 0.0f, 1.0f);
+		render_context.clear(0.75f, 0.75f, 0.75f, 1.0f);
 		render_context.present();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));

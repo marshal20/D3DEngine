@@ -80,17 +80,17 @@ namespace ce
 	{
 		close();
 
-		if (m_class_name)
-		{
-			delete[] m_class_name;
-			m_class_name = nullptr;
-		}
-
 		if (m_hWnd)
 		{
 			UnregisterClass(m_class_name, m_hInstance);
 			g_hwndWindowMap.erase(m_hWnd);
 			m_hWnd = nullptr;
+		}
+
+		if (m_class_name)
+		{
+			delete[] m_class_name;
+			m_class_name = nullptr;
 		}
 
 		m_hInstance = nullptr;
