@@ -4,12 +4,22 @@
 #include <Windows.h>
 #include <string>
 
-#include <CoreEngine\math\vec.h>
+#include <CoreEngine/math/vec.h>
 
 namespace ce
 {
 	class WindowImpl
 	{
+	private:
+		HWND m_hWnd = nullptr;
+		HINSTANCE m_hInstance = nullptr;
+		wchar_t* m_class_name = nullptr;
+
+		std::string m_name;
+		math::Vec2<int> m_size;
+		math::Vec2<int> m_position;
+		bool m_close = false;
+
 	public:
 		WindowImpl();
 		WindowImpl(const WindowImpl& other) = delete;
@@ -45,15 +55,5 @@ namespace ce
 	private:
 		void set_size_position();
 		static void set_style_state(HWND hWnd, long style, bool enable);
-
-	private:
-		HWND m_hWnd = nullptr;
-		HINSTANCE m_hInstance = nullptr;
-		wchar_t* m_class_name = nullptr;
-
-		std::string m_name;
-		math::Vec2<int> m_size;
-		math::Vec2<int> m_position;
-		bool m_close = false;
 	};
 }

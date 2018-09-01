@@ -1,11 +1,11 @@
-#include <CoreEngine\rendercontext.h>
+#include <CoreEngine/graphics/rendercontext.h>
 
 #include <d3d11.h>
 
-#include "window\windowimpl.h"
-#include "state\internalstate.h"
-#include "utils\safemem.h"
-#include "utils\callcheck.h"
+#include "../window/windowimpl.h"
+#include "state/internalstate.h"
+#include "../utils/safemem.h"
+#include "../utils/callcheck.h"
 
 namespace ce
 {
@@ -72,9 +72,7 @@ namespace ce
 
 	void RenderContext::set_main()
 	{
-		state::m_render_context = this;
-		state::d3d::m_device = m_device;
-		state::d3d::m_context = m_context;
+		state::kcontext = this;
 	}
 
 	void RenderContext::clear(float r, float g, float b, float a)
@@ -139,11 +137,21 @@ namespace ce
 		m_default_depth_stencil_state.init(true, true);
 		m_default_depth_stencil_state.set_main();
 
-		m_depth_texture.init(size);
+		m_depth_texture.create(size);
 
 		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_texture.get_view());
 
 		//setRestrizerOptions({ RestrizerOptions::CullMode::Back,
 		//	RestrizerOptions::FillMode::Solid, false, true, false });
+	}
+
+	ID3D11Device* RenderContext::get_device() const
+	{
+		return m_device;
+	}
+
+	ID3D11DeviceContext* RenderContext::get_context() const
+	{
+		return m_context;
 	}
 }

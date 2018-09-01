@@ -1,6 +1,7 @@
 #include <iostream>
-#include <CoreEngine\window.h>
-#include <CoreEngine\rendercontext.h>
+#include <CoreEngine/math/vec.h>
+#include <CoreEngine/window/window.h>
+#include <CoreEngine/graphics/rendercontext.h>
 #include <thread>
 
 int main()

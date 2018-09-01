@@ -1,10 +1,10 @@
-#include <CoreEngine\texture\depthtexture.h>
+#include <CoreEngine/graphics/depthtexture.h>
 
 #include <d3d11.h>
 
-#include "..\state\internalstate.h"
-#include "..\utils\callcheck.h"
-#include "..\utils\safemem.h"
+#include "state/internalstate.h"
+#include "../utils/callcheck.h"
+#include "../utils/safemem.h"
 
 namespace ce
 {
@@ -18,7 +18,7 @@ namespace ce
 
 	}
 
-	void DepthTexture::init(const math::Vec2<int>& size)
+	void DepthTexture::create(const math::Vec2<int>& size)
 	{
 		HRESULT hr;
 		D3D11_TEXTURE2D_DESC depthBufferDesc;
@@ -36,7 +36,7 @@ namespace ce
 		depthBufferDesc.CPUAccessFlags = 0;
 		depthBufferDesc.MiscFlags = 0;
 		
-		hr = state::d3d::m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_texture);
+		hr = state::kcontext->get_device()->CreateTexture2D(&depthBufferDesc, NULL, &m_texture);
 		CHECK_HR(hr);
 		
 		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -44,7 +44,7 @@ namespace ce
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
 		
-		hr = state::d3d::m_device->CreateDepthStencilView(m_texture, &depthStencilViewDesc, &m_view);
+		hr = state::kcontext->get_device()->CreateDepthStencilView(m_texture, &depthStencilViewDesc, &m_view);
 		CHECK_HR(hr);
 	}
 

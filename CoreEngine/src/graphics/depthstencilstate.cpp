@@ -1,8 +1,8 @@
-#include <CoreEngine\state\depthstencilstate.h>
+#include <CoreEngine/graphics/depthstencilstate.h>
 
 #include <d3d11.h>
 
-#include "internalstate.h"
+#include "state/internalstate.h"
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
 
@@ -47,7 +47,7 @@ namespace ce
 		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 		
-		hr = ce::state::d3d::m_device->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
+		hr = ce::state::kcontext->get_device()->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
 		CHECK_HR(hr);
 	}
 
@@ -58,7 +58,7 @@ namespace ce
 
 	void DepthStencilState::set_main()
 	{
-		ce::state::d3d::m_context->OMSetDepthStencilState(m_depth_stencil_state, 1);
+		ce::state::kcontext->get_context()->OMSetDepthStencilState(m_depth_stencil_state, 1);
 	}
 
 }

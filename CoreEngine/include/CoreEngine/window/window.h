@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 
-#include "math/vec.h"
+#include "../math/vec.h"
 
 namespace ce
 {
@@ -10,6 +10,10 @@ namespace ce
 
 	class Window
 	{
+	private:
+		friend class RenderContext;
+		std::unique_ptr<WindowImpl> m_impl;
+
 	public:
 		Window();
 		Window(const Window& other) = delete;
@@ -37,9 +41,5 @@ namespace ce
 		math::Vec2<int> get_size() const;
 		math::Vec2<int> get_client_size() const;
 		static math::Vec2<int> get_screen_size();
-
-	private:
-		friend class RenderContext;
-		std::unique_ptr<WindowImpl> m_impl;
 	};
 }

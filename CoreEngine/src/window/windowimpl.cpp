@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include "..\utils\stringutil.h"
+#include "../utils/stringutil.h"
 
 // for reference:
 // https://msdn.microsoft.com/en-us/library/bb384843.aspx

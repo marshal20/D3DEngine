@@ -7,6 +7,9 @@ namespace ce
 {
 	class DepthStencilState
 	{
+	private:
+		ID3D11DepthStencilState* m_depth_stencil_state = nullptr;
+
 	public:
 		DepthStencilState();
 		~DepthStencilState();
@@ -14,8 +17,5 @@ namespace ce
 		void init(bool depth_enable = true, bool stencil_enable = true);
 		void cleanup();
 		void set_main();
-
-	private:
-		ID3D11DepthStencilState* m_depth_stencil_state = nullptr;
 	};
 }

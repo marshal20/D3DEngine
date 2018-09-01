@@ -1,4 +1,4 @@
-#include <CoreEngine/window.h>
+#include <CoreEngine/window/window.h>
 
 #include "windowimpl.h"
 
