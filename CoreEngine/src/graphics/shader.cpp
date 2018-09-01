@@ -3,9 +3,9 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
+#include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
-#include "state/internalstate.h"
 
 namespace ce
 {
@@ -41,12 +41,12 @@ namespace ce
 		switch (type)
 		{
 		case Type::Vertex:
-			hr = state::kcontext->get_device()->CreateVertexShader(shader_blob, shader_blob->GetBufferSize(),
+			hr = RenderContext::get_device()->CreateVertexShader(shader_blob, shader_blob->GetBufferSize(),
 				nullptr, (ID3D11VertexShader**)&m_shader_handle);
 			break;
 
 		case Type::Pixel:
-			hr = state::kcontext->get_device()->CreatePixelShader(shader_blob, shader_blob->GetBufferSize(),
+			hr = RenderContext::get_device()->CreatePixelShader(shader_blob, shader_blob->GetBufferSize(),
 				nullptr, (ID3D11PixelShader**)&m_shader_handle);
 			break;
 		}
@@ -65,11 +65,11 @@ namespace ce
 		switch (m_type)
 		{
 		case Type::Vertex:
-			state::kcontext->get_context()->VSSetShader((ID3D11VertexShader*)m_shader_handle, NULL, 0);
+			RenderContext::get_context()->VSSetShader((ID3D11VertexShader*)m_shader_handle, NULL, 0);
 			break;
 
 		case Type::Pixel:
-			state::kcontext->get_context()->PSSetShader((ID3D11PixelShader*)m_shader_handle, NULL, 0);
+			RenderContext::get_context()->PSSetShader((ID3D11PixelShader*)m_shader_handle, NULL, 0);
 			break;
 		}
 	}
@@ -82,6 +82,7 @@ namespace ce
 		{
 		case Shader::Type::Vertex: return "vs_5_0";
 		case Shader::Type::Pixel: return "ps_5_0";
+		default: return "";
 		}
 	}
 }

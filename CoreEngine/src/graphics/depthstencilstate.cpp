@@ -2,7 +2,7 @@
 
 #include <d3d11.h>
 
-#include "state/internalstate.h"
+#include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
 
@@ -47,7 +47,7 @@ namespace ce
 		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 		
-		hr = ce::state::kcontext->get_device()->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
+		hr = ce::RenderContext::get_device()->CreateDepthStencilState(&depthStencilDesc, &m_depth_stencil_state);
 		CHECK_HR(hr);
 	}
 
@@ -56,9 +56,9 @@ namespace ce
 		SAFE_RELEASE(m_depth_stencil_state);
 	}
 
-	void DepthStencilState::set_main()
+	void DepthStencilState::use()
 	{
-		ce::state::kcontext->get_context()->OMSetDepthStencilState(m_depth_stencil_state, 1);
+		ce::RenderContext::get_context()->OMSetDepthStencilState(m_depth_stencil_state, 1);
 	}
 
 }

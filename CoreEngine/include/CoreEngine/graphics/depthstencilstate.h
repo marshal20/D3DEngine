@@ -16,6 +16,7 @@ namespace ce
 
 		void init(bool depth_enable = true, bool stencil_enable = true);
 		void cleanup();
-		void set_main();
+
+		void use();
 	};
 }

@@ -27,7 +27,6 @@
     <ClInclude Include="include\CoreEngine\window\window.h" />
     <ClInclude Include="include\CoreEngine\graphics\rendercontext.h" />
     <ClInclude Include="include\CoreEngine\graphics\layout.h" />
-    <ClInclude Include="src\graphics\state\internalstate.h" />
     <ClInclude Include="src\utils\callcheck.h" />
     <ClInclude Include="src\utils\safemem.h" />
     <ClInclude Include="src\utils\stringutil.h" />
@@ -38,7 +37,6 @@
     <ClCompile Include="src\graphics\gpubuffer.cpp" />
     <ClCompile Include="src\graphics\layout.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
-    <ClCompile Include="src\graphics\state\internalstate.cpp" />
     <ClCompile Include="src\graphics\rendercontext.cpp" />
     <ClCompile Include="src\graphics\depthtexture.cpp" />
     <ClCompile Include="src\utils\stringutil.cpp" />

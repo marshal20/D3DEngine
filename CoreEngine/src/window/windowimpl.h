@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <string>
 
-#include <CoreEngine/math/vec.h>
+#include <CoreEngine/math/vec2.h>
 
 namespace ce
 {

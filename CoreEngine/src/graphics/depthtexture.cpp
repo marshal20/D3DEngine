@@ -2,7 +2,7 @@
 
 #include <d3d11.h>
 
-#include "state/internalstate.h"
+#include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/callcheck.h"
 #include "../utils/safemem.h"
 
@@ -36,7 +36,7 @@ namespace ce
 		depthBufferDesc.CPUAccessFlags = 0;
 		depthBufferDesc.MiscFlags = 0;
 		
-		hr = state::kcontext->get_device()->CreateTexture2D(&depthBufferDesc, NULL, &m_texture);
+		hr = RenderContext::get_device()->CreateTexture2D(&depthBufferDesc, NULL, &m_texture);
 		CHECK_HR(hr);
 		
 		ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
@@ -44,7 +44,7 @@ namespace ce
 		depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		depthStencilViewDesc.Texture2D.MipSlice = 0;
 		
-		hr = state::kcontext->get_device()->CreateDepthStencilView(m_texture, &depthStencilViewDesc, &m_view);
+		hr = RenderContext::get_device()->CreateDepthStencilView(m_texture, &depthStencilViewDesc, &m_view);
 		CHECK_HR(hr);
 	}
 

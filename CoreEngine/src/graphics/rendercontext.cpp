@@ -2,21 +2,21 @@
 
 #include <d3d11.h>
 
+#include <CoreEngine/window/window.h>
 #include "../window/windowimpl.h"
-#include "state/internalstate.h"
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
 
 namespace ce
 {
-	RenderContext::RenderContext()
-	{
-	}
-
-	RenderContext::~RenderContext()
-	{
-	}
-
+	ID3D11Device* RenderContext::m_device = nullptr;
+	ID3D11DeviceContext* RenderContext::m_context = nullptr;
+	IDXGISwapChain* RenderContext::m_swapchain = nullptr;
+	DepthStencilState RenderContext::m_default_depth_stencil_state;
+	DepthTexture RenderContext::m_depth_texture;
+	ID3D11RenderTargetView* RenderContext::m_buffer_view = nullptr;
+	math::Vec2<int> RenderContext::m_buffer_size = { 0, 0 };
+	
 	void RenderContext::init(const Window* wind, const math::Vec2<int>& size)
 	{
 		HRESULT hr;
@@ -70,11 +70,6 @@ namespace ce
 		SAFE_RELEASE(m_device);
 	}
 
-	void RenderContext::set_main()
-	{
-		state::kcontext = this;
-	}
-
 	void RenderContext::clear(float r, float g, float b, float a)
 	{
 		float color[4] = { r, g, b, a };
@@ -118,8 +113,6 @@ namespace ce
 		ID3D11Texture2D* pBackBuffer;
 		HRESULT hr;
 
-		set_main();
-
 		m_default_depth_stencil_state.cleanup();
 		m_depth_texture.cleanup();
 		SAFE_RELEASE(m_buffer_view);
@@ -135,7 +128,7 @@ namespace ce
 
 		// Depth stencil state
 		m_default_depth_stencil_state.init(true, true);
-		m_default_depth_stencil_state.set_main();
+		m_default_depth_stencil_state.use();
 
 		m_depth_texture.create(size);
 
@@ -145,12 +138,12 @@ namespace ce
 		//	RestrizerOptions::FillMode::Solid, false, true, false });
 	}
 
-	ID3D11Device* RenderContext::get_device() const
+	ID3D11Device* RenderContext::get_device() 
 	{
 		return m_device;
 	}
 
-	ID3D11DeviceContext* RenderContext::get_context() const
+	ID3D11DeviceContext* RenderContext::get_context() 
 	{
 		return m_context;
 	}

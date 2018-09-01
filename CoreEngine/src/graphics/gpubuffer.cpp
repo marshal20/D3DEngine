@@ -2,7 +2,7 @@
 
 #include <d3d11.h>
 
-#include "state/internalstate.h"
+#include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/callcheck.h"
 #include "../utils/safemem.h"
 
@@ -32,7 +32,7 @@ namespace ce
 		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		buffer_desc.MiscFlags = NULL;
 		buffer_desc.StructureByteStride = NULL;
-		hr = state::kcontext->get_device()->CreateBuffer(&buffer_desc, NULL, &m_buffer);
+		hr = RenderContext::get_device()->CreateBuffer(&buffer_desc, NULL, &m_buffer);
 		CHECK_HR(hr);
 	}
 

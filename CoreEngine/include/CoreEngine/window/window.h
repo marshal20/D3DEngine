@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 
-#include "../math/vec.h"
+#include "../math/vec2.h"
 
 namespace ce
 {

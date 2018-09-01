@@ -39,9 +39,6 @@
     <ClInclude Include="include\CoreEngine\graphics\rendercontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\state\internalstate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\CoreEngine\graphics\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,9 +69,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\rendercontext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\graphics\state\internalstate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\shader.cpp">

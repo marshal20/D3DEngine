@@ -2,7 +2,7 @@
 
 #include <d3d11.h>
 
-#include "state/internalstate.h"
+#include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
 
@@ -27,7 +27,7 @@ namespace ce
 
 		create_elements_desc(elemnts_desc, m_list);
 
-		hr = state::kcontext->get_device()->CreateInputLayout(&elemnts_desc[0], elemnts_desc.size(),
+		hr = RenderContext::get_device()->CreateInputLayout(&elemnts_desc[0], elemnts_desc.size(),
 			NULL, NULL, &m_layout);
 		CHECK_HR(hr);
 	}
@@ -44,7 +44,7 @@ namespace ce
 
 	void Layout::use()
 	{
-		state::kcontext->get_context()->IASetInputLayout(m_layout);
+		RenderContext::get_context()->IASetInputLayout(m_layout);
 	}
 
 	// HELPER FUNCTIONS
