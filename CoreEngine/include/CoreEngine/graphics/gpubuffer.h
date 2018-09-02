@@ -12,18 +12,27 @@ namespace ce
 			Constant = 1, Vertex, Index
 		};
 
+		enum class Usage
+		{
+			Static = 1, Dynamic
+		};
+
 	private:
 		ID3D11Buffer* m_buffer = nullptr;
+		size_t m_size;
 		Type m_type;
+		Usage m_usage;
 
 	public:
 		GpuBuffer();
 		~GpuBuffer();
 
-		void init(size_t size, Type type);
+		void init(size_t size, Type type, Usage usage = Usage::Static);
 		void cleanup();
 
-		void update(const void* data, const size_t size);
+		void* map(bool discard = false);
+		void unmap();
+		void update(const void* data);
 
 	private:
 		friend class RenderContext;

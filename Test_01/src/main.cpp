@@ -30,7 +30,8 @@ int main()
 	ce::RenderContext::resize(window.get_client_size());
 	ce::RenderContext::set_viewport(window.get_client_size());
 
-	res_state.init(ce::RasterizerState::Cull::Back, ce::RasterizerState::Fill::Solid, ce::RasterizerState::Rotation::CCW);
+	res_state.init(ce::RasterizerState::Cull::Back, 
+		ce::RasterizerState::Fill::Solid, ce::RasterizerState::Rotation::CCW);
 
 	vertex_data.push_back({ {-0.5f, +0.5f} });
 	vertex_data.push_back({ {-0.5f, -0.5f} });
@@ -39,8 +40,9 @@ int main()
 	vertex_data.push_back({ {+0.5f, -0.5f} });
 	vertex_data.push_back({ {+0.5f, +0.5f} });
 
-	vertex_buffer.init(vertex_data.size() * sizeof(Vertex), ce::GpuBuffer::Type::Vertex);
-	vertex_buffer.update(&vertex_data[0], vertex_data.size() * sizeof(Vertex));
+	vertex_buffer.init(vertex_data.size() * sizeof(Vertex), 
+		ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
+	vertex_buffer.update(&vertex_data[0]);
 
 	input_layout.push({ "POSITION", ce::Layout::Element::Type::FLOAT, 2 });
 	input_layout.create();
