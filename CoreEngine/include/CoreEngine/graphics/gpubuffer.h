@@ -22,5 +22,8 @@ namespace ce
 
 		void init(size_t size, Type type);
 		void cleanup();
+
+	private:
+		friend class RenderContext;
 	};
 }

@@ -25,6 +25,5 @@ namespace ce
 		void cleanup();
 
 		void use();
-
 	};
 }

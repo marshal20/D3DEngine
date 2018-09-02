@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 
 #include <CoreEngine/graphics/rendercontext.h>
+#include <CoreEngine/graphics/gpubuffer.h>
 #include "../utils/safemem.h"
 #include "../utils/callcheck.h"
 
