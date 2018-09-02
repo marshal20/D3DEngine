@@ -25,6 +25,7 @@
     <ClInclude Include="include\CoreEngine\math\vec2.h" />
     <ClInclude Include="include\CoreEngine\graphics\depthstencilstate.h" />
     <ClInclude Include="include\CoreEngine\graphics\depthtexture.h" />
+    <ClInclude Include="include\CoreEngine\math\vec4.h" />
     <ClInclude Include="include\CoreEngine\window\window.h" />
     <ClInclude Include="include\CoreEngine\graphics\rendercontext.h" />
     <ClInclude Include="include\CoreEngine\graphics\layout.h" />

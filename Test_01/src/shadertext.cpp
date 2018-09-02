@@ -23,6 +23,12 @@ PixelInputType vs_main(VertexInputType input)
 )";
 
 const char* SIMPLE_SHADER_PS = R"(
+
+cbuffer ConstantInfo : register( b0 )
+{
+	float4 color;
+}
+
 struct PixelInputType
 {
     float4 position : SV_POSITION;
@@ -30,6 +36,6 @@ struct PixelInputType
 
 float4 ps_main(PixelInputType input) : SV_TARGET
 {
-    return float4(1.0, 1.0, 1.0, 1.0);
+    return color;
 }
 )";

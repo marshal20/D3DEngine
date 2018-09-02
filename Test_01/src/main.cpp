@@ -1,5 +1,6 @@
 #include <iostream>
 #include <CoreEngine/math/vec2.h>
+#include <CoreEngine/math/vec4.h>
 #include <CoreEngine/window/window.h>
 #include <CoreEngine/graphics/rendercontext.h>
 #include <CoreEngine/graphics/rastrizerstate.h>
@@ -21,9 +22,12 @@ int main()
 	ce::RasterizerState res_state;
 	std::vector<Vertex> vertex_data;
 	ce::GpuBuffer vertex_buffer;
+	ce::math::Vec4<float> color;
+	ce::GpuBuffer ps_constant_buffer;
 	ce::Shader vertex_shader;
 	ce::Shader pixel_shader;
 	ce::Layout input_layout;
+	float time = 0.0f;
 
 	window.init("Hello", ce::math::Vec2<int>(800, 600));
 	ce::RenderContext::init(&window);
@@ -44,6 +48,8 @@ int main()
 		ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
 	vertex_buffer.update(&vertex_data[0]);
 
+	ps_constant_buffer.init(4 * sizeof(float), ce::GpuBuffer::Type::Constant, ce::GpuBuffer::Usage::Static);
+
 	input_layout.push({ "POSITION", ce::Layout::Element::Type::FLOAT, 2 });
 	input_layout.create();
 
@@ -53,6 +59,8 @@ int main()
 	while (!window.is_closed())
 	{
 		window.update();
+		ce::RenderContext::resize(window.get_client_size());
+		ce::RenderContext::set_viewport(window.get_client_size());
 
 		ce::RenderContext::clear(0.75f, 0.75f, 0.75f, 1.0f);
 		// DRAW
@@ -61,11 +69,16 @@ int main()
 		pixel_shader.use();
 		input_layout.use();
 		ce::RenderContext::set_vertex_buffer(0, &vertex_buffer, sizeof(Vertex), 0);
+		color = { sin(time) * 0.5f + 0.5f, cos(time) * 0.5f + 0.5f,
+			sin(time) * cos(time) * 0.5f + 0.5f, 1.0f };
+		ps_constant_buffer.update(&color);
+		ce::RenderContext::set_constant_buffer(ce::Shader::Type::Pixel, 0, &ps_constant_buffer);
 		ce::RenderContext::set_primitive_topology(ce::PrimitiveTopology::TriangleList);
 		ce::RenderContext::draw(6);
 		ce::RenderContext::present();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		time += 0.05;
 	}
 
 	vertex_buffer.cleanup();
