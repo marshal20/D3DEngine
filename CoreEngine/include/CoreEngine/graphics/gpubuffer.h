@@ -23,6 +23,8 @@ namespace ce
 		void init(size_t size, Type type);
 		void cleanup();
 
+		void update(const void* data, const size_t size);
+
 	private:
 		friend class RenderContext;
 	};

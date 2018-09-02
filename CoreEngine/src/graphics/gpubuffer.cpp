@@ -27,7 +27,7 @@ namespace ce
 
 		ZeroMemory(&buffer_desc, sizeof(buffer_desc));
 		buffer_desc.ByteWidth = max(16, size);
-		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
 		buffer_desc.BindFlags = get_bind_flag(type);
 		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		buffer_desc.MiscFlags = NULL;
@@ -39,6 +39,15 @@ namespace ce
 	void GpuBuffer::cleanup()
 	{
 		SAFE_RELEASE(m_buffer);
+	}
+
+	void GpuBuffer::update(const void* data, const size_t size)
+	{
+		D3D11_MAPPED_SUBRESOURCE mapped_subsource;
+
+		RenderContext::get_context()->Map(m_buffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapped_subsource);
+		memcpy(mapped_subsource.pData, data, size);
+		RenderContext::get_context()->Unmap(m_buffer, NULL);
 	}
 
 	// HELPER FUNCTIONS

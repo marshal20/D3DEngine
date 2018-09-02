@@ -152,11 +152,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\shadertext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoreEngine\CoreEngine.vcxproj">
       <Project>{b9eb70de-99bf-407e-80d1-754c025d505f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\shadertext.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

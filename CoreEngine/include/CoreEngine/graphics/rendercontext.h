@@ -61,6 +61,7 @@ namespace ce
 		friend class Shader;
 		friend class Layout;
 		friend class GpuBuffer;
+		friend class RasterizerState;
 		static ID3D11Device* get_device();
 		static ID3D11DeviceContext* get_context();
 	};

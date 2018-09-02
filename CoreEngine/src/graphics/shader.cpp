@@ -36,18 +36,23 @@ namespace ce
 		hr = D3DCompile(text, strlen(text), NULL, NULL, NULL, entry_point, shader_type_to_name(type),
 			D3D10_SHADER_ENABLE_STRICTNESS, 0, &shader_blob, &message_blob);
 		CHECK_HR(hr);
+		// TODO: Add proper message reporting.
+		if (FAILED(hr))
+		{
+			printf("%s\n", (char*)message_blob->GetBufferPointer());
+		}
 
 		SAFE_RELEASE(message_blob);
 
 		switch (type)
 		{
 		case Type::Vertex:
-			hr = RenderContext::get_device()->CreateVertexShader(shader_blob, shader_blob->GetBufferSize(),
+			hr = RenderContext::get_device()->CreateVertexShader(shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
 				nullptr, (ID3D11VertexShader**)&m_shader_handle);
 			break;
 
 		case Type::Pixel:
-			hr = RenderContext::get_device()->CreatePixelShader(shader_blob, shader_blob->GetBufferSize(),
+			hr = RenderContext::get_device()->CreatePixelShader(shader_blob->GetBufferPointer(), shader_blob->GetBufferSize(),
 				nullptr, (ID3D11PixelShader**)&m_shader_handle);
 			break;
 		}

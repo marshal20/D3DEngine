@@ -244,8 +244,7 @@ namespace ce
 	{
 		RECT winrc;
 
-		GetWindowRect(m_hWnd, &winrc);
-		AdjustWindowRect(&winrc, GetWindowLong(m_hWnd, GWL_STYLE), false);
+		GetClientRect(m_hWnd, &winrc);
 		return { winrc.right - winrc.left, winrc.bottom - winrc.top };
 	}
 
