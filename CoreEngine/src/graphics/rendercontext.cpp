@@ -10,6 +10,7 @@
 
 namespace ce
 {
+
 	ID3D11Device* RenderContext::m_device = nullptr;
 	ID3D11DeviceContext* RenderContext::m_context = nullptr;
 	IDXGISwapChain* RenderContext::m_swapchain = nullptr;
@@ -17,7 +18,7 @@ namespace ce
 	DepthTexture RenderContext::m_depth_texture;
 	ID3D11RenderTargetView* RenderContext::m_buffer_view = nullptr;
 	math::Vec2<int> RenderContext::m_buffer_size = { 0, 0 };
-	
+
 	void RenderContext::init(const Window* wind, const math::Vec2<int>& size)
 	{
 		HRESULT hr;
@@ -71,13 +72,12 @@ namespace ce
 		SAFE_RELEASE(m_device);
 	}
 
-	void RenderContext::clear(float r, float g, float b, float a)
+	void RenderContext::clear(const math::Vec4<float>& color)
 	{
-		float color[4] = { r, g, b, a };
+		float float_color[4] = { color.r, color.g, color.b, color.a };
 
-		m_context->ClearRenderTargetView(m_buffer_view, color);
+		m_context->ClearRenderTargetView(m_buffer_view, float_color);
 		m_context->ClearDepthStencilView(m_depth_texture.get_view(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-
 	}
 
 	void RenderContext::present()
@@ -91,7 +91,6 @@ namespace ce
 		{
 			m_buffer_size = size;
 			init_buffers(size);
-			//set_viewport(size);
 		}
 	}
 
@@ -115,16 +114,16 @@ namespace ce
 
 		switch (primitive_topology)
 		{
-		case PrimitiveTopology::TriangleList: 
+		case PrimitiveTopology::TriangleList:
 			d3d_primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 			break;
-		case PrimitiveTopology::TriangleStrip: 
+		case PrimitiveTopology::TriangleStrip:
 			d3d_primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 			break;
-		case PrimitiveTopology::LineList: 
+		case PrimitiveTopology::LineList:
 			d3d_primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 			break;
-		case PrimitiveTopology::LineStrip: 
+		case PrimitiveTopology::LineStrip:
 			d3d_primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
 			break;
 		default: d3d_primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
@@ -196,18 +195,16 @@ namespace ce
 		m_depth_texture.create(size);
 
 		m_context->OMSetRenderTargets(1, &m_buffer_view, m_depth_texture.get_view());
-
-		//setRestrizerOptions({ RestrizerOptions::CullMode::Back,
-		//	RestrizerOptions::FillMode::Solid, false, true, false });
 	}
 
-	ID3D11Device* RenderContext::get_device() 
+	ID3D11Device* RenderContext::get_device()
 	{
 		return m_device;
 	}
 
-	ID3D11DeviceContext* RenderContext::get_context() 
+	ID3D11DeviceContext* RenderContext::get_context()
 	{
 		return m_context;
 	}
+
 }

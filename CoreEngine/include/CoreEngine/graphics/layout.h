@@ -7,6 +7,7 @@ struct ID3D11InputLayout;
 
 namespace ce
 {
+
 	class Layout
 	{
 	public:
@@ -37,5 +38,4 @@ namespace ce
 
 		void use();
 	};
-
 }

@@ -6,80 +6,14 @@
 #include "../utils/callcheck.h"
 #include "../utils/safemem.h"
 
-/*
-D3D11_RASTERIZER_DESC rasterDesc;
-D3D11_CULL_MODE cullmode;
-D3D11_FILL_MODE fillmode;
-HRESULT hr;
-
-if (m_buffers->pRasterState)
-{
-m_buffers->pRasterState->Release();
-m_buffers->pRasterState = nullptr;
-}
-
-cullmode = D3D11_CULL_BACK;
-switch (resOpt.cullmode)
-{
-case RestrizerOptions::CullMode::Back:
-cullmode = D3D11_CULL_BACK;
-break;
-case RestrizerOptions::CullMode::Front:
-cullmode = D3D11_CULL_FRONT;
-break;
-case RestrizerOptions::CullMode::None:
-cullmode = D3D11_CULL_NONE;
-break;
-default:
-break;
-}
-
-fillmode = D3D11_FILL_SOLID;
-switch (resOpt.fillmode)
-{
-case RestrizerOptions::FillMode::Solid:
-fillmode = D3D11_FILL_SOLID;
-break;
-case RestrizerOptions::FillMode::Wireframe:
-fillmode = D3D11_FILL_WIREFRAME;
-break;
-default:
-break;
-}
-
-rasterDesc.AntialiasedLineEnable = false;
-rasterDesc.CullMode = cullmode;
-rasterDesc.DepthBias = 0;
-rasterDesc.DepthBiasClamp = 0.0f;
-rasterDesc.DepthClipEnable = true;
-rasterDesc.FillMode = fillmode;
-rasterDesc.FrontCounterClockwise = resOpt.frontCounterClockwise;
-rasterDesc.MultisampleEnable = resOpt.multisampleEnable;
-rasterDesc.ScissorEnable = resOpt.scissorEnable;
-rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-if (m_buffers->pRasterState)
-{
-m_buffers->pRasterState->Release();
-m_buffers->pRasterState = nullptr;
-}
-
-hr = m_pDevice->CreateRasterizerState(&rasterDesc, &m_buffers->pRasterState);
-checks::D3D11CALL_ERR(hr, "ID3D11Device::CreateRasterizerState(...) failed.");
-
-m_pContext->RSSetState(m_buffers->pRasterState);
-*/
-
 namespace ce
 {
 	RasterizerState::RasterizerState()
 	{
-
 	}
 
 	RasterizerState::~RasterizerState()
 	{
-
 	}
 
 	void RasterizerState::init(Cull cull_mode, Fill fill_mode, Rotation front_face)

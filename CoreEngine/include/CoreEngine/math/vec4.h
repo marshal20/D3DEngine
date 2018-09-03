@@ -7,10 +7,11 @@ namespace ce
 		template<typename T>
 		struct Vec4
 		{
-			T x;
-			T y;
-			T z;
-			T w;
+			union
+			{
+				struct { T x, y, z, w; };
+				struct { T r, g, b, a; };
+			};
 
 			Vec4()
 			{

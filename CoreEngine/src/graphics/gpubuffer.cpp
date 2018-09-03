@@ -31,7 +31,7 @@ namespace ce
 
 		switch (usage)
 		{
-		case Usage::Static: 
+		case Usage::Static:
 			d3d_usage = D3D11_USAGE_DEFAULT;
 			d3d_cpu_access_flag = 0;
 			break;
@@ -109,5 +109,4 @@ namespace ce
 		default: return 0;
 		}
 	}
-
 }

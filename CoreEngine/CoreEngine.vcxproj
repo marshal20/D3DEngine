@@ -19,22 +19,31 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\CoreEngine\filesystem\file.h" />
+    <ClInclude Include="include\CoreEngine\filesystem\image.h" />
     <ClInclude Include="include\CoreEngine\graphics\gpubuffer.h" />
     <ClInclude Include="include\CoreEngine\graphics\rastrizerstate.h" />
     <ClInclude Include="include\CoreEngine\graphics\shader.h" />
+    <ClInclude Include="include\CoreEngine\graphics\texture2d.h" />
     <ClInclude Include="include\CoreEngine\math\vec2.h" />
     <ClInclude Include="include\CoreEngine\graphics\depthstencilstate.h" />
     <ClInclude Include="include\CoreEngine\graphics\depthtexture.h" />
     <ClInclude Include="include\CoreEngine\math\vec4.h" />
+    <ClInclude Include="include\CoreEngine\rendersystem\renderer2d.h" />
+    <ClInclude Include="include\CoreEngine\rendersystem\sprite.h" />
     <ClInclude Include="include\CoreEngine\window\window.h" />
     <ClInclude Include="include\CoreEngine\graphics\rendercontext.h" />
     <ClInclude Include="include\CoreEngine\graphics\layout.h" />
+    <ClInclude Include="src\3rd_party\stb\stb_image.h" />
+    <ClCompile Include="src\filesystem\file.cpp" />
     <ClInclude Include="src\utils\callcheck.h" />
     <ClInclude Include="src\utils\safemem.h" />
     <ClInclude Include="src\utils\stringutil.h" />
     <ClInclude Include="src\window\windowimpl.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3rd_party\stb\stb_image.cpp" />
+    <ClCompile Include="src\filesystem\image.cpp" />
     <ClCompile Include="src\graphics\depthstencilstate.cpp" />
     <ClCompile Include="src\graphics\gpubuffer.cpp" />
     <ClCompile Include="src\graphics\layout.cpp" />
@@ -42,6 +51,7 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\graphics\rendercontext.cpp" />
     <ClCompile Include="src\graphics\depthtexture.cpp" />
+    <ClCompile Include="src\graphics\texture2d.cpp" />
     <ClCompile Include="src\utils\stringutil.cpp" />
     <ClCompile Include="src\window\window.cpp" />
     <ClCompile Include="src\window\windowimpl.cpp" />

@@ -4,6 +4,7 @@ struct ID3D11DeviceChild;
 
 namespace ce
 {
+
 	class Shader
 	{
 	public:

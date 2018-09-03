@@ -7,7 +7,7 @@ namespace ce
 	class GpuBuffer
 	{
 	public:
-		enum class Type 
+		enum class Type
 		{
 			Constant = 1, Vertex, Index
 		};

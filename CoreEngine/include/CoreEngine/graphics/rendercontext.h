@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../math/vec2.h"
+#include "../math/vec4.h"
 #include "depthstencilstate.h"
 #include "depthtexture.h"
 #include "shader.h"
@@ -13,6 +14,7 @@ struct ID3D11RenderTargetView;
 namespace ce
 {
 	class Window;
+
 	class GpuBuffer;
 
 	enum class PrimitiveTopology
@@ -39,7 +41,7 @@ namespace ce
 		static void init(const Window* wind, const math::Vec2<int>& size = { 800, 600 });
 		static void cleanup();
 
-		static void clear(float r, float g, float b, float a);
+		static void clear(const math::Vec4<float>& color);
 		static void present();
 
 		static void resize(const math::Vec2<int>& size);
@@ -62,9 +64,9 @@ namespace ce
 		friend class Layout;
 		friend class GpuBuffer;
 		friend class RasterizerState;
+		friend class Texture2D;
 		static ID3D11Device* get_device();
 		static ID3D11DeviceContext* get_context();
 	};
 
 }
-

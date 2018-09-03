@@ -4,6 +4,8 @@
 #include <CoreEngine/window/window.h>
 #include <CoreEngine/graphics/rendercontext.h>
 #include <CoreEngine/graphics/rastrizerstate.h>
+#include <CoreEngine/filesystem/image.h>
+#include <CoreEngine/graphics/texture2d.h>
 #include <CoreEngine/graphics/gpubuffer.h>
 #include <CoreEngine/graphics/layout.h>
 #include <CoreEngine/graphics/shader.h>
@@ -14,6 +16,7 @@
 struct Vertex
 {
 	ce::math::Vec2<float> position;
+	ce::math::Vec2<float> tex_coords;
 };
 
 int main()
@@ -27,6 +30,8 @@ int main()
 	ce::Shader vertex_shader;
 	ce::Shader pixel_shader;
 	ce::Layout input_layout;
+	ce::Image image;
+	ce::Texture2D texture;
 	float time = 0.0f;
 
 	window.init("Hello", ce::math::Vec2<int>(800, 600));
@@ -37,12 +42,12 @@ int main()
 	res_state.init(ce::RasterizerState::Cull::Back, 
 		ce::RasterizerState::Fill::Solid, ce::RasterizerState::Rotation::CCW);
 
-	vertex_data.push_back({ {-0.5f, +0.5f} });
-	vertex_data.push_back({ {-0.5f, -0.5f} });
-	vertex_data.push_back({ {+0.5f, +0.5f} });
-	vertex_data.push_back({ {-0.5f, -0.5f} });
-	vertex_data.push_back({ {+0.5f, -0.5f} });
-	vertex_data.push_back({ {+0.5f, +0.5f} });
+	vertex_data.push_back({ {-0.5f, +0.5f}, {+0.0f, +0.0f} });
+	vertex_data.push_back({ {-0.5f, -0.5f}, {+0.0f, +1.0f} });
+	vertex_data.push_back({ {+0.5f, +0.5f}, {+1.0f, +0.0f} });
+	vertex_data.push_back({ {-0.5f, -0.5f}, {+0.0f, +1.0f} });
+	vertex_data.push_back({ {+0.5f, -0.5f}, {+1.0f, +1.0f} });
+	vertex_data.push_back({ {+0.5f, +0.5f}, {+1.0f, +0.0f} });
 
 	vertex_buffer.init(vertex_data.size() * sizeof(Vertex), 
 		ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
@@ -51,26 +56,38 @@ int main()
 	ps_constant_buffer.init(4 * sizeof(float), ce::GpuBuffer::Type::Constant, ce::GpuBuffer::Usage::Static);
 
 	input_layout.push({ "POSITION", ce::Layout::Element::Type::FLOAT, 2 });
+	input_layout.push({ "TEXCOORDS", ce::Layout::Element::Type::FLOAT, 2 });
 	input_layout.create();
 
 	vertex_shader.load_from_memory(SIMPLE_SHADER_VS, "vs_main", ce::Shader::Type::Vertex);
 	pixel_shader.load_from_memory(SIMPLE_SHADER_PS, "ps_main", ce::Shader::Type::Pixel);
 
+	image.load_from_file("res/Images/maze.png");
+	texture.create(image.get_size());
+	texture.update_from_image(&image);
+	texture.set_sample_options({ ce::Texture2D::Sample::Filter::Bilinear, 
+		ce::Texture2D::Sample::Wrap::Repeat, ce::Texture2D::Sample::Wrap::Repeat });
+	image.cleanup();
+
 	while (!window.is_closed())
 	{
 		window.update();
-		ce::RenderContext::resize(window.get_client_size());
-		ce::RenderContext::set_viewport(window.get_client_size());
+		if (!window.is_closed())
+		{
+			ce::RenderContext::resize(window.get_client_size());
+			ce::RenderContext::set_viewport(window.get_client_size());
+		}
 
-		ce::RenderContext::clear(0.75f, 0.75f, 0.75f, 1.0f);
+		ce::RenderContext::clear({ 0.75f, 0.75f, 0.75f, 1.0f });
 		// DRAW
 		res_state.use();
 		vertex_shader.use();
 		pixel_shader.use();
 		input_layout.use();
 		ce::RenderContext::set_vertex_buffer(0, &vertex_buffer, sizeof(Vertex), 0);
-		color = { sin(time) * 0.5f + 0.5f, cos(time) * 0.5f + 0.5f,
-			sin(time) * cos(time) * 0.5f + 0.5f, 1.0f };
+		texture.use(0);
+		color = { sin(time*0.9f) * 0.5f + 0.5f, cos(time*0.5f) * 0.5f + 0.5f,
+			sin(time*0.7f) * cos(time*2.0f) * 0.5f + 0.5f, 1.0f };
 		ps_constant_buffer.update(&color);
 		ce::RenderContext::set_constant_buffer(ce::Shader::Type::Pixel, 0, &ps_constant_buffer);
 		ce::RenderContext::set_primitive_topology(ce::PrimitiveTopology::TriangleList);
@@ -78,9 +95,10 @@ int main()
 		ce::RenderContext::present();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-		time += 0.05;
+		time += 0.05f;
 	}
 
+	texture.cleanup();
 	vertex_buffer.cleanup();
 	input_layout.cleanup();
 	vertex_shader.cleanup();
