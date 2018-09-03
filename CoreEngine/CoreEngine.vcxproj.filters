@@ -119,5 +119,8 @@
     <ClCompile Include="src\filesystem\file.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\rendersystem\renderer2d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -52,6 +52,7 @@
     <ClCompile Include="src\graphics\rendercontext.cpp" />
     <ClCompile Include="src\graphics\depthtexture.cpp" />
     <ClCompile Include="src\graphics\texture2d.cpp" />
+    <ClCompile Include="src\rendersystem\renderer2d.cpp" />
     <ClCompile Include="src\utils\stringutil.cpp" />
     <ClCompile Include="src\window\window.cpp" />
     <ClCompile Include="src\window\windowimpl.cpp" />

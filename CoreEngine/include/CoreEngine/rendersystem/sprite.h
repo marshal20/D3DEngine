@@ -5,17 +5,13 @@
 
 namespace ce
 {
+	class Texture2D;
+	
 	struct Sprite
 	{
 		math::Vec2<float> position;
+		math::Vec2<float> size;
 		math::Vec4<float> color;
-
-		Sprite()
-			: position({ 0.0f, 0.0f }), color({ 0.0f, 0.0f, 0.0f, 1.0f })
-		{}
-
-		Sprite(const math::Vec2<float>& position_, const math::Vec4<float>& color_)
-			: position(position_), color(color_)
-		{}
+		Texture2D* texture;
 	};
 }
