@@ -44,6 +44,6 @@ SamplerState SampleType : register( s0 );
 float4 ps_main(PixelInputType input) : SV_TARGET
 {
     float4 color = shaderTexture.Sample(SampleType, input.coord);
-    return color;
+    return lerp(color, kcolor, 0.5);
 }
 )";
