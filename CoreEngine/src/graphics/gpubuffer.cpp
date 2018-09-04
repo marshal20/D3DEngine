@@ -26,10 +26,13 @@ namespace ce
 		D3D11_USAGE d3d_usage;
 		UINT d3d_cpu_access_flag;
 
-		size = (int)ceil(float(size)/16.0f) * 16;
-		if (size > D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT*16)
+		if (type == Type::Constant)
 		{
-			// TODO: Handle error
+			size = (int)ceil(float(size) / 16.0f) * 16;
+			if (size > D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16)
+			{
+				// TODO: Handle error
+			}
 		}
 		m_size = size;
 		m_type = type;
