@@ -13,7 +13,7 @@ namespace ce
 	private:
 		HWND m_hWnd = nullptr;
 		HINSTANCE m_hInstance = nullptr;
-		wchar_t* m_class_name = nullptr;
+		std::wstring m_class_name;
 
 		std::string m_name;
 		math::Vec2<int> m_size;

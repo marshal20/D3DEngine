@@ -33,7 +33,7 @@ namespace ce
 		m_position = (get_screen_size() - m_size) / 2;
 
 		m_hInstance = GetModuleHandle(NULL);
-		m_class_name = util::create_wcharstr(m_name.c_str());
+		m_class_name = util::utf8_to_utf16(name);
 
 		wcex.cbSize = sizeof(WNDCLASSEX);
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -45,7 +45,7 @@ namespace ce
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 		wcex.lpszMenuName = NULL;
-		wcex.lpszClassName = m_class_name;
+		wcex.lpszClassName = m_class_name.c_str();
 		wcex.hIconSm = wcex.hIcon;
 
 		if (!RegisterClassEx(&wcex))
@@ -54,8 +54,8 @@ namespace ce
 		}
 
 		m_hWnd = CreateWindow(
-			m_class_name,
-			m_class_name,
+			m_class_name.c_str(),
+			m_class_name.c_str(),
 			WS_OVERLAPPEDWINDOW,
 			CW_USEDEFAULT, CW_USEDEFAULT,
 			size.x, size.y,
@@ -82,15 +82,9 @@ namespace ce
 
 		if (m_hWnd)
 		{
-			UnregisterClass(m_class_name, m_hInstance);
+			UnregisterClass(m_class_name.c_str(), m_hInstance);
 			g_hwndWindowMap.erase(m_hWnd);
 			m_hWnd = nullptr;
-		}
-
-		if (m_class_name)
-		{
-			delete[] m_class_name;
-			m_class_name = nullptr;
 		}
 
 		m_hInstance = nullptr;
@@ -157,12 +151,11 @@ namespace ce
 
 	void WindowImpl::set_name(const std::string& name)
 	{
-		wchar_t* new_title;
+		std::wstring new_title;
 
 		m_name = name;
-		new_title = util::create_wcharstr(m_name.c_str());
-		SetWindowText(m_hWnd, new_title);
-		delete[] new_title;
+		new_title = util::utf8_to_utf16(name);
+		SetWindowText(m_hWnd, new_title.c_str());
 	}
 
 	void WindowImpl::set_position(const math::Vec2<int>& position)
@@ -213,13 +206,13 @@ namespace ce
 	std::string WindowImpl::get_name() const
 	{
 		std::string name;
-		char* name_c;
+		wchar_t* name_c;
 		int length;
 
 		length = GetWindowTextLength(m_hWnd);
-		name_c = new char[length+1];
-		GetWindowTextA(m_hWnd, name_c, length + 1);
-		name = name_c;
+		name_c = new wchar_t[length+1];
+		GetWindowText(m_hWnd, name_c, length + 1);
+		name = util::utf16_to_utf8(name_c);
 		delete[] name_c;
 		return name;
 	}

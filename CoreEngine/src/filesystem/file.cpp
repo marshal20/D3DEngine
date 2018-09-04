@@ -18,9 +18,9 @@ namespace ce
 			}
 
 			in_file.seekg(0, std::ios::end);
-			raw.size = in_file.tellg();
+			raw.size = (size_t)in_file.tellg();
 			in_file.seekg(0, std::ios::beg);
-			raw.size -= in_file.tellg();
+			raw.size -= (size_t)in_file.tellg();
 
 			raw.data = new char[raw.size];
 			in_file.read(raw.data, raw.size);
