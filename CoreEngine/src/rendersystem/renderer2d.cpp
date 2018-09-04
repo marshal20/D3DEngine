@@ -179,6 +179,7 @@ namespace ce
 	{
 		ConstantBuffer constant_buffer;
 
+		m_depth_stencil_state->use();
 		m_vertex_shader->use();
 		m_pixel_shader->use();
 		m_layout->use();

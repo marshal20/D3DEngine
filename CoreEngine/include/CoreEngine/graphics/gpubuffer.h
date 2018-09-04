@@ -27,10 +27,10 @@ namespace ce
 		GpuBuffer();
 		~GpuBuffer();
 
-		void init(size_t size, Type type, Usage usage = Usage::Static);
+		void init(size_t size, Type type, Usage usage = Usage::Dynamic);
 		void cleanup();
 
-		void* map(bool discard = false);
+		void* map();
 		void unmap();
 		void update(const void* data, size_t size, size_t offset = 0);
 

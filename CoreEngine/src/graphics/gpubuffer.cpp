@@ -31,32 +31,18 @@ namespace ce
 			size = (int)ceil(float(size) / 16.0f) * 16;
 			if (size > D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16)
 			{
-				// TODO: Handle error
+				// TODO: Handle error: shader will only see the first 64kb of constant buffer.
 			}
 		}
 		m_size = size;
 		m_type = type;
 		m_usage = usage;
 
-		switch (usage)
-		{
-		case Usage::Static:
-			d3d_usage = D3D11_USAGE_DEFAULT;
-			d3d_cpu_access_flag = 0;
-			break;
-		case Usage::Dynamic:
-			d3d_usage = D3D11_USAGE_DYNAMIC;
-			d3d_cpu_access_flag = D3D11_CPU_ACCESS_WRITE;
-			break;
-		default:
-			break;
-		}
-		
 		ZeroMemory(&buffer_desc, sizeof(buffer_desc));
 		buffer_desc.ByteWidth = size;
-		buffer_desc.Usage = d3d_usage;
+		buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
 		buffer_desc.BindFlags = get_bind_flag(type);
-		buffer_desc.CPUAccessFlags = d3d_cpu_access_flag;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		buffer_desc.MiscFlags = NULL;
 		buffer_desc.StructureByteStride = NULL;
 		hr = RenderContext::get_device()->CreateBuffer(&buffer_desc, NULL, &m_buffer);
@@ -68,20 +54,12 @@ namespace ce
 		SAFE_RELEASE(m_buffer);
 	}
 
-	void* GpuBuffer::map(bool discard)
+	void* GpuBuffer::map()
 	{
 		HRESULT hr;
 		D3D11_MAPPED_SUBRESOURCE mapped_subsource;
-		D3D11_MAP d3d_map;
 
-		if (m_usage == Usage::Static)
-		{
-			return nullptr;
-		}
-
-		d3d_map = (discard) ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_READ_WRITE;
-
-		hr = RenderContext::get_context()->Map(m_buffer, NULL, d3d_map, NULL, &mapped_subsource);
+		hr = RenderContext::get_context()->Map(m_buffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &mapped_subsource);
 		CHECK_HR(hr);
 
 		return mapped_subsource.pData;
@@ -94,25 +72,16 @@ namespace ce
 
 	void GpuBuffer::update(const void* data, size_t size, size_t offset)
 	{
-		if (m_usage == Usage::Static)
+		char* mapped_data;
+
+		if (size + offset > m_size)
 		{
-			D3D11_BOX dst_box;
-			D3D11_BOX* dst_box_ptr;
-			dst_box.left = offset;
-			dst_box.right = offset + size;
-			dst_box.top = 0;
-			dst_box.bottom = 1;
-			dst_box.front = 0;
-			dst_box.back = 1;
-			dst_box_ptr = m_type == Type::Constant ? NULL : &dst_box;
-			RenderContext::get_context()->UpdateSubresource(m_buffer, 0, dst_box_ptr, data, 0, 0);
+			// TODO: Error: access out of bound.
 		}
-		else if (m_usage == Usage::Dynamic)
-		{
-			char* mapped_data = (char*)map(true);
-			memcpy((void*)(mapped_data + offset), data, size);
-			unmap();
-		}
+
+		mapped_data = (char*)map();
+		memcpy((void*)(mapped_data + offset), data, size);
+		unmap();
 	}
 
 	// HELPER FUNCTIONS
