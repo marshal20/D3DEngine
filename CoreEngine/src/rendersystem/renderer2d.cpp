@@ -119,10 +119,10 @@ namespace ce
 		m_layout->create();
 
 		m_vertex_buffer->init(MAX_SPRITES * sizeof(Vertex),
-			ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
+			ce::GpuBuffer::Type::Vertex);
 
 		m_constant_buffer->init(sizeof(ConstantBuffer),
-			ce::GpuBuffer::Type::Constant, ce::GpuBuffer::Usage::Dynamic);
+			ce::GpuBuffer::Type::Constant);
 	}
 
 	void Renderer2D::cleanup()

@@ -19,24 +19,21 @@ namespace ce
 	{
 	}
 
-	void GpuBuffer::init(size_t size, Type type, Usage usage)
+	void GpuBuffer::init(size_t size, Type type)
 	{
 		HRESULT hr;
 		D3D11_BUFFER_DESC buffer_desc;
-		D3D11_USAGE d3d_usage;
-		UINT d3d_cpu_access_flag;
 
 		if (type == Type::Constant)
 		{
 			size = (int)ceil(float(size) / 16.0f) * 16;
 			if (size > D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16)
 			{
-				// TODO: Handle error: shader will only see the first 64kb of constant buffer.
+				// TODO: Warning: shader will only see the first 64kb of constant buffer.
 			}
 		}
 		m_size = size;
 		m_type = type;
-		m_usage = usage;
 
 		ZeroMemory(&buffer_desc, sizeof(buffer_desc));
 		buffer_desc.ByteWidth = size;
