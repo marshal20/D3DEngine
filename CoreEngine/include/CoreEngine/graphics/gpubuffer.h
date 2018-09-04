@@ -32,7 +32,7 @@ namespace ce
 
 		void* map(bool discard = false);
 		void unmap();
-		void update(const void* data);
+		void update(const void* data, size_t size, size_t offset = 0);
 
 	private:
 		friend class RenderContext;

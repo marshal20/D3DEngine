@@ -51,8 +51,10 @@ int main()
 		my_sprite.size = { 1.0f, 1.0f };
 		my_sprite.color = { sin(time*0.9f) * 0.5f + 0.5f, cos(time*0.5f) * 0.5f + 0.5f,
 			sin(time*0.7f) * cos(time*2.0f) * 0.5f + 0.5f, 1.0f };
-		my_sprite.texture = &texture;
-		my_sprite.texture = nullptr;
+		if (time > 2.0f)
+			my_sprite.texture = nullptr;
+		else
+			my_sprite.texture = &texture;
 
 		renderer2d.clear();
 		renderer2d.draw(&my_sprite);

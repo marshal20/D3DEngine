@@ -2,6 +2,7 @@
 
 #include <CoreEngine/graphics/rendercontext.h>
 #include <CoreEngine/graphics/rastrizerstate.h>
+#include <CoreEngine/graphics/depthstencilstate.h>
 #include <CoreEngine/graphics/texture2d.h>
 #include <CoreEngine/graphics/gpubuffer.h>
 #include <CoreEngine/graphics/layout.h>
@@ -27,7 +28,7 @@ PixelInputType vs_main(VertexInputType input)
 {
     PixelInputType output;
     
-	output.position = float4(input.position.x, input.position.y, 0.0, 1.0);
+	output.position = float4(input.position, 0.0, 1.0);
 	output.coord = input.coord;
 
     return output;
@@ -38,8 +39,8 @@ const char* sprite_renderer_pixel_shader =
 R"(
 cbuffer ConstantInfo : register( b0 )
 {
-	bool ktextured;
 	float4 kcolor;
+	int ktextured;
 }
 
 struct PixelInputType
@@ -53,14 +54,13 @@ SamplerState SampleType : register( s0 );
 
 float4 ps_main(PixelInputType input) : SV_TARGET
 {
-    float4 color;
-	if(ktextured) {
+    float4 color = kcolor;
+	if(ktextured) 
+	{
 		color = shaderTexture.Sample(SampleType, input.coord);
 	}
-	else {
-		color = kcolor;
-	}
-    return kcolor;
+
+    return color;
 }
 )";
 
@@ -82,8 +82,8 @@ namespace ce
 	
 	struct ConstantBuffer
 	{
-		bool ktextured;
 		math::Vec4<float> kcolor;
+		int ktextured;
 	};
 
 	Renderer2D::Renderer2D()
@@ -97,6 +97,7 @@ namespace ce
 	void Renderer2D::init()
 	{
 		m_rasterizer_state = new RasterizerState;
+		m_depth_stencil_state = new DepthStencilState;
 		m_vertex_shader = new Shader;
 		m_pixel_shader = new Shader;
 		m_layout = new Layout;
@@ -107,6 +108,8 @@ namespace ce
 
 		m_rasterizer_state->init(ce::RasterizerState::Cull::Back,
 			ce::RasterizerState::Fill::Solid, ce::RasterizerState::Rotation::CCW);
+
+		m_depth_stencil_state->init(false, false);
 
 		m_vertex_shader->load_from_memory(sprite_renderer_vertex_shader, "vs_main", ce::Shader::Type::Vertex);
 		m_pixel_shader->load_from_memory(sprite_renderer_pixel_shader, "ps_main", ce::Shader::Type::Pixel);
@@ -119,12 +122,13 @@ namespace ce
 			ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
 
 		m_constant_buffer->init(sizeof(ConstantBuffer),
-			ce::GpuBuffer::Type::Vertex, ce::GpuBuffer::Usage::Dynamic);
+			ce::GpuBuffer::Type::Constant, ce::GpuBuffer::Usage::Dynamic);
 	}
 
 	void Renderer2D::cleanup()
 	{
 		m_rasterizer_state->cleanup();
+		m_depth_stencil_state->cleanup();
 		m_vertex_shader->cleanup();
 		m_pixel_shader->cleanup();
 		m_layout->cleanup();
@@ -132,6 +136,7 @@ namespace ce
 		m_constant_buffer->cleanup();
 
 		SAFE_FREE(m_rasterizer_state);
+		SAFE_FREE(m_depth_stencil_state);
 		SAFE_FREE(m_vertex_shader);
 		SAFE_FREE(m_pixel_shader);
 		SAFE_FREE(m_layout);
@@ -167,9 +172,7 @@ namespace ce
 
 	void Renderer2D::update()
 	{
-		Vertex* data = (Vertex*)m_vertex_buffer->map(true);
-		memcpy(data, &m_vertex_array[0], sizeof(Vertex) * m_cur_index);
-		m_vertex_buffer->unmap();
+		m_vertex_buffer->update(&m_vertex_array[0], sizeof(Vertex) * m_cur_index);
 	}
 
 	void Renderer2D::render()
@@ -184,7 +187,7 @@ namespace ce
 		{
 			constant_buffer.ktextured = (batch.texture != nullptr);
 			constant_buffer.kcolor = batch.color;
-			m_constant_buffer->update(&constant_buffer);
+			m_constant_buffer->update(&constant_buffer, sizeof(constant_buffer));
 			RenderContext::set_constant_buffer(ce::Shader::Type::Pixel, 0, m_constant_buffer);
 			if (batch.texture)
 			{

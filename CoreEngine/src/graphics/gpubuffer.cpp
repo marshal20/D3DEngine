@@ -1,6 +1,7 @@
 #include <CoreEngine/graphics/gpubuffer.h>
 
 #include <d3d11.h>
+#include <math.h>
 
 #include <CoreEngine/graphics/rendercontext.h>
 #include "../utils/callcheck.h"
@@ -25,6 +26,11 @@ namespace ce
 		D3D11_USAGE d3d_usage;
 		UINT d3d_cpu_access_flag;
 
+		size = (int)ceil(float(size)/16.0f) * 16;
+		if (size > D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT*16)
+		{
+			// TODO: Handle error
+		}
 		m_size = size;
 		m_type = type;
 		m_usage = usage;
@@ -42,9 +48,9 @@ namespace ce
 		default:
 			break;
 		}
-
+		
 		ZeroMemory(&buffer_desc, sizeof(buffer_desc));
-		buffer_desc.ByteWidth = max(16, size);
+		buffer_desc.ByteWidth = size;
 		buffer_desc.Usage = d3d_usage;
 		buffer_desc.BindFlags = get_bind_flag(type);
 		buffer_desc.CPUAccessFlags = d3d_cpu_access_flag;
@@ -83,16 +89,25 @@ namespace ce
 		RenderContext::get_context()->Unmap(m_buffer, NULL);
 	}
 
-	void GpuBuffer::update(const void* data)
+	void GpuBuffer::update(const void* data, size_t size, size_t offset)
 	{
 		if (m_usage == Usage::Static)
 		{
-			RenderContext::get_context()->UpdateSubresource(m_buffer, 0, NULL, data, 0, 0);
+			D3D11_BOX dst_box;
+			D3D11_BOX* dst_box_ptr;
+			dst_box.left = offset;
+			dst_box.right = offset + size;
+			dst_box.top = 0;
+			dst_box.bottom = 1;
+			dst_box.front = 0;
+			dst_box.back = 1;
+			dst_box_ptr = m_type == Type::Constant ? NULL : &dst_box;
+			RenderContext::get_context()->UpdateSubresource(m_buffer, 0, dst_box_ptr, data, 0, 0);
 		}
 		else if (m_usage == Usage::Dynamic)
 		{
-			void* mapped_data = map(true);
-			memcpy_s(mapped_data, m_size, data, m_size);
+			char* mapped_data = (char*)map(true);
+			memcpy((void*)(mapped_data + offset), data, size);
 			unmap();
 		}
 	}

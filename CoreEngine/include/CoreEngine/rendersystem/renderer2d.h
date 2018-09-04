@@ -6,6 +6,7 @@
 namespace ce
 {
 	class RasterizerState;
+	class DepthStencilState;
 	class Shader;
 	class Layout;
 	class GpuBuffer;
@@ -20,6 +21,7 @@ namespace ce
 	private:
 		static const size_t MAX_SPRITES = 10000;
 		RasterizerState* m_rasterizer_state = nullptr;
+		DepthStencilState* m_depth_stencil_state = nullptr;
 		Shader* m_vertex_shader = nullptr;
 		Shader* m_pixel_shader = nullptr;
 		Layout* m_layout = nullptr;
